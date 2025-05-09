@@ -1,0 +1,27 @@
+services:
+  webapp:
+    image: preventech
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    environment:
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=prevendb;Username=preventech;Password=1234
+
+  db:
+    image: postgres:alpine
+    environment:
+      POSTGRES_DB: prevendb
+      POSTGRES_USER: preventech
+      POSTGRES_PASSWORD: 1234
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  pgdata:
