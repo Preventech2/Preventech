@@ -1,0 +1,16 @@
+﻿<h3>ClickTester</h3>
+
+<section>
+    <p>This component is designed to test click events.</p>
+    <p>Counter: @counter</p>
+    <button @onclick="HandleClick">Click Me</button>
+</section>
+
+@code {
+    public int counter { get; set; } = 0;
+
+    private void HandleClick()
+    {
+        counter++;
+    }
+}
