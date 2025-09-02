@@ -7,9 +7,14 @@
 -- Database creation must be performed outside a multi lined SQL file. 
 -- These commands were put in this file only as a convenience.
 -- 
--- object: new_database | type: DATABASE --
--- DROP DATABASE IF EXISTS new_database;
-CREATE DATABASE new_database;
+-- object: "Preventech" | type: DATABASE --
+-- DROP DATABASE IF EXISTS "Preventech";
+CREATE DATABASE "Preventech"
+	ENCODING = 'UTF8'
+	LC_COLLATE = 'pt_BR.UTF-8'
+	LC_CTYPE = 'pt_BR.UTF-8'
+	TABLESPACE = pg_default
+	OWNER = postgres;
 -- ddl-end --
 
 
@@ -18,9 +23,10 @@ CREATE DATABASE new_database;
 CREATE TABLE public."Usuario" (
 	id uuid NOT NULL,
 	nome text,
-	telefone varchar(20),
-	email varchar(50),
+	telefone character varying(50),
+	email character varying(50),
 	tipo smallint NOT NULL,
+	senha bigint NOT NULL,
 	CONSTRAINT "Usuario_pk" PRIMARY KEY (id)
 );
 -- ddl-end --
@@ -31,7 +37,7 @@ ALTER TABLE public."Usuario" OWNER TO postgres;
 -- DROP TABLE IF EXISTS public."Ordem_Servico" CASCADE;
 CREATE TABLE public."Ordem_Servico" (
 	id uuid NOT NULL,
-	descricao varchar(100),
+	descricao character varying(100),
 	"dataInicio" date,
 	"dataConclusao" date,
 	status smallint,
@@ -48,7 +54,10 @@ CREATE TABLE public."Patrimonio" (
 	nome text,
 	numero text,
 	descricao json,
-	CONSTRAINT "Maquina_pk" PRIMARY KEY (id)
+	"id_Preventiva" uuid,
+	"id_Usuario" uuid,
+	CONSTRAINT "Maquina_pk" PRIMARY KEY (id),
+	CONSTRAINT "Patrimonio_uq" UNIQUE ("id_Preventiva")
 );
 -- ddl-end --
 ALTER TABLE public."Patrimonio" OWNER TO postgres;
@@ -71,10 +80,10 @@ ALTER TABLE public."Peca" OWNER TO postgres;
 -- DROP TABLE IF EXISTS public."Setor" CASCADE;
 CREATE TABLE public."Setor" (
 	id uuid NOT NULL,
-	nome varchar(50),
-	descricao varchar(100),
-	telefone varchar(20),
-	email varchar(50),
+	nome character varying(50),
+	descricao character varying(100),
+	telefone character varying(50),
+	email character varying(50),
 	CONSTRAINT "Setor_pk" PRIMARY KEY (id)
 );
 -- ddl-end --
@@ -88,17 +97,122 @@ CREATE TABLE public."Sala" (
 	"numeroSala" smallint,
 	"numeroPredio" smallint,
 	"id_Setor" uuid,
-	prazo_reqisicao date,
+	prazo_requisicao date,
 	CONSTRAINT "Sala_pk" PRIMARY KEY (id)
 );
 -- ddl-end --
 ALTER TABLE public."Sala" OWNER TO postgres;
 -- ddl-end --
 
--- object: "Setor_fk" | type: CONSTRAINT --
--- ALTER TABLE public."Sala" DROP CONSTRAINT IF EXISTS "Setor_fk" CASCADE;
-ALTER TABLE public."Sala" ADD CONSTRAINT "Setor_fk" FOREIGN KEY ("id_Setor")
-REFERENCES public."Setor" (id) MATCH FULL
+-- object: public."Habilidade" | type: TABLE --
+-- DROP TABLE IF EXISTS public."Habilidade" CASCADE;
+CREATE TABLE public."Habilidade" (
+	id uuid NOT NULL,
+	descricao character varying(50),
+	"id_Usuario" uuid,
+	"id_HabilidadeSistema" uuid,
+	CONSTRAINT "Habilidade_pk" PRIMARY KEY (id)
+);
+-- ddl-end --
+ALTER TABLE public."Habilidade" OWNER TO postgres;
+-- ddl-end --
+
+-- object: public."Requiscao" | type: TABLE --
+-- DROP TABLE IF EXISTS public."Requiscao" CASCADE;
+CREATE TABLE public."Requiscao" (
+	id uuid NOT NULL,
+	data_requisicao date,
+	descricao text,
+	titulo character varying(50),
+	"id_Usuario" uuid,
+	prazo date,
+	CONSTRAINT "Requiscao_pk" PRIMARY KEY (id)
+);
+-- ddl-end --
+ALTER TABLE public."Requiscao" OWNER TO postgres;
+-- ddl-end --
+
+-- object: public."many_Requiscao_has_many_Setor" | type: TABLE --
+-- DROP TABLE IF EXISTS public."many_Requiscao_has_many_Setor" CASCADE;
+CREATE TABLE public."many_Requiscao_has_many_Setor" (
+	"id_Requiscao" uuid NOT NULL,
+	"id_Setor" uuid NOT NULL,
+	CONSTRAINT "many_Requiscao_has_many_Setor_pk" PRIMARY KEY ("id_Requiscao","id_Setor")
+);
+-- ddl-end --
+ALTER TABLE public."many_Requiscao_has_many_Setor" OWNER TO postgres;
+-- ddl-end --
+
+-- object: public."many_Requiscao_has_many_Patrimonio" | type: TABLE --
+-- DROP TABLE IF EXISTS public."many_Requiscao_has_many_Patrimonio" CASCADE;
+CREATE TABLE public."many_Requiscao_has_many_Patrimonio" (
+	"id_Requiscao" uuid NOT NULL,
+	"id_Patrimonio" uuid NOT NULL,
+	CONSTRAINT "many_Requiscao_has_many_Patrimonio_pk" PRIMARY KEY ("id_Requiscao","id_Patrimonio")
+);
+-- ddl-end --
+ALTER TABLE public."many_Requiscao_has_many_Patrimonio" OWNER TO postgres;
+-- ddl-end --
+
+-- object: public."HabilidadeSistema" | type: TABLE --
+-- DROP TABLE IF EXISTS public."HabilidadeSistema" CASCADE;
+CREATE TABLE public."HabilidadeSistema" (
+	id uuid NOT NULL,
+	nome character varying(20) NOT NULL,
+	CONSTRAINT "HabilidadesSistema_pk" PRIMARY KEY (id)
+);
+-- ddl-end --
+ALTER TABLE public."HabilidadeSistema" OWNER TO postgres;
+-- ddl-end --
+
+-- object: public."Preditiva" | type: TABLE --
+-- DROP TABLE IF EXISTS public."Preditiva" CASCADE;
+CREATE TABLE public."Preditiva" (
+	id uuid NOT NULL,
+	"id_Patrimonio" uuid,
+	CONSTRAINT "Preditiva_pk" PRIMARY KEY (id)
+);
+-- ddl-end --
+ALTER TABLE public."Preditiva" OWNER TO postgres;
+-- ddl-end --
+
+-- object: public."Preventiva" | type: TABLE --
+-- DROP TABLE IF EXISTS public."Preventiva" CASCADE;
+CREATE TABLE public."Preventiva" (
+	id uuid NOT NULL,
+	pdf text,
+	frequencia date,
+	CONSTRAINT "Preventiva_pk" PRIMARY KEY (id)
+);
+-- ddl-end --
+ALTER TABLE public."Preventiva" OWNER TO postgres;
+-- ddl-end --
+
+-- object: pgcrypto | type: EXTENSION --
+-- DROP EXTENSION IF EXISTS pgcrypto CASCADE;
+CREATE EXTENSION pgcrypto
+WITH SCHEMA public
+VERSION '1.3';
+-- ddl-end --
+COMMENT ON EXTENSION pgcrypto IS E'cryptographic functions';
+-- ddl-end --
+
+-- object: "Usuario_fk" | type: CONSTRAINT --
+-- ALTER TABLE public."Patrimonio" DROP CONSTRAINT IF EXISTS "Usuario_fk" CASCADE;
+ALTER TABLE public."Patrimonio" ADD CONSTRAINT "Usuario_fk" FOREIGN KEY ("id_Usuario")
+REFERENCES public."Usuario" (id) MATCH FULL
+ON DELETE SET NULL ON UPDATE CASCADE;
+-- ddl-end --
+
+-- object: "Patrimonio_uq1" | type: CONSTRAINT --
+-- ALTER TABLE public."Patrimonio" DROP CONSTRAINT IF EXISTS "Patrimonio_uq1" CASCADE;
+ALTER TABLE public."Patrimonio" ADD CONSTRAINT "Patrimonio_uq1" UNIQUE ("id_Usuario");
+-- ddl-end --
+
+-- object: "Preventiva_fk" | type: CONSTRAINT --
+-- ALTER TABLE public."Patrimonio" DROP CONSTRAINT IF EXISTS "Preventiva_fk" CASCADE;
+ALTER TABLE public."Patrimonio" ADD CONSTRAINT "Preventiva_fk" FOREIGN KEY ("id_Preventiva")
+REFERENCES public."Preventiva" (id) MATCH FULL
 ON DELETE SET NULL ON UPDATE CASCADE;
 -- ddl-end --
 
@@ -109,17 +223,18 @@ REFERENCES public."Ordem_Servico" (id) MATCH FULL
 ON DELETE SET NULL ON UPDATE CASCADE;
 -- ddl-end --
 
--- object: public."Habilidade" | type: TABLE --
--- DROP TABLE IF EXISTS public."Habilidade" CASCADE;
-CREATE TABLE public."Habilidade" (
-	id uuid NOT NULL,
-	descricao varchar(20),
-	"id_Usuario" uuid,
-	nome varchar(20),
-	CONSTRAINT "Habilidade_pk" PRIMARY KEY (id)
-);
+-- object: "Setor_fk" | type: CONSTRAINT --
+-- ALTER TABLE public."Sala" DROP CONSTRAINT IF EXISTS "Setor_fk" CASCADE;
+ALTER TABLE public."Sala" ADD CONSTRAINT "Setor_fk" FOREIGN KEY ("id_Setor")
+REFERENCES public."Setor" (id) MATCH FULL
+ON DELETE SET NULL ON UPDATE CASCADE;
 -- ddl-end --
-ALTER TABLE public."Habilidade" OWNER TO postgres;
+
+-- object: "HabilidadeSistema_fk" | type: CONSTRAINT --
+-- ALTER TABLE public."Habilidade" DROP CONSTRAINT IF EXISTS "HabilidadeSistema_fk" CASCADE;
+ALTER TABLE public."Habilidade" ADD CONSTRAINT "HabilidadeSistema_fk" FOREIGN KEY ("id_HabilidadeSistema")
+REFERENCES public."HabilidadeSistema" (id) MATCH FULL
+ON DELETE SET NULL ON UPDATE CASCADE;
 -- ddl-end --
 
 -- object: "Usuario_fk" | type: CONSTRAINT --
@@ -129,20 +244,6 @@ REFERENCES public."Usuario" (id) MATCH FULL
 ON DELETE SET NULL ON UPDATE CASCADE;
 -- ddl-end --
 
--- object: public."Requiscao" | type: TABLE --
--- DROP TABLE IF EXISTS public."Requiscao" CASCADE;
-CREATE TABLE public."Requiscao" (
-	id uuid NOT NULL,
-	data_requisicao date,
-	descricao text,
-	titulo varchar(20),
-	"id_Usuario" uuid,
-	CONSTRAINT "Requiscao_pk" PRIMARY KEY (id)
-);
--- ddl-end --
-ALTER TABLE public."Requiscao" OWNER TO postgres;
--- ddl-end --
-
 -- object: "Usuario_fk" | type: CONSTRAINT --
 -- ALTER TABLE public."Requiscao" DROP CONSTRAINT IF EXISTS "Usuario_fk" CASCADE;
 ALTER TABLE public."Requiscao" ADD CONSTRAINT "Usuario_fk" FOREIGN KEY ("id_Usuario")
@@ -150,4 +251,38 @@ REFERENCES public."Usuario" (id) MATCH FULL
 ON DELETE SET NULL ON UPDATE CASCADE;
 -- ddl-end --
 
+-- object: "Requiscao_fk" | type: CONSTRAINT --
+-- ALTER TABLE public."many_Requiscao_has_many_Setor" DROP CONSTRAINT IF EXISTS "Requiscao_fk" CASCADE;
+ALTER TABLE public."many_Requiscao_has_many_Setor" ADD CONSTRAINT "Requiscao_fk" FOREIGN KEY ("id_Requiscao")
+REFERENCES public."Requiscao" (id) MATCH FULL
+ON DELETE RESTRICT ON UPDATE CASCADE;
+-- ddl-end --
+
+-- object: "Setor_fk" | type: CONSTRAINT --
+-- ALTER TABLE public."many_Requiscao_has_many_Setor" DROP CONSTRAINT IF EXISTS "Setor_fk" CASCADE;
+ALTER TABLE public."many_Requiscao_has_many_Setor" ADD CONSTRAINT "Setor_fk" FOREIGN KEY ("id_Setor")
+REFERENCES public."Setor" (id) MATCH FULL
+ON DELETE RESTRICT ON UPDATE CASCADE;
+-- ddl-end --
+
+-- object: "Requiscao_fk" | type: CONSTRAINT --
+-- ALTER TABLE public."many_Requiscao_has_many_Patrimonio" DROP CONSTRAINT IF EXISTS "Requiscao_fk" CASCADE;
+ALTER TABLE public."many_Requiscao_has_many_Patrimonio" ADD CONSTRAINT "Requiscao_fk" FOREIGN KEY ("id_Requiscao")
+REFERENCES public."Requiscao" (id) MATCH FULL
+ON DELETE RESTRICT ON UPDATE CASCADE;
+-- ddl-end --
+
+-- object: "Patrimonio_fk" | type: CONSTRAINT --
+-- ALTER TABLE public."many_Requiscao_has_many_Patrimonio" DROP CONSTRAINT IF EXISTS "Patrimonio_fk" CASCADE;
+ALTER TABLE public."many_Requiscao_has_many_Patrimonio" ADD CONSTRAINT "Patrimonio_fk" FOREIGN KEY ("id_Patrimonio")
+REFERENCES public."Patrimonio" (id) MATCH FULL
+ON DELETE RESTRICT ON UPDATE CASCADE;
+-- ddl-end --
+
+-- object: "Patrimonio_fk" | type: CONSTRAINT --
+-- ALTER TABLE public."Preditiva" DROP CONSTRAINT IF EXISTS "Patrimonio_fk" CASCADE;
+ALTER TABLE public."Preditiva" ADD CONSTRAINT "Patrimonio_fk" FOREIGN KEY ("id_Patrimonio")
+REFERENCES public."Patrimonio" (id) MATCH FULL
+ON DELETE SET NULL ON UPDATE CASCADE;
+-- ddl-end --
 
