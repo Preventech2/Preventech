@@ -1,0 +1,30 @@
+@page "/cadastrar/maquina"
+@using PrevenTech.Core
+
+<PageTitle>Cadastrar uma máquina</PageTitle>
+
+
+<h1>Cadastrar maqugina</h1>
+
+<form method="post" @onsubmit="formData" @formname="cadastrar-maquina">
+    <label>nome:
+        <InputText @bind-Value="Maquina!.Nome"/>
+    </label>
+    <label>patrimonio:
+        <InputText @bind-Value="Maquina!.Patrimonio"/>
+    </label>
+    <button type="submit"></button>
+</form>
+
+@code {
+    [SupplyParameterFromForm]
+    private Core.Maquina? Maquina { get; set; }
+    
+    protected override void OnInitialized() => Maquina ??= new(new Localizacao(0, 0, 0, 0), "", "", 0);
+    private async void formData() {
+        using var http = new HttpClient();
+        var content = JsonSerializer.Serialize(Maquina);
+        var txt = new StringContent(content, System.Text.Encoding.UTF8, "application/json");
+        await http.PostAsync("api/cadastrar/maquinas", txt);
+    }
+}

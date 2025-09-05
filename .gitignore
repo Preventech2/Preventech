@@ -3,6 +3,9 @@
 ##
 ## Get latest from `dotnet new gitignore`
 
+out/
+outpublish/
+*.pem
 # dotenv files
 .env
 
