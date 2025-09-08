@@ -2,27 +2,27 @@ using System;
 
 namespace PrevenTech.Core;
 
-public sealed class Localizacao(int campus, int predio, int andar, int numero)
+public sealed class Localizacao
 {
     /// <summary>
     /// Número do campus
     /// </summary>
-    public int Campus { get; set; } = campus;
+    public int Campus { get; set; }
 
     /// <summary>
     /// Número do prédio
     /// </summary>
-    public int Predio { get; set; } = predio;
+    public int Predio { get; set; }
 
     /// <summary>
     /// Número do andar
     /// </summary>
-    public int Andar { get; set; } = andar;
+    public int Andar { get; set; }
 
     /// <summary>
     /// Número da sala
     /// </summary>
-    public int Numero { get; set; } = numero;
+    public int Numero { get; set; }
 
     public override string ToString() => $"c{Campus} p{Predio} sala {Numero} {Andar}º andar";
     

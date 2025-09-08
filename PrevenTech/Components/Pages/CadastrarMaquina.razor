@@ -4,26 +4,28 @@
 <PageTitle>Cadastrar uma máquina</PageTitle>
 
 
-<h1>Cadastrar maqugina</h1>
+<h2>Cadastrar maqugina</h2>
 
-<form method="post" @onsubmit="formData" @formname="cadastrar-maquina">
+<EditForm Model="Maquina" OnSubmit="formData" FormName="cadastrar-maquina">
+    <AntiforgeryToken />
     <label>nome:
         <InputText @bind-Value="Maquina!.Nome"/>
     </label>
     <label>patrimonio:
         <InputText @bind-Value="Maquina!.Patrimonio"/>
     </label>
-    <button type="submit"></button>
-</form>
+    <button type="submit">asd</button>
+</EditForm>
 
 @code {
     [SupplyParameterFromForm]
-    private Core.Maquina? Maquina { get; set; }
+    private Core.Maquina? Maquina { get; set; } = null;
     
-    protected override void OnInitialized() => Maquina ??= new(new Localizacao(0, 0, 0, 0), "", "", 0);
+    protected override void OnInitialized() => Maquina ??= new Maquina();
     private async void formData() {
         using var http = new HttpClient();
         var content = JsonSerializer.Serialize(Maquina);
+        Console.WriteLine(":p.");
         var txt = new StringContent(content, System.Text.Encoding.UTF8, "application/json");
         await http.PostAsync("api/cadastrar/maquinas", txt);
     }

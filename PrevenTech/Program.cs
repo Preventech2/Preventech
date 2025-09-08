@@ -66,11 +66,15 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.UsePathBase("/out/wwwroot/");
 app.UseHttpsRedirection();
 
 app.UseAntiforgery();
 app.UseAuthorization();
 app.MapStaticAssets();
+app.UseStaticFiles();
+app.UseRouting();
+
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode();
