@@ -1,0 +1,84 @@
+﻿@page "/cadastrar/equipamento"
+
+<PageTitle>Cadastrar uma máquina</PageTitle>
+
+<h2>Cadastrar máquina</h2>
+
+@if (!string.IsNullOrEmpty(mensagemResultado))
+{
+    <div class="alert @(sucesso ? "alert-success" : "alert-danger")" role="alert">
+        @mensagemResultado
+    </div>
+}
+
+<EditForm Model="equipamento" OnSubmit="FormData" FormName="cadastrar-Equipamento">
+    <label>Nome:
+        <InputText @bind-Value="equipamento!.Nome" class="form-control"/>
+    </label>
+    <label>Patrimônio:
+        <InputText @bind-Value="equipamento!.Patrimonio" class="form-control"/>
+    </label>
+    <button type="submit" class="btn btn-primary" disabled="@isProcessing">
+        @if (isProcessing)
+        {
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            <text>Cadastrando...</text>
+        }
+        else
+        {
+            <text>Cadastrar</text>
+        }
+    </button>
+</EditForm>
+
+@code {
+    [SupplyParameterFromForm]
+    private Equipamento? equipamento { get; set; } = null;
+
+    [Inject]
+    EquipamentoService equipamentoService { get; set; } = null!;
+    
+    private string mensagemResultado = string.Empty;
+    private bool sucesso = false;
+    private bool isProcessing = false;
+
+    protected override void OnInitialized() => equipamento ??= new Equipamento();
+    
+    private async Task FormData()
+    {
+        isProcessing = true;
+        mensagemResultado = string.Empty;
+        StateHasChanged();
+        equipamento!.Local = "sem local"; // Garantir que Local não seja nulo
+        try
+        {
+            // tem que mudar, atualmente o equipamentoService apenas chama a API e ela só retorna um sucesso
+            // testando API
+            var resultado = await equipamentoService.AddEquipamentoAsync(equipamento!);     
+
+            if (resultado != null && resultado.Success)
+            {
+                mensagemResultado = resultado.Message;
+                sucesso = true;
+                
+                // Limpar o formulário após sucesso
+                equipamento = new Equipamento();
+            }
+            else
+            {
+                mensagemResultado = "Erro inesperado ao cadastrar a máquina.";
+                sucesso = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            mensagemResultado = $"Erro: {ex.Message}";
+            sucesso = false;
+        }
+        finally
+        {
+            isProcessing = false;
+            StateHasChanged();
+        }
+    }
+}

@@ -12,4 +12,4 @@ COPY --from=build /app/out .
 
 EXPOSE 5001
 
-ENTRYPOINT ["dotnet", "PrevenTech.dll"]
+ENTRYPOINT ["dotnet", "Preventech.dll"]

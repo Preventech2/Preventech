@@ -1,3 +1,20 @@
 {
-    "dotnet.defaultSolution": "PrevenTech.sln"
+    "dotnet.defaultSolution": "Preventech.sln",
+    "dbcode.connections": [
+        {
+            "connectionId": "zDRnCrO8JyD0tLgcUYcdm",
+            "name": "PreventechConnection",
+            "driver": "postgres",
+            "connectionType": "host",
+            "host": "localhost",
+            "port": 5432,
+            "ssl": false,
+            "username": "postgres",
+            "password": "",
+            "savePassword": "secretStorage",
+            "database": "Preventech",
+            "readOnly": false,
+            "connectionTimeout": 30
+        }
+    ]
 }
