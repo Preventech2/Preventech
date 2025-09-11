@@ -13,6 +13,7 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<Equipamento> Equipamentos { get; set; }
 
+// ================ existe a chance de que os relacionamentos não sejam descobertos ================
     // Agora não precisamos do OnModelCreating porque usamos Data Annotations!
     // protected override void OnModelCreating(ModelBuilder modelBuilder)
     // {
