@@ -12,6 +12,7 @@ public class ApplicationDbContext : DbContext
     }
 
     public DbSet<Equipamento> Equipamentos { get; set; }
+    public DbSet<Usuario> Usuarios { get; set; }
 
     // Agora não precisamos do OnModelCreating porque usamos Data Annotations!
     // protected override void OnModelCreating(ModelBuilder modelBuilder)
