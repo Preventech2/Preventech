@@ -1,0 +1,68 @@
+﻿@page "/cadastrar/ordem-servico"
+
+<PageTitle>Cadastrar uma Ordem de Serviço</PageTitle>
+
+<h2>Cadastrar OS</h2>
+
+@if (!string.IsNullOrEmpty(mensagemResultado))
+{
+    <div class="alert @(sucesso ? "alert-success" : "alert-danger")" role="alert">
+        @mensagemResultado
+    </div>
+}
+
+<EditForm Model="ordemServico" OnSubmit="FormsData" FormName="cadastrar-Equipamento">
+
+</EditForm>
+
+@code {
+    [SupplyParameterFromForm]
+    private OrdemServico? ordemServico { get; set; } = null;
+
+    [Inject]
+    OrdemServicoService OSservice { get; set; } = null!;
+    
+    private string mensagemResultado = string.Empty;
+    private bool sucesso = false;
+    private bool isProcessing = false;
+
+    protected override void OnInitialized() => ordemServico ??= new OrdemServico();
+    
+    private async Task FormsData()
+    {
+        isProcessing = true;
+        mensagemResultado = string.Empty;
+        StateHasChanged();
+        ordemServico!.Descricao = "sem descrição"; // Garantir que Descirção não seja nula
+        try
+        {
+            // tem que mudar, atualmente o equipamentoService apenas chama a API e ela só retorna um sucesso
+            // testando API
+            var resultado = await OSservice.AddOrdemServicoAsync(ordemServico!);     
+
+            if (resultado != null && resultado.Success)
+            {
+                mensagemResultado = resultado.Message;
+                sucesso = true;
+                
+                // Limpar o formulário após sucesso
+                ordemServico = new OrdemServico();
+            }
+            else
+            {
+                mensagemResultado = "Erro inesperado ao cadastrar Ordem de Serviço.";
+                sucesso = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            mensagemResultado = $"Erro: {ex.Message}";
+            sucesso = false;
+        }
+        finally
+        {
+            isProcessing = false;
+            StateHasChanged();
+        }
+    }
+}

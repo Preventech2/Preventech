@@ -4,17 +4,12 @@ namespace Preventech.Core.Models;
 
 public class OrdemServico
 {
-    /// <summary>
-    /// Data de abertura de OS
-    /// </summary>
-    public DateTime Abertura { get; private set; }
+    public DateTime Abertura { get; set; }
+    public long Id { get; set; }
 
-    /// <summary>
-    /// Identificador de ordem de
-    /// </summary>
-    public long Id { get; private set; }
+    public StatusOS Status { get; set; }
 
+    public string Descricao { get; set; } = "";
 
-    public StatusOS Status { get; private set; }
-
+    public string? TecnicoResponsavel { get; set; }
 }
