@@ -12,11 +12,25 @@ builder.Services.AddRazorComponents()
 // Add API controller support
 builder.Services.AddControllers();
 
+// Configure HTTPS redirection
+//builder.Services.AddHttpsRedirection(options =>
+//{
+//    options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
+//    options.HttpsPort = 7111; // Porta HTTPS definida para suprimir o aviso de segurança
+//});
+
 // Configure PostgreSQL
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Configure HttpClient Services for API communication
+// Configure HttpClient
+//builder.Services.AddHttpClient<EquipamentoService>(client =>
+//{
+//    client.BaseAddress = new Uri("http://localhost:5091/");
+//});
+
+builder.Services.AddScoped<OrdemServicoService>();
+
 builder.Services.AddHttpClient<EquipamentoService>(client =>
 {
     client.BaseAddress = new Uri("http://localhost:5091/");
@@ -37,8 +51,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
-
+//app.UseHttpsRedirection();
 
 app.UseAntiforgery();
 
