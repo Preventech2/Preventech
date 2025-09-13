@@ -58,32 +58,76 @@ namespace Preventech.Core.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<string>> LoginUsuario([FromBody] Usuario usuario)
+        public async Task<ApiResponse<Usuario>> LoginUsuario([FromBody] Usuario usuario)
         {
             if (usuario == null)
             {
-                return BadRequest("Dados do usuário inválidos.");
+                return new ApiResponse<Usuario>
+                {
+                    Success = false,
+                    Message = "Dados do usuário inválidos.",
+                    Data = null
+                };
             }
 
             try
             {
-                // Procura usuario por id
+                // Procura usuario por cpf
                 Usuario? usuarioEncontrado = await _context.Usuarios
-                                .Where(user => user.Id == usuario.Id
-                // Em caso de uso de criptografia, deve-se criptografar/descriptografar antes a senha
-                                && user.Senha == usuario.Senha) 
+                                .Where(user => user.Cpf == usuario.Cpf
+                                // Em caso de uso de criptografia, deve-se criptografar/descriptografar antes a senha
+                                && user.Senha == usuario.Senha)
                                 .FirstOrDefaultAsync();
 
                 if (usuarioEncontrado == null)
                 {
-                    return StatusCode(StatusCodes.Status401Unauthorized, "Credenciais inválidas.");
+                    return new ApiResponse<Usuario>
+                    {
+                        Success = false,
+                        Message = "Usuário não encontrado.",
+                        Data = null
+                    };
                 }
 
-                return Ok($"Usuário '{usuario.Nome}' logado com sucesso.");
+                return new ApiResponse<Usuario>
+                {
+                    Success = true,
+                    Message = $"Usuário '{usuarioEncontrado.Nome}' logado com sucesso.",
+                    Data = usuarioEncontrado
+                };
             }
             catch (Exception ex)
             {
-                return BadRequest($"Erro ao cadastrar usuário: {ex.Message}");
+                return new ApiResponse<Usuario>
+                {
+                    Success = false,
+                    Message = $"Erro ao cadastrar usuário: {ex.Message}",
+                    Data = null
+                };
+            }
+        }
+
+        [HttpGet]
+        public async Task<ApiResponse<List<Usuario>>> GetUsuarios()
+        {
+            try
+            {
+                var usuarios = await _context.Usuarios.ToListAsync();
+                return new ApiResponse<List<Usuario>>
+                {
+                    Success = true,
+                    Message = "Usuários buscados com sucesso.",
+                    Data = usuarios
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse<List<Usuario>>
+                {
+                    Success = false,
+                    Message = $"Erro ao buscar usuários: {ex.Message}",
+                    Data = null
+                };
             }
         }
     }

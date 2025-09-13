@@ -7,9 +7,12 @@ namespace Preventech.Core.Models;
 public class Usuario
 {
     [Key]
-    [Required]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
+
+    [Required]
+    [StringLength(11)]
+    public string Cpf { get; set; } = null!;
 
     [MaxLength(50)]
     public string Nome { get; set; } = null!;

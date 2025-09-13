@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Preventech.Core.Models;
 using Preventech.Core.DatabaseContexts;
+using Preventech.Core.DTOs;
 
 namespace Preventech.Core.Controllers
 {
@@ -18,11 +19,16 @@ namespace Preventech.Core.Controllers
         }
 
         [HttpPost("cadastro")]
-        public async Task<ActionResult<string>> CadastrarEquipamento([FromBody] Equipamento equipamento)
+        public async Task<ApiResponse<Equipamento>> CadastrarEquipamento([FromBody] Equipamento equipamento)
         {
             if (equipamento == null)
             {
-                return BadRequest("Dados do equipamento inválidos.");
+                return new ApiResponse<Equipamento>
+                {
+                    Success = false,
+                    Message = "Dados do equipamento inválidos",
+                    Data = null
+                };
             }
 
             try
@@ -33,25 +39,45 @@ namespace Preventech.Core.Controllers
                 // Salva as mudanças no banco de dados
                 await _context.SaveChangesAsync();
                 
-                return Ok($"Equipamento '{equipamento.Nome}' cadastrado com sucesso.");
+                return new ApiResponse<Equipamento>
+                {
+                    Success = true,
+                    Message = "Equipamento cadastrado com sucesso",
+                    Data = equipamento
+                };
             }
             catch (Exception ex)
             {
-                return BadRequest($"Erro ao cadastrar equipamento: {ex.Message}");
+                return new ApiResponse<Equipamento>
+                {
+                    Success = false,
+                    Message = $"Erro ao cadastrar equipamento: {ex.Message}",
+                    Data = null
+                };
             }
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Equipamento>>> GetEquipamentos()
+        public async Task<ApiResponse<List<Equipamento>>> GetEquipamentos()
         {
             try
             {
                 var equipamentos = await _context.Equipamentos.ToListAsync();
-                return Ok(equipamentos);
+                return new ApiResponse<List<Equipamento>>
+                {
+                    Success = true,
+                    Message = "Equipamentos recuperados com sucesso",
+                    Data = equipamentos
+                };
             }
             catch (Exception ex)
             {
-                return BadRequest($"Erro ao buscar equipamentos: {ex.Message}");
+                return new ApiResponse<List<Equipamento>>
+                {
+                    Success = false,
+                    Message = $"Erro ao buscar equipamentos: {ex.Message}",
+                    Data = null
+                };
             }
         }
 
