@@ -12,5 +12,5 @@ public class Preditiva
     /// <summary>
     /// Equipamento referente à esta manutenção
     /// </summary>
-    public Equipamento Referente { get; set; }
+    public Equipamento? Referente { get; set; }
 }

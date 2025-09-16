@@ -63,7 +63,7 @@ else
 
         ordensServico = Enumerable.Range(1, 8).Select(index => new OrdemServico
         {
-            Id = Random.Shared.Next(0, 55),
+            Id = new Guid(0,0,0,0,0,0,0,0,0,0,0),
             Abertura = dataAbertura.AddDays(index),
             TecnicoResponsavel = tecnicosMOCK[Random.Shared.Next(tecnicosMOCK.Length)],
             Descricao = descricoesMOCK[Random.Shared.Next(descricoesMOCK.Length)]

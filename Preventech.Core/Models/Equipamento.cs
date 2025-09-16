@@ -16,27 +16,24 @@ public class Equipamento
     /// <summary>
     /// Nome do patrimônio
     /// </summary>
-    [Required]
     [MaxLength(120)]
-    public required string Nome { get; set; } = "";
+    public string? Nome { get; set; } = "";
 
     /// <summary>
     /// Chave patrimonial
     /// </summary>
-    [Required]
     [MaxLength(120)]
-    public required string Patrimonio { get; set; } = "";
+    public string? Patrimonio { get; set; } = "";
 
     /// <summary>
     /// Localização do patrimônio
     /// </summary>
-    [Required]
-    public required Localizacao Local { get; set; }
+    public Localizacao? Local { get; set; }
 
     /// <summary>
     /// Manutenção preventiva associada à máquina
     /// </summary>
-    public Preventiva? ManutPreventiva { get; set; }
+    public ICollection<Preventiva>? ManutPreventiva { get; set; }
 
     /// <summary>
     /// Manutenções preditivas associadas à máquina

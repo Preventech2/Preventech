@@ -24,13 +24,10 @@
     
     private string mensagemResultado = string.Empty;
     private bool sucesso = false;
-    private bool isProcessing = false;
-
     protected override void OnInitialized() => ordemServico ??= new OrdemServico();
     
     private async Task FormsData()
     {
-        isProcessing = true;
         mensagemResultado = string.Empty;
         StateHasChanged();
         ordemServico!.Descricao = "sem descrição"; // Garantir que Descirção não seja nula
@@ -61,7 +58,6 @@
         }
         finally
         {
-            isProcessing = false;
             StateHasChanged();
         }
     }

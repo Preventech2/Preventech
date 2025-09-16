@@ -49,7 +49,7 @@
         isProcessing = true;
         mensagemResultado = string.Empty;
         StateHasChanged();
-        equipamento!.Local = "sem local"; // Garantir que Local não seja nulo
+        equipamento!.Local = new(); // Garantir que Local não seja nulo
         try
         {
             // tem que mudar, atualmente o equipamentoService apenas chama a API e ela só retorna um sucesso
@@ -60,9 +60,6 @@
             {
                 mensagemResultado = resultado.Message;
                 sucesso = true;
-                
-                // Limpar o formulário após sucesso
-                equipamento = new Equipamento();
             }
             else
             {

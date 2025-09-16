@@ -2,6 +2,9 @@ using System;
 
 namespace Preventech.Core.Models;
 
+/// <summary>
+/// Localização de uma máquina no campus
+/// </summary>
 public class Localizacao
 {
     /// <summary>

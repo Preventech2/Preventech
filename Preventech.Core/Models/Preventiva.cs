@@ -23,4 +23,9 @@ public class Preventiva
     [Required]
     [MaxLength(240)]
     public required string ArquivoReferente { get; set; }
+
+    /// <summary>
+    /// Equipamento referente à esta manutenção
+    /// </summary>
+    public Equipamento? Referente { get; set; }
 }
