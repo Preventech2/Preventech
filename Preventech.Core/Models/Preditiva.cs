@@ -8,4 +8,9 @@ public class Preditiva
     /// Representa a frequência de manutenção preditiva
     /// </summary>
     public DateTimeOffset Frequencia { get; set; }
+
+    /// <summary>
+    /// Equipamento referente à esta manutenção
+    /// </summary>
+    public Equipamento Referente { get; set; }
 }
