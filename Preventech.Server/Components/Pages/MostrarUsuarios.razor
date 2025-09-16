@@ -1,0 +1,37 @@
+@page "/usuarios"
+@rendermode InteractiveServer
+
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using Preventech.Core.DTOs
+
+@if (usuarios == null)
+{
+    <p><em>Carregando...</em></p>
+}
+else if (!usuarios.Any())
+{
+    <p><em>Nenhum usuário cadastrado.</em></p>
+}
+else
+{
+    <h3>Lista de Usuários</h3>
+}
+
+<QuickGrid TGridItem="Usuario" Items="@usuarios">
+    <PropertyColumn Property="@(item => item.Id)" Title="ID" />
+    <PropertyColumn Property="@(item => item.Nome)" Title="Nome" />
+    <PropertyColumn Property="@(item => item.Email)" Title="Email" />
+</QuickGrid>
+
+@code {
+    private IQueryable<Usuario> usuarios = null!;
+
+    [Inject]
+    UsuarioService usuarioService { get; set; } = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ApiResponse<List<Usuario>> response = await usuarioService.GetUsuariosAsync();
+        usuarios = response.Data?.AsQueryable() ?? new List<Usuario>().AsQueryable();
+    }
+}

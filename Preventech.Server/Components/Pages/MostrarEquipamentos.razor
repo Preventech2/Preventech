@@ -1,0 +1,38 @@
+@page "/equipamentos"
+@rendermode InteractiveServer
+
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using Preventech.Core.DTOs
+
+@if (equipamentos == null)
+{
+    <p><em>Carregando...</em></p>
+}
+else if (!equipamentos.Any())
+{
+    <p><em>Nenhum equipamento cadastrado.</em></p>
+}
+else
+{
+    <h3>Lista de Equipamentos</h3>
+}
+
+<QuickGrid TGridItem="Equipamento" Items="@equipamentos">
+    <PropertyColumn Property="@(item => item.Id)" Title="ID" />
+    <PropertyColumn Property="@(item => item.Patrimonio)" Title="Patrimônio" />
+    <PropertyColumn Property="@(item => item.Nome)" Title="Nome" />
+    <PropertyColumn Property="@(item => item.Local)" Title="Local" />
+</QuickGrid>
+
+@code {
+    private IQueryable<Equipamento> equipamentos = null!;
+
+    [Inject]
+    EquipamentoService equipamentoService { get; set; } = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ApiResponse<List<Equipamento>> response = await equipamentoService.GetEquipamentosAsync();
+        equipamentos = response.Data?.AsQueryable() ?? new List<Equipamento>().AsQueryable();
+    }
+}

@@ -10,7 +10,6 @@ public class OrdemServico
     /// Identificador de ordem de serviço
     /// </summary>
     [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public Guid Id { get; set; }
 
 
@@ -24,6 +23,11 @@ public class OrdemServico
     /// Estado atual da OS
     /// </summary>
     public StatusOS Status { get; set; }
+  
+    
+    public string Descricao { get; set; } = "";
+
+    public string? TecnicoResponsavel { get; set; }
 
     public static Guid GerarIdOrdem()
     {
@@ -39,5 +43,4 @@ public class OrdemServico
             0,
             (byte)agora.Second);
     }
-
 }
