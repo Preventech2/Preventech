@@ -15,45 +15,40 @@ public class OrdemServicoService
     }
 
     // Example method to get a list of OrdemServico
-    public async Task<IEnumerable<OrdemServico>> GetOrdemServicosAsync()
+    public async Task<ApiResponse<List<OrdemServico>>> GetOrdemServicosAsync()
     {
-        return await _httpClient.GetFromJsonAsync<IEnumerable<OrdemServico>>("api/ordemservicos") ?? Enumerable.Empty<OrdemServico>();
+        var response = await _httpClient.GetAsync("api/ordem-servico");
+        var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<OrdemServico>>>()
+        ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<List<OrdemServico>>.");
+        return result;
     }
 
     // Example method to get a single OrdemServico by ID
     public async Task<OrdemServico?> GetOrdemServicoByIdAsync(long id)
     {
-        return await _httpClient.GetFromJsonAsync<OrdemServico>($"api/ordemservicos/{id}");
+        return await _httpClient.GetFromJsonAsync<OrdemServico>($"api/ordem-servico/{id}");
     }
 
     // Example method to create a new OrdemServico
-    public async Task<ApiResponse<OrdemServico>?> AddOrdemServicoAsync(OrdemServico ordemServico)
+    public async Task<ApiResponse<OrdemServico>?> AddOrdemServicoAsync(OrdemServico OS)
     {
-        var response = await _httpClient.PostAsJsonAsync("api/ordemservicos", ordemServico);
-        response.EnsureSuccessStatusCode();
-
-        if (response.IsSuccessStatusCode)
-        {
-            return await response.Content.ReadFromJsonAsync<ApiResponse<OrdemServico>>();
-        }
-        else
-        {
-            var errorContent = await response.Content.ReadAsStringAsync();
-            throw new HttpRequestException($"Erro ao cadastrar Ordem de Serviço: {response.StatusCode} - {errorContent}");
-        }
+        var response = await _httpClient.PostAsJsonAsync("api/ordem-servico/cadastro", OS);
+        var result = await response.Content.ReadFromJsonAsync<ApiResponse<OrdemServico>>()
+        ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<OrdemServico>.");
+        return result;
     }
 
     // Example method to update an existing OrdemServico
     public async Task UpdateOrdemServicoAsync(long id, OrdemServico ordemServico)
     {
-        var response = await _httpClient.PutAsJsonAsync($"api/ordemservicos/{id}", ordemServico);
+        var response = await _httpClient.PutAsJsonAsync($"api/ordem-servico/{id}", ordemServico);
         response.EnsureSuccessStatusCode();
     }
 
     // Example method to delete an OrdemServico
     public async Task DeleteOrdemServicoAsync(long id)
     {
-        var response = await _httpClient.DeleteAsync($"api/ordemservicos/{id}");
+        var response = await _httpClient.DeleteAsync($"api/ordem-servico/{id}");
         response.EnsureSuccessStatusCode();
     }
 }

@@ -20,6 +20,8 @@ public enum StatusOS
     /// </summary>
     Deferida,
 
+    Parada,
+
 
     EmImpedimento
 }

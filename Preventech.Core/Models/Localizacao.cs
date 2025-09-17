@@ -1,4 +1,6 @@
 using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Preventech.Core.Models;
 
@@ -10,6 +12,12 @@ public class Localizacao
     /// <summary>
     /// Número do campus
     /// </summary>
+    /// 
+
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int Id { get; set; }
+
     public int Campus { get; set; }
 
     /// <summary>

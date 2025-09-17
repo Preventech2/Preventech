@@ -34,6 +34,11 @@ builder.Services.AddHttpClient<UsuarioService>(client =>
     client.BaseAddress = new Uri("http://localhost:5091/");
 });
 
+builder.Services.AddHttpClient<OrdemServicoService>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:5091/");
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

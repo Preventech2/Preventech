@@ -11,8 +11,24 @@
     </div>
 }
 
-<EditForm Model="ordemServico" OnSubmit="FormsData" FormName="cadastrar-Equipamento">
-
+<EditForm Model="ordemServico" OnSubmit="FormData" FormName="cadastrar-Ordem-Servico">
+    <label>Título:
+        <InputText @bind-Value="ordemServico!.Titulo" class="form-control"/>
+    </label>
+    <label>Descrição:
+        <InputText @bind-Value="ordemServico!.Descricao" class="form-control"/>
+    </label>
+    <button type="submit" class="btn btn-primary" disabled="@isProcessing">
+        @if (isProcessing)
+        {
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            <text>Cadastrando...</text>
+        }
+        else
+        {
+            <text>Cadastrar</text>
+        }
+    </button>
 </EditForm>
 
 @code {
@@ -21,44 +37,25 @@
 
     [Inject]
     OrdemServicoService OSservice { get; set; } = null!;
-    
+
     private string mensagemResultado = string.Empty;
     private bool sucesso = false;
+    private bool isProcessing = false;
     protected override void OnInitialized() => ordemServico ??= new OrdemServico();
     
-    private async Task FormsData()
+    private async Task FormData()
     {
+        isProcessing = true;
         mensagemResultado = string.Empty;
-        StateHasChanged();
-        ordemServico!.Descricao = "sem descrição"; // Garantir que Descirção não seja nula
-        try
-        {
-            // tem que mudar, atualmente o equipamentoService apenas chama a API e ela só retorna um sucesso
-            // testando API
-            var resultado = await OSservice.AddOrdemServicoAsync(ordemServico!);     
+        ordemServico!.Abertura = DateTime.UtcNow;
+        ordemServico!.Status = StatusOS.Parada;
+        ordemServico!.TecnicoResponsavel = "Não atribuído";
+        //ordemServico!.Requisitante = UsuarioLogado.NomeCompleto;
+        
+        Core.DTOs.ApiResponse<OrdemServico> response = await OSservice.AddOrdemServicoAsync(ordemServico) ?? new Core.DTOs.ApiResponse<OrdemServico>();
+        mensagemResultado = response.Message;
 
-            if (resultado != null && resultado.Success)
-            {
-                mensagemResultado = resultado.Message;
-                sucesso = true;
-                
-                // Limpar o formulário após sucesso
-                ordemServico = new OrdemServico();
-            }
-            else
-            {
-                mensagemResultado = "Erro inesperado ao cadastrar Ordem de Serviço.";
-                sucesso = false;
-            }
-        }
-        catch (Exception ex)
-        {
-            mensagemResultado = $"Erro: {ex.Message}";
-            sucesso = false;
-        }
-        finally
-        {
-            StateHasChanged();
-        }
+        isProcessing = false;
+        sucesso = true;
     }
 }

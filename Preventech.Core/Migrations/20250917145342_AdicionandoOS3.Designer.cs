@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Preventech.Core.DatabaseContexts;
@@ -11,9 +12,11 @@ using Preventech.Core.DatabaseContexts;
 namespace Preventech.Core.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250917145342_AdicionandoOS3")]
+    partial class AdicionandoOS3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -86,9 +89,6 @@ namespace Preventech.Core.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("RequisitanteId")
-                        .HasColumnType("integer");
-
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
@@ -100,8 +100,6 @@ namespace Preventech.Core.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("RequisitanteId");
 
                     b.ToTable("OrdensServico");
                 });
@@ -193,17 +191,6 @@ namespace Preventech.Core.Migrations
                         .HasForeignKey("LocalId");
 
                     b.Navigation("Local");
-                });
-
-            modelBuilder.Entity("Preventech.Core.Models.OrdemServico", b =>
-                {
-                    b.HasOne("Preventech.Core.Models.Usuario", "Requisitante")
-                        .WithMany()
-                        .HasForeignKey("RequisitanteId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Requisitante");
                 });
 
             modelBuilder.Entity("Preventech.Core.Models.Preditiva", b =>

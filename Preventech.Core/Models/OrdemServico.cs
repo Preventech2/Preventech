@@ -12,7 +12,6 @@ public class OrdemServico
     [Key]
     public Guid Id { get; set; }
 
-
     /// <summary>
     /// Data de abertura de OS
     /// </summary>
@@ -23,8 +22,9 @@ public class OrdemServico
     /// Estado atual da OS
     /// </summary>
     public StatusOS Status { get; set; }
-  
-    
+
+    public string Titulo { get; set; } = "";
+
     public string Descricao { get; set; } = "";
 
     public string? TecnicoResponsavel { get; set; }
