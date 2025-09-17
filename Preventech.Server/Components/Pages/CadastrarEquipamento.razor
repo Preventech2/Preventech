@@ -1,9 +1,12 @@
 ﻿@page "/cadastrar/equipamento"
+@rendermode InteractiveServer
+@inject IJSRuntime jsr
 
-<PageTitle>Cadastrar uma máquina</PageTitle>
+<PageTitle>Cadastrar um equipamento</PageTitle>
 
-<h2>Cadastrar máquina</h2>
+<h2>Cadastrar Equipamento</h2>
 
+<h1>Cadastrar Equipamento</h1>
 @if (!string.IsNullOrEmpty(mensagemResultado))
 {
     <div class="alert @(sucesso ? "alert-success" : "alert-danger")" role="alert">
@@ -49,24 +52,22 @@
         isProcessing = true;
         mensagemResultado = string.Empty;
         StateHasChanged();
-        equipamento!.Local = "sem local"; // Garantir que Local não seja nulo
+        equipamento!.Local = new(); // Garantir que Local não seja nulo
         try
         {
             // tem que mudar, atualmente o equipamentoService apenas chama a API e ela só retorna um sucesso
             // testando API
             var resultado = await equipamentoService.AddEquipamentoAsync(equipamento!);     
 
+            await jsr.InvokeVoidAsync("console.log", resultado);
             if (resultado != null && resultado.Success)
             {
                 mensagemResultado = resultado.Message;
                 sucesso = true;
-                
-                // Limpar o formulário após sucesso
-                equipamento = new Equipamento();
             }
             else
             {
-                mensagemResultado = "Erro inesperado ao cadastrar a máquina.";
+                mensagemResultado = "Erro inesperado ao cadastrar o equipamento.";
                 sucesso = false;
             }
         }

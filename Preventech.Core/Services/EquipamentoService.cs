@@ -30,7 +30,7 @@ public class EquipamentoService
     public async Task<ApiResponse<Equipamento>?> AddEquipamentoAsync(Equipamento Equipamento)
     {
         var response = await _httpClient.PostAsJsonAsync("api/equipamentos/cadastro", Equipamento);
-
+        Console.WriteLine(response.StatusCode);
         if (response.IsSuccessStatusCode)
         {
             return await response.Content.ReadFromJsonAsync<ApiResponse<Equipamento>>();
@@ -38,7 +38,7 @@ public class EquipamentoService
         else
         {
             var errorContent = await response.Content.ReadAsStringAsync();
-            throw new HttpRequestException($"Erro ao cadastrar máquina: {response.StatusCode} - {errorContent}");
+            throw new HttpRequestException($"Erro ao cadastrar equipamento: {response.StatusCode} - {errorContent}");
         }
     }
 

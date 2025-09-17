@@ -1,0 +1,183 @@
+@page "/cadastrar/localizacao"
+@rendermode InteractiveServer
+
+<PageTitle>Cadastrar um prédio</PageTitle>
+
+<h1>Cadastrar localização </h1>
+@if (!string.IsNullOrEmpty(mensagemResultado))
+{
+    <div class="alert @(sucesso ? "alert-success" : "alert-danger")" role="alert">
+    @mensagemResultado
+</div>
+}
+
+<h2> Cadastrar uma localização</h2>
+<EditForm Model="local" OnSubmit="SubmitLoc" FormName="cadastrar-Localizaco">
+    <label>Campus:
+        <InputNumber @bind-Value="local!.Campus" class="form-control" />
+    </label>
+    <label>Prédio:
+        <InputNumber @bind-Value="local!.Predio" class="form-control" />
+    </label>
+    <label>Andares:
+        <InputNumber @bind-Value="local!.Andar" class="form-control" />
+    </label>
+    <label>Salas:
+        <InputNumber @bind-Value="local!.Numero" class="form-control" />
+    </label>
+    <button type="submit" class="btn btn-primary" disabled="@isProcessing">
+        @if (isProcessing)
+        {
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            <text>Cadastrando...</text>
+        }
+        else
+        {
+            <text>Cadastrar</text>
+        }
+    </button>
+</EditForm>
+<br>
+
+<h2> Cadastrar várias localizações</h2>
+<p>cadastra todas as salas a parir da sala 01 até a especificada, para todos os
+    andares a patir do 1o andar até o ultimo
+</p>
+
+<EditForm Model="Predio" OnSubmit="SubmitPred" FormName="cadastrar-Localizacoes">
+    <label>Campus:
+        <InputNumber @bind-Value="predio!.campus" class="form-control" />
+    </label>
+    <label>Prédio:
+        <InputNumber @bind-Value="predio!.predio" class="form-control" />
+    </label>
+    <label>Andares:
+        <InputNumber @bind-Value="predio!.andares" class="form-control" />
+    </label>
+    <label>Salas:
+        <InputNumber @bind-Value="predio!.salas" class="form-control" />
+    </label>
+    <button type="submit" class="btn btn-primary" disabled="@isProcessing">
+        @if (isProcessing)
+        {
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            <text>Cadastrando...</text>
+        }
+        else
+        {
+            <text>Cadastrar</text>
+        }
+    </button>
+</EditForm>
+<br>
+
+
+
+@code {
+    [SupplyParameterFromForm]
+    private Predio? predio { get; set; } = null;
+
+    [SupplyParameterFromForm]
+    private Localizacao? local { get; set; } = null;
+
+    [Inject]
+    LocalizacaoService localizacaoService { get; set; } = null!;
+
+    private string mensagemResultado = string.Empty;
+    private bool sucesso = false;
+    private bool isProcessing = false;
+
+    protected override void OnInitialized() => predio ??= new predio();
+
+    private async Task SubmitLoc()
+    {
+        isProcessing = true;
+        mensagemResultado = string.Empty;
+        StateHasChanged();
+        try
+        {
+            // tem que mudar, atualmente o equipamentoService apenas chama a API e ela só retorna um sucesso
+            // testando API
+            var resultado = await localizacaoService.AddLocalizacaoAsync(local!);
+
+            if (resultado != null && resultado.Success)
+            {
+                mensagemResultado = resultado.Message;
+                sucesso = true;
+            }
+            else
+            {
+                mensagemResultado = "Erro inesperado ao cadastrar localização.";
+                sucesso = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            mensagemResultado = $"Erro: {ex.Message}";
+            sucesso = false;
+        }
+        finally
+        {
+            isProcessing = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SubmitPred()
+    {
+        isProcessing = true;
+        mensagemResultado = string.Empty;
+        StateHasChanged();
+        var locInicial = new Localizacao
+            {
+                Campus = predio!.campus,
+                Predio = predio!.predio,
+                Andar = 1,
+                Numero = 1,
+            };
+        var locFinal = new Localizacao
+            {
+                Campus = predio!.campus,
+                Predio = predio!.predio,
+                Andar = predio!.andares,
+                Numero = predio!.salas,
+            };
+
+        try
+        {
+            // tem que mudar, atualmente o equipamentoService apenas chama a API e ela só retorna um sucesso
+            // testando API
+            var resultado = await localizacaoService.AddLocalizacaoAsync(locInicial, locFinal);
+
+            if (resultado != null && resultado.Success)
+            {
+                mensagemResultado = resultado.Message;
+                sucesso = true;
+            }
+            else
+            {
+                mensagemResultado = "Erro inesperado ao cadastrar localização.";
+                sucesso = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            mensagemResultado = $"Erro: {ex.Message}";
+            sucesso = false;
+        }
+        finally
+        {
+            isProcessing = false;
+            StateHasChanged();
+        }
+    }
+
+    public class Predio
+    {
+        public int campus { get; set; }
+        public int predio { get; set; }
+        public int andares { get; set; }
+        public int salas { get; set; }
+
+    }
+}

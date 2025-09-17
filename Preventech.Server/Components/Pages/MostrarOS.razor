@@ -1,0 +1,47 @@
+@page "/ordens-servico"
+@rendermode InteractiveServer
+
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using Preventech.Core.DTOs
+
+<PageTitle>Visualizar Ordens de Servico</PageTitle>
+ 
+@if (ordens == null)
+{
+    <p><em>Carregando...</em></p>
+}
+else if (!ordens.Any())
+{
+    <p><em>Nenhuma ordem de serviço cadastrada.</em></p>
+}
+else
+{
+    <h3>Lista de Ordens de Serviço</h3>
+}
+
+<QuickGrid Items="@ordens">
+    <PropertyColumn Property="@(item => item.Id)" Title="ID" />
+    <PropertyColumn Property="@(item => item.Titulo)" Title="Título" />
+    <PropertyColumn Property="@(item => item.Descricao)" Title="Descrição" />
+    <PropertyColumn Property="@(item => item.Abertura)" Title="Data de Abertura" />
+    <PropertyColumn Property="@(item => item.Status)" Title="Status" />
+    <PropertyColumn Property="@(item => item.TecnicoResponsavel)" Title="Técnico Responsável"/>
+</QuickGrid>
+
+@code {
+    private IQueryable<OrdemServico> ordens = null!;
+
+    [Inject]
+    OrdemServicoService ordemService { get; set; } = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ApiResponse<List<OrdemServico>> response = await ordemService.GetOrdemServicosAsync();
+        ordens = response.Data?.AsQueryable() ?? new List<OrdemServico>().AsQueryable();
+    }
+    @inject NavigationManager NavigationManager
+    void VerDetalhes(OrdemServico ordem)
+    {
+    NavigationManager.NavigateTo($"/ordemservico/{ordem.Id}");
+    }
+}

@@ -1,27 +1,43 @@
+networks:
+  net:
+    driver: bridge
+
 services:
-  webapp:
+  preventech:
+    networks:
+      - net
     image: preventech
-    build:
-      context: .
-      dockerfile: Dockerfile
+
+    build: .
     ports:
-      - "8080:80"
+      - "8080:8080"
     depends_on:
-      - db
+      db: 
+        condition: service_healthy
+        restart: true
     environment:
-      - ASPNETCORE_URLS=http://+:80
-      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=prevendb;Username=preventech;Password=1234
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=preventech;Username=preventech;Password=1234
+    command: dotnet Preventech.Server.dll
 
   db:
     image: postgres:alpine
+    restart: always
+    networks:
+      - net
     environment:
-      POSTGRES_DB: prevendb
+      POSTGRES_DB: Preventech
       POSTGRES_USER: preventech
       POSTGRES_PASSWORD: 1234
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U preventech -d Preventech"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
 
 volumes:
   pgdata:
