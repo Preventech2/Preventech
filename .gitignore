@@ -5,6 +5,8 @@
 
 out/
 outpublish/
+Preventech.Core/[Mm]igrations/*
+
 *.pem
 # dotenv files
 .env

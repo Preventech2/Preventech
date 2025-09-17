@@ -31,12 +31,12 @@ public class Equipamento
     public Localizacao? Local { get; set; }
 
     /// <summary>
-    /// Manutenção preventiva associada à máquina
+    /// Manutenção preventiva associada ao equipamento
     /// </summary>
     public ICollection<Preventiva>? ManutPreventiva { get; set; }
 
     /// <summary>
-    /// Manutenções preditivas associadas à máquina
+    /// Manutenções preditivas associadas ao equipamento
     /// </summary>
     public ICollection<Preditiva>? ManutPreditiva { get; set; }
 

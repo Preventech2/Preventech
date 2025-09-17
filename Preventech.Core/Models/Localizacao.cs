@@ -5,10 +5,17 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Preventech.Core.Models;
 
 /// <summary>
-/// Localização de uma máquina no campus
+/// Localização de uma equipamento no campus
 /// </summary>
 public class Localizacao
 {
+    /// <summary>
+    /// Identificador interno do equipamento
+    /// </summary>
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int Id { get; set; }
+
     /// <summary>
     /// Número do campus
     /// </summary>
@@ -35,5 +42,5 @@ public class Localizacao
     /// </summary>
     public int Numero { get; set; }
 
-    public override string ToString() => $"c{Campus} p{Predio} sala {Numero} {Andar}º andar";
+    public override string ToString() => $"c{Campus}p{Predio}s{Numero}";
 }

@@ -7,13 +7,13 @@ using Preventech.Core.DTOs;
 
 namespace Preventech.Core.Controllers
 {
-    [Route("api/equipamentos")]
+    [Route("api/localizacao")]
     [ApiController]
-    public class EquipamentoController : ControllerBase
+    public class LocalizacaoController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
 
-        public EquipamentoController(ApplicationDbContext context)
+        public LocalizacaoController(ApplicationDbContext context)
         {
             _context = context;
         }
@@ -26,10 +26,10 @@ namespace Preventech.Core.Controllers
             {
                 // Adiciona o equipamento ao contexto
                 _context.Equipamentos.Add(equipamento);
-                
+
                 // Salva as mudanças no banco de dados
                 await _context.SaveChangesAsync();
-                
+
                 return new ApiResponse<Equipamento>
                 {
                     Success = true,
@@ -49,21 +49,20 @@ namespace Preventech.Core.Controllers
         }
 
         [HttpGet]
-        public async Task<ApiResponse<List<Equipamento>>> GetEquipamentos()
+        public async Task<ApiResponse<List<Localizacao>>> GetEquipamentos()
         {
             try
             {
-                var equipamentos = await _context.Equipamentos.ToListAsync();
-                return new ApiResponse<List<Equipamento>>
+                return new ApiResponse<List<Localizacao>>
                 {
                     Success = true,
                     Message = "Equipamentos recuperados com sucesso",
-                    Data = equipamentos
+                    Data = await _context.Localizacoes.ToListAsync()
                 };
             }
             catch (Exception ex)
             {
-                return new ApiResponse<List<Equipamento>>
+                return new ApiResponse<List<Localizacao>>
                 {
                     Success = false,
                     Message = $"Erro ao buscar equipamentos: {ex.Message}",
@@ -72,20 +71,21 @@ namespace Preventech.Core.Controllers
             }
         }
 
-        [HttpGet("{patrimonio}")]
-        public async Task<ActionResult<Equipamento>> GetEquipamento(string patrimonio)
+        [HttpGet("{campus}")]
+        public async Task<ActionResult<Localizacao>> GetDentroCampus(int campus)
         {
             try
             {
-                var equipamento = await _context.Equipamentos
-                    .FirstOrDefaultAsync(e => e.Patrimonio == patrimonio);
-                
-                if (equipamento == null)
+                var localizacoes = await _context.Localizacoes
+                    .Where(loc => loc.Campus == campus)
+                    .ToListAsync();
+
+                if (localizacoes == null)
                 {
-                    return NotFound($"Equipamento com patrimônio '{patrimonio}' não encontrado.");
+                    return NotFound($"campus c{campus} não encontrado.");
                 }
-                
-                return Ok(equipamento);
+
+                return Ok(localizacoes);
             }
             catch (Exception ex)
             {

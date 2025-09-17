@@ -7,6 +7,13 @@ namespace Preventech.Core.Models;
 public class Preditiva
 {
     /// <summary>
+    /// Identificador interno da manutenção preditiva
+    /// </summary>
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int Id { get; set; }
+
+    /// <summary>
     /// Representa a frequência de manutenção preditiva
     /// </summary>
     /// 

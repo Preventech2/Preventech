@@ -16,22 +16,16 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Configure HttpClient
-//builder.Services.AddHttpClient<EquipamentoService>(client =>
-//{
-//    client.BaseAddress = new Uri("http://localhost:5091/");
-//});
-
 builder.Services.AddScoped<OrdemServicoService>();
 
 builder.Services.AddHttpClient<EquipamentoService>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5091/");
+    client.BaseAddress = new Uri("http://localhost:8080/");
 });
 
 builder.Services.AddHttpClient<UsuarioService>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5091/");
+    client.BaseAddress = new Uri("http://localhost:8080/");
 });
 
 builder.Services.AddHttpClient<OrdemServicoService>(client =>
