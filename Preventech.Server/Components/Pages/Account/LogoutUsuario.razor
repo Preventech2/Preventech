@@ -1,0 +1,20 @@
+﻿@page "/logout"
+
+@rendermode InteractiveServer
+
+@inject AuthenticationStateService authStateService
+@inject NavigationManager navigationManager
+
+<PageTitle>Logout</PageTitle>
+
+<h3>LogoutUsuario</h3>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender) {
+        if (firstRender)
+        {
+            await authStateService.MarkUserAsLoggedOut();
+            navigationManager.NavigateTo("/", true);
+        }
+    }
+}

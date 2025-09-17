@@ -1,6 +1,10 @@
 @page "/login"
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @using Preventech.Core.DTOs
 @rendermode InteractiveServer
+
+@inject AuthenticationStateService authStateService
+@inject NavigationManager navigationManager
 
 <h3>Login</h3>
 
@@ -27,14 +31,7 @@
 </EditForm>
 
 @code {
-    private Usuario usuario = new Usuario
-    {
-        Id = 0,
-        Cpf = "",
-        Senha = "",
-        Nome = "",
-        Email = ""
-    };
+    private Usuario usuario = new Usuario();
 
     [Inject]
     private UsuarioService usuarioService { get; set; } = null!;
@@ -45,5 +42,11 @@
     {
         ApiResponse<Usuario> response = await usuarioService.LoginUsuarioAsync(usuario);
         mensagem = response.Message;
+
+        if(response.Success && response.Data != null)
+        {
+            await authStateService.MarkUserAsAuthenticated(response.Data);
+            navigationManager.NavigateTo("/", true);
+        }
     }
 }

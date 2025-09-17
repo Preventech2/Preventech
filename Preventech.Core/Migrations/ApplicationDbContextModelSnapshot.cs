@@ -62,17 +62,17 @@ namespace Preventech.Core.Migrations
                         .HasColumnType("character varying(11)");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
                     b.Property<string>("Nome")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<int?>("Perfil")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Senha")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 

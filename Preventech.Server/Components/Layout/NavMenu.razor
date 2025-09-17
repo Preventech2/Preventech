@@ -1,6 +1,14 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@rendermode InteractiveServer
+
+@inject AuthenticationStateService authStateService
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">Preventech.Server</a>
+    @if(!string.IsNullOrEmpty(NomeUsuario)) {
+        <a class="navbar-brand" href="">@NomeUsuario</a>
+    } else {
+        <a class="navbar-brand" href="">Convidado</a>
+    }
     </div>
 </div>
 
@@ -13,18 +21,24 @@
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
             </NavLink>
         </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
     </nav>
+    <AuthorizeView>
+        <Authorized>
+            @* Adicione aqui os links que o usuário autenticado pode ver. *@
+
+        </Authorized>
+    </AuthorizeView>
 </div>
 
+@code {
+    private string? NomeUsuario = null;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender) {
+        if (firstRender)
+        {
+            Usuario? usuario = await authStateService.GetUsuarioAsync();
+            NomeUsuario = usuario?.Nome;
+            StateHasChanged();
+        }
+    }
+}

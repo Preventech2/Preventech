@@ -1,0 +1,13 @@
+﻿@rendermode InteractiveServer
+
+<section>
+    <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+    <AuthorizeView>
+        <Authorized>
+            <a href="/logout">Logout</a>
+        </Authorized>
+        <NotAuthorized>
+            <a href="/login">Login</a>
+        </NotAuthorized>
+    </AuthorizeView>
+</section>

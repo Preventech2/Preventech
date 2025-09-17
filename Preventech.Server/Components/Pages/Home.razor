@@ -1,14 +1,36 @@
 ﻿@page "/"
 
+@rendermode InteractiveServer
+
 <PageTitle>Home</PageTitle>
 
 <h1>Bem vindo ao Preventech!</h1>
 
-<ul>
-    <li><a href="/cadastrar/equipamento">Cadastrar Equipamento</a></li>
-    <li><a href="/equipamentos">Equipamentos</a></li>
-    <li><a href="/cadastrar/usuario">Cadastrar Usuário</a></li>
-    <li><a href="/usuarios">Usuários</a></li>
-    <li><a href="/login">Login</a></li>
-</ul>
+<AuthorizeView>
+    <Authorized>
+        <p>Você está logado.</p>
+        <ul>
+            <li><a href="/cadastrar/equipamento">Cadastrar Equipamento</a></li>
+            <li><a href="/equipamentos">Equipamentos</a></li>
+            <li><a href="/cadastrar/usuario">Cadastrar Usuário</a></li>
+            <li><a href="/usuarios">Usuários</a></li>
+            <li><a href="/enviar-email">Enviar Email</a></li>
+        </ul>
+    </Authorized>
+    <NotAuthorized>
+        <p>Você não está logado. Por favor, faça login para acessar mais funcionalidades.</p>
+    </NotAuthorized>
+</AuthorizeView>
 
+<p>
+    <AuthorizeView Roles="VisualizarEquipamento">
+        <Authorized>
+            <!-- Conteúdo permitido -->
+            Top Secret
+        </Authorized>
+        <NotAuthorized>
+            <!-- Conteúdo negado -->
+            Conteudo restrito
+        </NotAuthorized>
+    </AuthorizeView>
+</p>

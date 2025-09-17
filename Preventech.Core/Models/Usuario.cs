@@ -12,14 +12,17 @@ public class Usuario
 
     [Required]
     [StringLength(11)]
-    public string Cpf { get; set; } = null!;
+    public string? Cpf { get; set; }
 
     [MaxLength(50)]
-    public string Nome { get; set; } = null!;
+    public string? Nome { get; set; }
+
+    [EmailAddress]
+    [MaxLength(50)]
+    public string? Email { get; set; }
 
     [MaxLength(50)]
-    public string Email { get; set; } = null!;
+    public string? Senha { get; set; }
 
-    [MaxLength(50)]
-    public string Senha { get; set; } = null!;
+    public Perfil? Perfil { get; set; }
 }

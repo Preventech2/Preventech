@@ -2,6 +2,10 @@ using Preventech.Server.Components;
 using Preventech.Core.DatabaseContexts;
 using Preventech.Core.Services;
 using Microsoft.EntityFrameworkCore;
+using Preventech.Server.SecurityServices;
+using Microsoft.AspNetCore.Components.Authorization;
+using Quartz;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +22,15 @@ builder.Services.AddControllers();
 //    options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
 //    options.HttpsPort = 7111; // Porta HTTPS definida para suprimir o aviso de segurança
 //});
+
+// Add Authorization and Authentication services
+
+builder.Services.AddAuthorization();
+builder.Services.AddCascadingAuthenticationState();
+
+// Add scope to the AuthenticationStateProvider
+builder.Services.AddScoped<AuthenticationStateProvider, AuthenticationStateService>();
+builder.Services.AddScoped<AuthenticationStateService>();
 
 // Configure PostgreSQL
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -41,6 +54,11 @@ builder.Services.AddHttpClient<UsuarioService>(client =>
     client.BaseAddress = new Uri("http://localhost:5091/");
 });
 
+builder.Services.AddHttpClient<EmailService>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:5091/");
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -54,6 +72,9 @@ if (!app.Environment.IsDevelopment())
 //app.UseHttpsRedirection();
 
 app.UseAntiforgery();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Map API controllers
 app.MapControllers();
