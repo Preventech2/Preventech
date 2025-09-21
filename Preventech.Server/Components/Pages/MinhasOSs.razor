@@ -1,4 +1,4 @@
-@page "/ordens-servico"
+@page "/ordens-servico/user/{responsavelId:int}"
 @rendermode InteractiveServer
 
 @using Microsoft.AspNetCore.Components.QuickGrid
@@ -12,7 +12,7 @@
 }
 else if (!ordens.Any())
 {
-    <p><em>Nenhuma ordem de serviço cadastrada.</em></p>
+    <p><em>Você não é responsável por nenhuma ordem de serviço.</em></p>
 }
 else
 {
@@ -44,9 +44,12 @@ else
     [Inject]
     OrdemServicoService ordemService { get; set; } = null!;
 
+    [Parameter]
+    public int responsavelId { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
-        ApiResponse<List<OrdemServico>> response = await ordemService.GetOrdemServicosAsync();
+        ApiResponse<List<OrdemServico>> response = await ordemService.GetOrdemServicoByResponsavelAsync(responsavelId);
         ordens = response.Data?.AsQueryable() ?? new List<OrdemServico>().AsQueryable();
     }
     @inject NavigationManager NavigationManager

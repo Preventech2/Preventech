@@ -27,7 +27,9 @@ public class OrdemServico
     public string Descricao { get; set; } = "";
 
     public string? Observacoes { get; set; }
-    public string? TecnicoResponsavel { get; set; }
+    
+    public int? TecnicoResponsavelId { get; set; }
+    public Usuario? TecnicoResponsavel { get; set; }
 
     public int? EquipamentoId { get; set; }
     public Equipamento? Equipamento { get; set; }
