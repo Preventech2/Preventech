@@ -49,14 +49,14 @@ namespace Preventech.Core.Controllers
         }
 
         [HttpGet]
-        public async Task<ApiResponse<List<Localizacao>>> GetEquipamentos()
+        public async Task<ApiResponse<List<Localizacao>>> GetLocalizacao()
         {
             try
             {
                 return new ApiResponse<List<Localizacao>>
                 {
                     Success = true,
-                    Message = "Equipamentos recuperados com sucesso",
+                    Message = "Localizações recuperadas com sucesso",
                     Data = await _context.Localizacoes.ToListAsync()
                 };
             }

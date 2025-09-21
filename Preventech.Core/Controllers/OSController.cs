@@ -82,23 +82,28 @@ namespace Preventech.Core.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<OrdemServico>> GetOS(Guid id)
-        {
+        public async Task<ApiResponse<OrdemServico>> GetOS(Guid id)
+        {            
             try
             {
                 var ordem = await _context.OrdensServico
                     .FirstOrDefaultAsync(e => e.Id == id);
-                
-                if (ordem == null)
+
+                return new ApiResponse<OrdemServico>
                 {
-                    return NotFound($"Ordem de serviço com id '{id}' não encontrada.");
-                }
-                
-                return Ok(ordem);
+                    Success = true,
+                    Message = "Ordem de Serviço recuperados com sucesso",
+                    Data = ordem
+                };
             }
             catch (Exception ex)
             {
-                return BadRequest($"Erro ao buscar ordem de serviço: {ex.Message}");
+                return new ApiResponse<OrdemServico>
+                {
+                    Success = false,
+                    Message = $"Erro ao buscar Ordem de Servicos: {ex.Message}",
+                    Data = null
+                };
             }
         }
     }

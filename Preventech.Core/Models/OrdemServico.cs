@@ -24,11 +24,17 @@ public class OrdemServico
     public StatusOS Status { get; set; }
 
     public string Titulo { get; set; } = "";
-
     public string Descricao { get; set; } = "";
 
+    public string? Observacoes { get; set; }
     public string? TecnicoResponsavel { get; set; }
 
+    public int? EquipamentoId { get; set; }
+    public Equipamento? Equipamento { get; set; }
+    
+    public int? RequisitanteId { get; set; }
+    public Usuario? Requisitante { get; set; }
+    
     public static Guid GerarIdOrdem()
     {
         var agora = DateTimeOffset.Now;

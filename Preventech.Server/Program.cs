@@ -50,12 +50,12 @@ builder.Services.AddHttpClient<UsuarioService>(client =>
 
 builder.Services.AddHttpClient<OrdemServicoService>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5091/");
+    client.BaseAddress = new Uri("http://localhost:8080/");
 });
 
 builder.Services.AddHttpClient<EmailService>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5091/");
+    client.BaseAddress = new Uri("http://localhost:8080/");
 });
 
 var app = builder.Build();
