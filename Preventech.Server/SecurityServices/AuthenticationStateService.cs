@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using System.Security.Claims;
 using Preventech.Core.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Preventech.Core.Services;
 
 namespace Preventech.Server.SecurityServices;
 
@@ -75,7 +76,9 @@ public class AuthenticationStateService(ProtectedSessionStorage sessionStorage) 
         try
         {
             var result = await _sessionStorage.GetAsync<Usuario>("usuario");
-            return result.Success ? result.Value : null;
+            var usuario = result.Success ? result.Value : null;
+
+            return usuario;
         }
         catch
         {

@@ -37,4 +37,12 @@ public class UsuarioService
         ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<List<Usuario>>.");
         return result;
     }
+
+    public async Task<ApiResponse<Usuario>> GetUsuarioByIdAsync(int id)
+    {
+        var response = await _httpClient.GetAsync($"api/usuarios/{id}");
+        var result = await response.Content.ReadFromJsonAsync<ApiResponse<Usuario>>()
+        ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<Usuario>.");
+        return result;
+    }
 }

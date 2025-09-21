@@ -1,4 +1,7 @@
 ﻿@page "/cadastrar/ordem-servico"
+@rendermode InteractiveServer
+
+@inject AuthenticationStateService authStateService
 
 <PageTitle>Cadastrar uma Ordem de Serviço</PageTitle>
 
@@ -11,62 +14,70 @@
     </div>
 }
 
-<EditForm Model="ordemServico" OnSubmit="FormData" FormName="cadastrar-Ordem-Servico">
-    <div class="mb-3">
-        <label>Título:
-            <InputText @bind-Value="ordemServico!.Titulo" class="form-control"/>
-        </label>
-    </div>
-    
-    <div class="mb-3">
-        <label>Descrição:
-            <InputTextArea @bind-Value="ordemServico!.Descricao" class="form-control"/>
-        </label>
-    </div>
+@if (usuario == null)
+{
+    <p><em>Carregando usuário</em></p>
+}
+else {
+    <EditForm Model="ordemServico" OnSubmit="FormData" FormName="cadastrar-Ordem-Servico">
+        <div class="mb-3">
+            <label>Título:
+                <InputText @bind-Value="ordemServico!.Titulo" class="form-control"/>
+            </label>
+        </div>
 
         <div class="mb-3">
-        <label>Alguma observação?:
-            <InputTextArea @bind-Value="ordemServico!.Observacoes" class="form-control"/>
-        </label>
-    </div>
-    
-    @if(equipamentos != null && equipamentos.Any()) 
-    {
-        <div class="mb-3">
-            <label>Equipamento:
-                <InputSelect @bind-Value="ordemServico!.EquipamentoId">
-                    @foreach (Equipamento equipamento in equipamentos)
-                    {
-                        <option value="@equipamento.Id">@equipamento.ToString()</option>
-                    }
-                </InputSelect>
+            <label>Descrição:
+                <InputTextArea @bind-Value="ordemServico!.Descricao" class="form-control"/>
             </label>
-            <span>Não encontrou o equipamento? <a href="/cadastrar/equipamento">Cadastre-o!</a></span>
         </div>
-    }
-    else
-    {
-        <p><em>Carregando equipamentos</em></p>
-    }
-    
-    <button type="submit" class="btn btn-primary" disabled="@isProcessing">
-        @if (isProcessing)
+
+            <div class="mb-3">
+            <label>Alguma observação?
+                <InputTextArea @bind-Value="ordemServico!.Observacoes" class="form-control"/>
+            </label>
+        </div>
+
+        @if(equipamentos != null && equipamentos.Any()) 
         {
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            <text>Cadastrando...</text>
+            <div class="mb-3">
+                <label>Equipamento:
+                    <InputSelect @bind-Value="ordemServico!.EquipamentoId">
+                        @foreach (Equipamento equipamento in equipamentos)
+                        {
+                            <option value="@equipamento.Id">@equipamento.ToString()</option>
+                        }
+                    </InputSelect>
+                </label>
+                <span>Não encontrou o equipamento? <a href="/cadastrar/equipamento">Cadastre-o!</a></span>
+            </div>
         }
         else
         {
-            <text>Cadastrar</text>
+            <p><em>Carregando equipamentos</em></p>
         }
-    </button>
-</EditForm>
+
+        <button type="submit" class="btn btn-primary" disabled="@isProcessing">
+            @if (isProcessing)
+            {
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <text>Cadastrando...</text>
+            }
+            else
+            {
+                <text>Cadastrar</text>
+            }
+        </button>
+    </EditForm>
+}
 
 @code {
     [SupplyParameterFromForm]
     private OrdemServico? ordemServico { get; set; } = null;
     
     private IQueryable<Equipamento> equipamentos = null!;
+
+    private Usuario usuario = null!;
 
     [Inject]
     OrdemServicoService OSservice { get; set; } = null!;
@@ -84,6 +95,21 @@
 
         ApiResponse<List<Equipamento>> response = await EquipService.GetEquipamentosAsync();
         equipamentos = response.Data?.AsQueryable() ?? new List<Equipamento>().AsQueryable();
+
+        Usuario? responseUser = await authStateService.GetUsuarioAsync();
+
+        if (responseUser != null)
+        {
+            usuario = responseUser;
+        }
+
+        else
+        {
+            usuario = new Usuario
+            {
+                Nome = "Usuário não identificado"
+            };
+        }
     }
     
     private async Task FormData()
@@ -92,8 +118,8 @@
         mensagemResultado = string.Empty;
         ordemServico!.Abertura = DateTime.UtcNow;
         ordemServico!.Status = StatusOS.Parada;
-        ordemServico!.TecnicoResponsavel = "Não atribuído";
-        //ordemServico!.Requisitante = UsuarioLogado.NomeCompleto;
+        ordemServico!.TecnicoResponsavel = null;
+        ordemServico!.RequisitanteId = usuario.Id;
         
         Core.DTOs.ApiResponse<OrdemServico> response = await OSservice.AddOrdemServicoAsync(ordemServico) ?? new Core.DTOs.ApiResponse<OrdemServico>();
         mensagemResultado = response.Message;
