@@ -2,17 +2,15 @@ using System;
 using System.Net.Http.Json;
 using Preventech.Core.Models;
 using Preventech.Core.DTOs;
+using Microsoft.Extensions.Logging;
+using System.Security.Cryptography;
 
 namespace Preventech.Core.Services;
 
-public class UsuarioService
+public class UsuarioService(HttpClient httpClient, ILogger<UsuarioService> logger)
 {
-    private readonly HttpClient _httpClient;
-
-    public UsuarioService(HttpClient httpClient)
-    {
-        _httpClient = httpClient;
-    }
+    private readonly ILogger<UsuarioService> _logger = logger;
+    private readonly HttpClient _httpClient = httpClient;
 
     public async Task<ApiResponse<Usuario>> AddUsuarioAsync(Usuario usuario)
     {
@@ -22,19 +20,41 @@ public class UsuarioService
         return result;
     }
 
-    public async Task<ApiResponse<Usuario>> LoginUsuarioAsync(Usuario usuario)
+    public async Task<ApiResponse<string>> LoginUsuarioAsync(Usuario usuario)
     {
         var response = await _httpClient.PostAsJsonAsync($"api/usuarios/login", usuario);
         var result = await response.Content.ReadFromJsonAsync<ApiResponse<Usuario>>()
-        ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<Usuario>.");
-        return result;
-    }
+        ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<Usuario> while login.");
 
+        if (result.Success)
+        {
+            response = await _httpClient.PostAsJsonAsync("api/authentication/login", result.Data);
+            var authResult = await response.Content.ReadFromJsonAsync<ApiResponse<string>>()
+            ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<string> while authenticating.");
+            return authResult;
+        }
+
+        return new ApiResponse<string>
+        {
+            Success = false,
+            Message = result.Message,
+            Data = null
+        };
+    }
+    
     public async Task<ApiResponse<List<Usuario>>> GetUsuariosAsync()
     {
         var response = await _httpClient.GetAsync("api/usuarios");
         var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<Usuario>>>()
         ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<List<Usuario>>.");
+        return result;
+    }
+
+    public async Task<ApiResponse<Usuario>> InviteUsuarioAsync(Usuario usuario)
+    {
+        var response = await _httpClient.PostAsJsonAsync("api/usuarios/invite", usuario);
+        var result = await response.Content.ReadFromJsonAsync<ApiResponse<Usuario>>()
+        ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<Usuario>.");
         return result;
     }
 }

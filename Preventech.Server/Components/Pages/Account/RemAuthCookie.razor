@@ -1,0 +1,16 @@
+﻿@page "/rem-auth-cookie"
+@using Microsoft.AspNetCore.Authentication
+@using Preventech.Core.Constants
+@using Preventech.Server.Provider
+
+@inject CustomAuthStateProvider authStateProvider
+@inject IHttpContextAccessor httpContextAccessor
+@inject NavigationManager navigationManager
+
+@code {
+    protected override void OnInitialized()
+    {
+        httpContextAccessor.HttpContext!.Response.Cookies.Delete(AuthConstants.CookieName);
+        navigationManager.NavigateTo("/", true);
+    }
+}

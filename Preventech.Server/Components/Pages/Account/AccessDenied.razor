@@ -1,6 +1,5 @@
 ﻿@page "/access-denied"
 
-@inject AuthenticationStateService authStateService
 @inject NavigationManager navigationManager
 
 <PageTitle>Access Denied</PageTitle>
@@ -10,9 +9,8 @@
 <button class="btn btn-primary" @onclick="NavigateToLogin">Go to Login</button>
 
 @code {
-    private async Task NavigateToLogin()
+    private void NavigateToLogin()
     {
-        await authStateService.MarkUserAsLoggedOut();
         navigationManager.NavigateTo("/login");
     }
 }

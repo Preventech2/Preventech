@@ -1,9 +1,12 @@
 @page "/login"
+@using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @using Preventech.Core.DTOs
+@using Preventech.Server.Provider
+
 @rendermode InteractiveServer
 
-@inject AuthenticationStateService authStateService
+@inject CustomAuthStateProvider authStateProvider
 @inject NavigationManager navigationManager
 
 <h3>Login</h3>
@@ -28,6 +31,7 @@
         <InputText id="senha" type="password" class="form-control" @bind-Value="usuario.Senha" />
     </div>
     <button type="submit" class="btn btn-primary">Entrar</button>
+    <p><a href="/signup">Não tem uma conta? Cadastre-se</a></p>
 </EditForm>
 
 @code {
@@ -40,13 +44,15 @@
 
     private async Task HandleValidSubmit()
     {
-        ApiResponse<Usuario> response = await usuarioService.LoginUsuarioAsync(usuario);
-        mensagem = response.Message;
-
-        if(response.Success && response.Data != null)
+        ApiResponse<string> response = await usuarioService.LoginUsuarioAsync(usuario);
+        if (response.Success)
         {
-            await authStateService.MarkUserAsAuthenticated(response.Data);
-            navigationManager.NavigateTo("/", true);
+            navigationManager.NavigateTo($"/add-auth-cookie?Token={response.Data}", true);
         }
+        else
+        {
+            mensagem = response.Message ?? "Erro ao fazer login.";
+            usuario = new Usuario(); // Limpa os campos
+        } 
     }
 }

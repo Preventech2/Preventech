@@ -1,0 +1,34 @@
+﻿@page "/add-auth-cookie"
+@using Preventech.Core.Constants
+
+@inject IHttpContextAccessor httpContextAccessor
+@inject NavigationManager navigationManager
+
+@code {
+    [SupplyParameterFromQuery]
+    public string? Token { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (!string.IsNullOrEmpty(Token))
+        {
+            httpContextAccessor.HttpContext!.Response.Cookies.Append(
+                AuthConstants.CookieName,
+                Token,
+                new CookieOptions
+                {
+                    HttpOnly = AuthConstants.CookieHttpOnly,
+                    SameSite = AuthConstants.CookieSameSite,
+                    Secure = AuthConstants.CookieSecure,
+                    Expires = DateTime.UtcNow.AddHours(AuthConstants.CookieExpiryInHours)
+                }
+            );
+
+            navigationManager.NavigateTo("/", true);
+        }
+        else
+        {
+            navigationManager.NavigateTo("/login", true);
+        }
+    }
+}

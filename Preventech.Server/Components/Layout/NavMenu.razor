@@ -1,14 +1,9 @@
-﻿@rendermode InteractiveServer
-
-@inject AuthenticationStateService authStateService
+﻿@using Preventech.Server.Provider
+@rendermode InteractiveServer
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-    @if(!string.IsNullOrEmpty(NomeUsuario)) {
         <a class="navbar-brand" href="">@NomeUsuario</a>
-    } else {
-        <a class="navbar-brand" href="">Convidado</a>
-    }
     </div>
 </div>
 
@@ -25,7 +20,13 @@
     <AuthorizeView>
         <Authorized>
             @* Adicione aqui os links que o usuário autenticado pode ver. *@
-
+        <nav class="nav flex-column">
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/cadastrar/equipamento" Match="NavLinkMatch.All">
+                    <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Cadastrar Equipamento
+                </NavLink>
+            </div>
+        </nav>
         </Authorized>
     </AuthorizeView>
 </div>
@@ -33,12 +34,19 @@
 @code {
     private string? NomeUsuario = null;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender) {
-        if (firstRender)
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateTask;
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
         {
-            Usuario? usuario = await authStateService.GetUsuarioAsync();
-            NomeUsuario = usuario?.Nome;
-            StateHasChanged();
+            // Tenta pegar a claim padrão do nome
+            NomeUsuario = user.Identity.Name 
+                ?? user.Claims.FirstOrDefault(c => c.Type == "name")?.Value;
         }
     }
 }

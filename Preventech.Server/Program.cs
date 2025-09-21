@@ -2,10 +2,10 @@ using Preventech.Server.Components;
 using Preventech.Core.DatabaseContexts;
 using Preventech.Core.Services;
 using Microsoft.EntityFrameworkCore;
-using Preventech.Server.SecurityServices;
 using Microsoft.AspNetCore.Components.Authorization;
+using Preventech.Server.Provider;
 using Quartz;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using Preventech.Core.Constants;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,14 +23,21 @@ builder.Services.AddControllers();
 //    options.HttpsPort = 7111; // Porta HTTPS definida para suprimir o aviso de segurança
 //});
 
-// Add Authorization and Authentication services
-
-builder.Services.AddAuthorization();
+// authorization and authentication services
 builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
+builder.Services.AddScoped<CustomAuthStateProvider>();
+builder.Services.AddAuthentication(AuthConstants.CookieName)
+    .AddCookie(AuthConstants.CookieName, options =>
+    {
+        options.LoginPath = "/login";
+        options.LogoutPath = "/logout";
+        options.AccessDeniedPath = "/access-denied";
+        options.ExpireTimeSpan = TimeSpan.FromHours(AuthConstants.CookieExpiryInHours);
+        options.SlidingExpiration = true;
+    });
 
-// Add scope to the AuthenticationStateProvider
-builder.Services.AddScoped<AuthenticationStateProvider, AuthenticationStateService>();
-builder.Services.AddScoped<AuthenticationStateService>();
+builder.Services.AddHttpContextAccessor();
 
 // Configure PostgreSQL
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -72,7 +79,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseAntiforgery();
 
-app.UseAuthentication();
+app.UseAuthentication(); 
 app.UseAuthorization();
 
 // Map API controllers

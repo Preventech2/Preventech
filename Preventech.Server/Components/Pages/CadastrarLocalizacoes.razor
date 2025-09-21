@@ -44,18 +44,18 @@
     andares a patir do 1o andar até o ultimo
 </p>
 
-<EditForm Model="Predio" OnSubmit="SubmitPred" FormName="cadastrar-Localizacoes">
+<EditForm Model="predio" OnSubmit="SubmitPred" FormName="cadastrar-Localizacoes">
     <label>Campus:
-        <InputNumber @bind-Value="predio!.campus" class="form-control" />
+        <InputNumber @bind-Value="predio!.Campus" class="form-control" />
     </label>
     <label>Prédio:
-        <InputNumber @bind-Value="predio!.predio" class="form-control" />
+        <InputNumber @bind-Value="predio!.Predio" class="form-control" />
     </label>
     <label>Andares:
-        <InputNumber @bind-Value="predio!.andares" class="form-control" />
+        <InputNumber @bind-Value="predio!.Andares" class="form-control" />
     </label>
     <label>Salas:
-        <InputNumber @bind-Value="predio!.salas" class="form-control" />
+        <InputNumber @bind-Value="predio!.Salas" class="form-control" />
     </label>
     <button type="submit" class="btn btn-primary" disabled="@isProcessing">
         @if (isProcessing)
@@ -75,7 +75,7 @@
 
 @code {
     [SupplyParameterFromForm]
-    private Predio? predio { get; set; } = null;
+    private Locais? predio { get; set; } = null;
 
     [SupplyParameterFromForm]
     private Localizacao? local { get; set; } = null;
@@ -87,7 +87,7 @@
     private bool sucesso = false;
     private bool isProcessing = false;
 
-    protected override void OnInitialized() => predio ??= new predio();
+    protected override void OnInitialized() => predio ??= new Locais();
 
     private async Task SubmitLoc()
     {
@@ -130,17 +130,17 @@
         StateHasChanged();
         var locInicial = new Localizacao
             {
-                Campus = predio!.campus,
-                Predio = predio!.predio,
+                Campus = predio!.Campus,
+                Predio = predio!.Predio,
                 Andar = 1,
                 Numero = 1,
             };
         var locFinal = new Localizacao
             {
-                Campus = predio!.campus,
-                Predio = predio!.predio,
-                Andar = predio!.andares,
-                Numero = predio!.salas,
+                Campus = predio!.Campus,
+                Predio = predio!.Predio,
+                Andar = predio!.Andares,
+                Numero = predio!.Salas,
             };
 
         try
@@ -172,12 +172,11 @@
         }
     }
 
-    public class Predio
+    public class Locais
     {
-        public int campus { get; set; }
-        public int predio { get; set; }
-        public int andares { get; set; }
-        public int salas { get; set; }
-
+        public int Campus { get; set; }
+        public int Predio { get; set; }
+        public int Andares { get; set; }
+        public int Salas { get; set; }
     }
 }

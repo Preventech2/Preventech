@@ -1,0 +1,42 @@
+﻿@using System.Text.RegularExpressions
+
+<input type="checkbox" checked="@IsChecked" @onchange="OnCheckboxChanged" />
+<label>@FormattedFlagName</label>
+
+@code {
+    [Parameter]
+    public Perfil Flag { get; set; }
+
+    [Parameter]
+    public Perfil? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<Perfil?> ValueChanged { get; set; }
+
+    // Exibe o nome formatado do perfil
+    private string FormattedFlagName => FormatFlagName(Flag);
+
+    // Define se o checkbox está marcado
+    private bool IsChecked => Value.HasValue && Value.Value.HasFlag(Flag);
+
+    // Formata o nome do perfil para exibição
+    private static string FormatFlagName(Perfil perfil)
+    {
+        string? nome = perfil.ToString();
+        return Regex.Replace(nome, "(?<!^)([A-Z])", " $1");
+    }
+
+    // Manipula a mudança do checkbox
+    private async Task OnCheckboxChanged(ChangeEventArgs e)
+    {
+        bool isChecked = e.Value is bool b && b;
+        Perfil? newValue = Value ?? default;
+
+        if (isChecked)
+            newValue |= Flag;
+        else
+            newValue &= ~Flag;
+
+        await ValueChanged.InvokeAsync(newValue);
+    }
+}
