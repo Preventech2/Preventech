@@ -24,9 +24,21 @@ public class OrdemServicoService
     }
 
     // Example method to get a single OrdemServico by ID
-    public async Task<OrdemServico?> GetOrdemServicoByIdAsync(long id)
+    
+    public async Task<ApiResponse<OrdemServico>> GetOrdemServicoByIdAsync(Guid id)
     {
-        return await _httpClient.GetFromJsonAsync<OrdemServico>($"api/ordem-servico/{id}");
+        var response = await _httpClient.GetAsync($"api/ordem-servico/{id}");
+        var result = await response.Content.ReadFromJsonAsync<ApiResponse<OrdemServico>>()
+        ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<OrdemServico>.");
+        return result;
+    }
+
+    public async Task<ApiResponse<List<OrdemServico>>> GetOrdemServicoByResponsavelAsync(int id)
+    {
+        var response = await _httpClient.GetAsync($"api/ordem-servico/user/{id}");
+        var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<OrdemServico>>>()
+        ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<OrdemServico>.");
+        return result;
     }
 
     // Example method to create a new OrdemServico
@@ -39,10 +51,14 @@ public class OrdemServicoService
     }
 
     // Example method to update an existing OrdemServico
-    public async Task UpdateOrdemServicoAsync(long id, OrdemServico ordemServico)
+    public async Task<ApiResponse<OrdemServico>?> UpdateOrdemServicoAsync(Guid id, OrdemServico ordemServico)
     {
         var response = await _httpClient.PutAsJsonAsync($"api/ordem-servico/{id}", ordemServico);
         response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<ApiResponse<OrdemServico>>()
+        ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<OrdemServico>.");
+
+        return result;
     }
 
     // Example method to delete an OrdemServico

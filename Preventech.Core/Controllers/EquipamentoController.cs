@@ -26,10 +26,10 @@ namespace Preventech.Core.Controllers
             {
                 // Adiciona o equipamento ao contexto
                 _context.Equipamentos.Add(equipamento);
-                
+
                 // Salva as mudanças no banco de dados
                 await _context.SaveChangesAsync();
-                
+
                 return new ApiResponse<Equipamento>
                 {
                     Success = true,
@@ -72,24 +72,27 @@ namespace Preventech.Core.Controllers
             }
         }
 
-        [HttpGet("{patrimonio}")]
-        public async Task<ActionResult<Equipamento>> GetEquipamento(string patrimonio)
+        [HttpGet("{id}")]
+        public async Task<ApiResponse<Equipamento>> GetEquipamentoById(int id)
         {
             try
             {
-                var equipamento = await _context.Equipamentos
-                    .FirstOrDefaultAsync(e => e.Patrimonio == patrimonio);
-                
-                if (equipamento == null)
+                var equipamentos = await _context.Equipamentos.FindAsync(id);
+                return new ApiResponse<Equipamento>
                 {
-                    return NotFound($"Equipamento com patrimônio '{patrimonio}' não encontrado.");
-                }
-                
-                return Ok(equipamento);
+                    Success = true,
+                    Message = "Equipamentos recuperados com sucesso",
+                    Data = equipamentos
+                };
             }
             catch (Exception ex)
             {
-                return BadRequest($"Erro ao buscar equipamento: {ex.Message}");
+                return new ApiResponse<Equipamento>
+                {
+                    Success = false,
+                    Message = $"Erro ao buscar equipamentos: {ex.Message}",
+                    Data = null
+                };
             }
         }
     }

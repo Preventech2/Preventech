@@ -20,19 +20,30 @@
     <AuthorizeView>
         <Authorized>
             @* Adicione aqui os links que o usuário autenticado pode ver. *@
-        <nav class="nav flex-column">
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="/cadastrar/equipamento" Match="NavLinkMatch.All">
-                    <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Cadastrar Equipamento
-                </NavLink>
-            </div>
-        </nav>
+            @if (usuario != null)
+            
+            {
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="@url">
+                       <span class="bi bi-briefcase-fill" aria-hidden="true"></span> Minhas OSs
+                    </NavLink>
+                </div>
+            }
         </Authorized>
     </AuthorizeView>
 </div>
 
 @code {
     private string? NomeUsuario = null;
+    private Usuario? usuario = null;
+
+    private string url = "/ordens-servico/user/";
+
+    protected override async Task OnInitializedAsync()
+    {
+        usuario = await authStateService.GetUsuarioAsync();
+        url += usuario?.Id.ToString();
+    }
 
     [CascadingParameter]
     private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;

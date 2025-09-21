@@ -1,0 +1,214 @@
+@page "/ordens-servico/{id:guid}"
+@rendermode InteractiveServer
+
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using Preventech.Core.DTOs
+
+@inject AuthenticationStateService authStateService
+
+<PageTitle>Visualizar Ordem de Serviço</PageTitle>
+ 
+@if (ordem == null)
+{
+    <p><em>Carregando...</em></p>
+}
+else
+{
+    <h2>@ordem.Titulo</h2>
+    
+    <div>
+        <img src="@GetStatusIcon(@ordem.Status)" alt="Status Icon"
+             width="14" height="14" style="margin-right: 2px;" />
+        @ordem.Status
+        [Aberta em @ordem.Abertura]
+    </div>
+    <br>
+    <p><strong>Descrição:</strong> @ordem.Descricao</p>
+    <p><strong>Observações:</strong> @ordem.Observacoes</p>
+    <p><strong>Id:</strong> @ordem.Id</p>
+    <p><strong>Equipamento:</strong> @equipamento.ToString()</p>
+    <p>
+        <strong>Requisitado por: </strong> 
+            @if (ordem.Requisitante == null) {
+                <span> Carregando</span>
+            }
+
+            else {
+                @ordem.Requisitante.Nome
+            }
+    </p>
+
+@if (ordem.TecnicoResponsavel == null) {
+    <EditForm Model="ordem" OnSubmit="FormData" FormName="pegar-Ordem-Servico">
+        <button type="submit" class="btn btn-primary" disabled="@isProcessing">
+            @if (isProcessing)
+            {
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span class="visually-hidden">Processando...</span>
+            }
+            else
+            {
+                <text>Pegar ordem</text>
+            }
+        </button>
+    </EditForm>      
+}
+
+else if (ordem.TecnicoResponsavel.Id == usuario.Id && ordem.Status != StatusOS.Concluida) {
+    <div>
+        <EditForm Model="ordem" OnSubmit="FormDataCancel" FormName="pegar-Ordem-Servico">
+            <button type="submit" class="btn btn-danger" disabled="@isProcessing">
+                @if (isProcessing)
+                {
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span class="visually-hidden">Processando...</span>
+                }
+                else
+                {
+                    <text>Cancelar</text>
+                }
+            </button>
+        </EditForm>
+    </div>
+    <div>
+        <EditForm Model="ordem" OnSubmit="FormDataFinish" FormName="pegar-Ordem-Servico">
+            <button type="submit" class="btn btn-success" disabled="@isProcessing">
+                @if (isProcessing)
+                {
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span class="visually-hidden">Processando...</span>
+                }
+                else
+                {
+                    <text>Concluir OS</text>
+                }
+            </button>
+        </EditForm>     
+    </div>  
+}
+
+else {
+    <p><strong>Técnico Responsável:</strong> @ordem.TecnicoResponsavel.Nome</p>
+}
+
+}
+
+@code {
+    private OrdemServico ordem = null!;
+    private Equipamento equipamento = null!;
+    private Usuario usuario = null!;
+
+    [Parameter]
+    public Guid id { get; set; }
+
+    [Inject]
+    OrdemServicoService ordemService { get; set; } = null!;
+    
+    [Inject]
+    EquipamentoService EquipService { get; set; } = null!;
+
+    private string mensagemResultado = string.Empty;
+    private bool sucesso = false;
+    private bool isProcessing = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ApiResponse<OrdemServico>? response = await ordemService.GetOrdemServicoByIdAsync(id);
+        
+        if (response != null && response.Data != null)
+        {
+            ordem = response.Data;
+        }
+
+        else
+        {
+            ordem = new OrdemServico();
+        }
+
+        if (ordem.EquipamentoId.HasValue)
+        {
+            ApiResponse<Equipamento> responseEquip = await EquipService.GetEquipamentoByIdRealAsync(ordem.EquipamentoId.Value);
+    
+            if (responseEquip != null && responseEquip.Data != null)
+            {
+                equipamento = responseEquip.Data;
+            }
+        }
+
+        else
+        {
+            equipamento = new Equipamento
+            {
+                Nome = "Não atribuído",
+                Patrimonio = "N/A"
+            };
+        }
+
+        Usuario? responseUser = await authStateService.GetUsuarioAsync();
+
+        if (responseUser != null)
+        {
+            usuario = responseUser;
+        }
+
+        else
+        {
+            usuario = new Usuario
+            {
+                Nome = "Usuário não identificado"
+            };
+        }
+    }
+    private string GetStatusIcon(StatusOS status)
+    {
+        return status switch
+        {
+            StatusOS.EmImpedimento => "img/em-impedimento.png",
+            StatusOS.Concluida => "img/concluida.png",
+            StatusOS.EmProgresso => "img/em-progresso.png",
+            StatusOS.Parada => "img/parada.png",
+            StatusOS.Deferida => "img/deferida.png",
+            _ => ""
+        };
+    }
+
+    private async Task FormData()
+    {
+        ordem.TecnicoResponsavel = usuario;
+        ordem.TecnicoResponsavelId = usuario.Id; 
+        ordem!.Status = StatusOS.EmProgresso;
+        isProcessing = true;
+        
+        Core.DTOs.ApiResponse<OrdemServico> response = await ordemService.UpdateOrdemServicoAsync(ordem.Id, ordem) ?? new Core.DTOs.ApiResponse<OrdemServico>();
+        mensagemResultado = response.Message;
+
+        isProcessing = false;
+        sucesso = true;
+    }
+
+    private async Task FormDataCancel()
+    {
+        ordem.TecnicoResponsavel = null;
+        ordem.TecnicoResponsavelId = null; 
+        ordem!.Status = StatusOS.Parada;
+        isProcessing = true;
+        
+        Core.DTOs.ApiResponse<OrdemServico> response = await ordemService.UpdateOrdemServicoAsync(ordem.Id, ordem) ?? new Core.DTOs.ApiResponse<OrdemServico>();
+        mensagemResultado = response.Message;
+
+        isProcessing = false;
+        sucesso = true;
+    }
+
+    private async Task FormDataFinish()
+    {
+        ordem!.Status = StatusOS.Concluida;
+        isProcessing = true;
+        
+        Core.DTOs.ApiResponse<OrdemServico> response = await ordemService.UpdateOrdemServicoAsync(ordem.Id, ordem) ?? new Core.DTOs.ApiResponse<OrdemServico>();
+        mensagemResultado = response.Message;
+
+        isProcessing = false;
+        sucesso = true;
+    }
+}

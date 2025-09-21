@@ -27,6 +27,14 @@ public class EquipamentoService
         return await _httpClient.GetFromJsonAsync<Equipamento>($"api/equipamentos/{patrimonio}");
     }
 
+    public async Task<ApiResponse<Equipamento>> GetEquipamentoByIdRealAsync(int id)
+    {
+        var response = await _httpClient.GetAsync($"api/equipamentos/{id}");
+        var result = await response.Content.ReadFromJsonAsync<ApiResponse<Equipamento>>()
+        ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<Equipamento>.");
+        return result;
+    }
+
     public async Task<ApiResponse<Equipamento>?> AddEquipamentoAsync(Equipamento Equipamento)
     {
         var response = await _httpClient.PostAsJsonAsync("api/equipamentos/cadastro", Equipamento);
