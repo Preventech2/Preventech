@@ -44,7 +44,7 @@
     andares a patir do 1o andar até o ultimo
 </p>
 
-<EditForm Model="Predio" OnSubmit="SubmitPred" FormName="cadastrar-Localizacoes">
+<EditForm Model="predio" OnSubmit="SubmitPred" FormName="cadastrar-Localizacoes">
     <label>Campus:
         <InputNumber @bind-Value="predio!.campus" class="form-control" />
     </label>
@@ -87,7 +87,7 @@
     private bool sucesso = false;
     private bool isProcessing = false;
 
-    protected override void OnInitialized() => predio ??= new predio();
+    protected override void OnInitialized() => predio ??= new Predio();
 
     private async Task SubmitLoc()
     {

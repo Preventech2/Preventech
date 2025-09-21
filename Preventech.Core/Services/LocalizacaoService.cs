@@ -14,10 +14,10 @@ public class LocalizacaoService
         _httpClient = httpClient;
     }
 
-    public async Task<ApiResponse<List<Equipamento>>> GetLocalizacoes()
+    public async Task<ApiResponse<List<Localizacao>>> GetLocalizacoes()
     {
         var response = await _httpClient.GetAsync("api/localizacao");
-        var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<Equipamento>>>()
+        var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<Localizacao>>>()
         ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<List<Equipamento>>.");
         return result;
     }

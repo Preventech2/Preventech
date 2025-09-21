@@ -24,9 +24,13 @@ public class OrdemServicoService
     }
 
     // Example method to get a single OrdemServico by ID
-    public async Task<OrdemServico?> GetOrdemServicoByIdAsync(long id)
+    
+    public async Task<ApiResponse<OrdemServico>> GetOrdemServicoByIdAsync(Guid id)
     {
-        return await _httpClient.GetFromJsonAsync<OrdemServico>($"api/ordem-servico/{id}");
+        var response = await _httpClient.GetAsync($"api/ordem-servico/{id}");
+        var result = await response.Content.ReadFromJsonAsync<ApiResponse<OrdemServico>>()
+        ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<OrdemServico>.");
+        return result;
     }
 
     // Example method to create a new OrdemServico

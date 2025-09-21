@@ -20,11 +20,6 @@ public class Localizacao
     /// Número do campus
     /// </summary>
     /// 
-
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; set; }
-
     public int Campus { get; set; }
 
     /// <summary>

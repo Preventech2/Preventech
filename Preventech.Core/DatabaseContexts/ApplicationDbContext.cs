@@ -15,10 +15,12 @@ public class ApplicationDbContext : DbContext
     public DbSet<Usuario> Usuarios { get; set; }
 
     public DbSet<OrdemServico> OrdensServico { get; set; }
+    
+    public DbSet<Localizacao> Localizacoes { get; set; }
 
-    public DbSet<Peca> Pecas { get; set; };
+    //public DbSet<Peca> Pecas { get; set; }
 
-// ================ existe a chance de que os relacionamentos não sejam descobertos ================
+    // ================ existe a chance de que os relacionamentos não sejam descobertos ================
     // Agora não precisamos do OnModelCreating porque usamos Data Annotations!
     // protected override void OnModelCreating(ModelBuilder modelBuilder)
     // {

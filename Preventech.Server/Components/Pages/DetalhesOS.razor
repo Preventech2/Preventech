@@ -1,0 +1,85 @@
+@page "/ordens-servico/{id:guid}"
+@rendermode InteractiveServer
+
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using Preventech.Core.DTOs
+
+<PageTitle>Visualizar Ordem de Serviço</PageTitle>
+ 
+@if (ordem == null)
+{
+    <p><em>Carregando...</em></p>
+}
+else
+{
+    <h2>@ordem.Titulo</h2>
+    <div>
+        <img src="@GetStatusIcon(@ordem.Status)" alt="Status Icon"
+             width="14" height="14" style="margin-right: 2px;" />
+        @ordem.Status
+        [Aberta em @ordem.Abertura]
+    </div>
+    <br>
+    <p><strong>Descrição:</strong> @ordem.Descricao</p>
+    <p><strong>Observações:</strong> @ordem.Observacoes</p>
+    <p><strong>Id:</strong> @ordem.Id</p>
+    <p><strong>Tecnico Responsavel:</strong> @ordem.TecnicoResponsavel</p>
+    <p><strong>Equipamento:</strong> @equipamento.ToString()</p>
+}
+
+@code {
+    private OrdemServico ordem = null!;
+    private Equipamento equipamento = null!;
+
+    [Parameter]
+    public Guid id { get; set; }
+
+    [Inject]
+    OrdemServicoService ordemService { get; set; } = null!;
+    
+    [Inject]
+    EquipamentoService EquipService { get; set; } = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ApiResponse<OrdemServico>? response = await ordemService.GetOrdemServicoByIdAsync(id);
+        if (response != null && response.Data != null)
+        {
+            ordem = response.Data;
+        }
+
+        else
+        {
+            ordem = new OrdemServico();
+        }
+
+        if (ordem.EquipamentoId.HasValue)
+        {
+            ApiResponse<Equipamento> responseEquip = await EquipService.GetEquipamentoByIdRealAsync(ordem.EquipamentoId.Value);
+    
+            if (responseEquip != null && responseEquip.Data != null)
+            {
+                equipamento = responseEquip.Data;
+            }
+        }
+        else
+        {
+            equipamento = new Equipamento
+            {
+                Nome = "Não atribuído",
+                Patrimonio = "N/A"
+            };
+        }
+    }
+    private string GetStatusIcon(StatusOS status)
+    {
+        return status switch
+        {
+            StatusOS.EmImpedimento => "img/em-impedimento.png",
+            StatusOS.EmProgresso => "img/em-progresso.png",
+            StatusOS.Parada => "img/parada.png",
+            StatusOS.Deferida => "img/deferida.png",
+            _ => ""
+        };
+    }
+}
