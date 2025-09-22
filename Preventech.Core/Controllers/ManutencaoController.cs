@@ -12,17 +12,17 @@ namespace Preventech.Core.Controllers;
 [ApiController]
 public class ManutencaoController
 {
-    private static ApplicationDbContext? _context;
+    private ApplicationDbContext _context;
+    private DateTime UltimaVarredura;
 
     [DllImport("libc")]
     private static extern void signal(int signum, Action handler);
     private const int SIGUSR1 = 10;
-
     public ManutencaoController(ApplicationDbContext context)
     {
-        Console.WriteLine("== log");
         _context = context;
-        signal(SIGUSR1, LeituraDiaria);
+        LeituraDiaria();
+        UltimaVarredura = DateTime.Today;
     }
 
     /// <summary>
@@ -31,7 +31,7 @@ public class ManutencaoController
     /// <param name="ultima">última vez que a manutenção foi realizada</param>
     /// <param name="freq">frequência da manutenção</param>
     /// <returns></returns>
-    private static StatusManutencao status(DateTime ultima, DateTimeOffset freq)
+    private static StatusManutencao Status(DateTime ultima, DateTimeOffset freq)
     {
         if (ultima.Add(freq.Subtract(DateTimeOffset.UnixEpoch)).Date < DateTime.Today)
             return StatusManutencao.Atrasada;
@@ -44,21 +44,37 @@ public class ManutencaoController
 
     // Essas linhas são o coração da preventech inteira
     // teoricamente isso poderia ser uma procedure com pg_cron, mas
-    private static void LeituraDiaria()
+    [HttpGet("varredura/")]
+    private async Task<ApiResponse<TimeSpan>> LeituraDiaria()
     {
         var hoje = DateTime.Today;
         var inicio = DateTime.Now;
+        if (UltimaVarredura - inicio < TimeSpan.FromHours(23)) {
+            Console.WriteLine("Sistema já foi varrido recentemente");
+            return new ApiResponse<TimeSpan>
+            {
+                Success = false,
+                Message = "Sistema varrido recentemente",
+                Data = UltimaVarredura - inicio,
+            };
+        }
         Console.WriteLine($"== Iniciando varredura dia {hoje}");
-        Console.WriteLine($"context == null ? {_context == null}");
         foreach (var pred in _context!.Preditivas)
-            pred.Status = status(pred.UltimaRealizacao, pred.Frequencia);
+            pred.Status = Status(pred.UltimaRealizacao, pred.Frequencia);
 
         foreach (var prev in _context!.Preventivas)
-            prev.Status = status(prev.UltimaRealizacao, prev.Frequencia);
+            prev.Status = Status(prev.UltimaRealizacao, prev.Frequencia);
 
         _context.SaveChanges();
-        var diff = DateTime.Now - inicio;
-        Console.WriteLine($"== Varredura completa em {diff.ToString()}");
+        UltimaVarredura = DateTime.Now;
+        var diff = UltimaVarredura - inicio;
+        Console.WriteLine($"== Varredura completa em {diff}");
+        return new ApiResponse<TimeSpan>
+        {
+            Success = true,
+            Message = "Sistema varrido",
+            Data = UltimaVarredura - inicio,
+        };
     }
 
     [HttpGet("preditivas")]
@@ -78,7 +94,7 @@ public class ManutencaoController
             return new ApiResponse<List<Preditiva>?>
             {
                 Success = false,
-                Message = $"Erro ao receber status de preditivas : {ex.ToString()}",
+                Message = $"Erro ao receber status de preditivas : {ex}",
                 Data = null,
             };
         }
@@ -101,7 +117,7 @@ public class ManutencaoController
             return new ApiResponse<List<Preventiva>?>
             {
                 Success = false,
-                Message = $"Erro ao receber status de preditivas : {ex.ToString()}",
+                Message = $"Erro ao receber status de preditivas : {ex}",
                 Data = null,
             };
         }
@@ -126,7 +142,7 @@ public class ManutencaoController
             return new ApiResponse<Preditiva?>
             {
                 Success = false,
-                Message = $"Erro ao receber status de preditivas : {ex.ToString()}",
+                Message = $"Erro ao receber status de preditivas : {ex}",
                 Data = null,
             };
         }

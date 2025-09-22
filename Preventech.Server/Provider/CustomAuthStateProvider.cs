@@ -68,4 +68,8 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
     {
         NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
     }
+
+    public async Task<Usuario> GetUsuarioAsync() {
+        return new Usuario();
+    }
 }

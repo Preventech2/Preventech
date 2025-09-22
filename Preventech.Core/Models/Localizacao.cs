@@ -47,5 +47,5 @@ public class Localizacao
     } 
     
 
-    public override string ToString() => $"c{Campus}p{Predio}s{Numero}";
+    public override string ToString() => $"c{Campus}p{Predio}s{Andar}{(Numero < 10 ? "0" : "")}{Numero}";
 }

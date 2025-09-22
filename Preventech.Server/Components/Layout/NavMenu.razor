@@ -1,6 +1,8 @@
 ﻿@using Preventech.Server.Provider
 @rendermode InteractiveServer
 
+@inject CustomAuthStateProvider authStateService
+
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">@NomeUsuario</a>
@@ -39,17 +41,13 @@
 
     private string url = "/ordens-servico/user/";
 
-    protected override async Task OnInitializedAsync()
-    {
-        usuario = await authStateService.GetUsuarioAsync();
-        url += usuario?.Id.ToString();
-    }
-
     [CascadingParameter]
     private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
+        usuario = await authStateService.GetUsuarioAsync();
+        url += usuario?.Id.ToString();
         var authState = await AuthenticationStateTask;
         var user = authState.User;
 

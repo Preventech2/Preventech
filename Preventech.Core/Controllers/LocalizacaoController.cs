@@ -113,8 +113,8 @@ namespace Preventech.Core.Controllers
         {
             try
             {
-                var salas = from i in Enumerable.Range(1, locais.Andar + 1)
-                            from j in Enumerable.Range(1, locais.Numero + 1)
+                var salas = from i in Enumerable.Range(1, locais.Andar)
+                            from j in Enumerable.Range(1, locais.Numero)
                             select new Localizacao(locais.Campus, locais.Predio, i, j);
 
                 _context.Localizacoes.AddRange(salas);

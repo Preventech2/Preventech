@@ -32,4 +32,6 @@ ENV PATH="$PATH:/root/.dotnet/tools"
 
 COPY --from=publish /app/publish .
 
+RUN echo "0   0   *   *   * "
+
 ENTRYPOINT ["dotnet", "Preventech.Server.dll"]
