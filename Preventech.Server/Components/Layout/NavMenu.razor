@@ -11,7 +11,7 @@
     <div class="container-fluid">
         <AuthorizeView>
             <Authorized>
-                <a class="navbar-brand" href="">@userInfo?.Name</a>
+                <a class="navbar-brand" href="">@nomeUsuario</a>
             </Authorized>
             <NotAuthorized>
                 <a class="navbar-brand" href="">Usuario</a>
@@ -48,6 +48,8 @@
 
 @code {
     private UserInfo? userInfo;
+    private Usuario? usuario = null;
+    private string nomeUsuario = "Usuário";
     private string url = "/ordens-servico/user/";
 
     [CascadingParameter]
@@ -63,9 +65,18 @@
 
         if (user.Identity?.IsAuthenticated == true)
         {
-            // Tenta pegar a claim padrão do nome
-            NomeUsuario = user.Identity.Name 
-                ?? user.Claims.FirstOrDefault(c => c.Type == "name")?.Value;
+            // Get the name from ClaimTypes.Name (set in AuthController)
+            nomeUsuario = user.Identity.Name 
+                ?? user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value
+                ?? "Usuário";
+                
+            // You can also get other claims if needed:
+            // var cpf = user.Claims.FirstOrDefault(c => c.Type == "Cpf")?.Value;
+            // var roles = user.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToList();
+        }
+        else
+        {
+            nomeUsuario = "Usuário";
         }
     }
 }
