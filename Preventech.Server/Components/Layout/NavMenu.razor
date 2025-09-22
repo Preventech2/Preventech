@@ -5,13 +5,12 @@
 @rendermode InteractiveServer
 
 @inject UserClaimsHelper UserClaimsHelper
-@inject CustomAuthStateProvider authStateService
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <AuthorizeView>
             <Authorized>
-                <a class="navbar-brand" href="">@nomeUsuario</a>
+                <a class="navbar-brand" href="">@userInfo?.Name</a>
             </Authorized>
             <NotAuthorized>
                 <a class="navbar-brand" href="">Usuario</a>
@@ -58,25 +57,5 @@
     protected override async Task OnInitializedAsync()
     {
         userInfo = await UserClaimsHelper.GetCurrentUserInfoAsync();
-        usuario = await authStateService.GetUsuarioAsync();
-        url += usuario?.Id.ToString();
-        var authState = await AuthenticationStateTask;
-        var user = authState.User;
-
-        if (user.Identity?.IsAuthenticated == true)
-        {
-            // Get the name from ClaimTypes.Name (set in AuthController)
-            nomeUsuario = user.Identity.Name 
-                ?? user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value
-                ?? "Usuário";
-                
-            // You can also get other claims if needed:
-            // var cpf = user.Claims.FirstOrDefault(c => c.Type == "Cpf")?.Value;
-            // var roles = user.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToList();
-        }
-        else
-        {
-            nomeUsuario = "Usuário";
-        }
     }
 }
