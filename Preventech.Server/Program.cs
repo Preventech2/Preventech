@@ -65,7 +65,13 @@ builder.Services.AddHttpClient<EmailService>(client =>
     client.BaseAddress = new Uri("http://localhost:8080/");
 });
 
+builder.Services.AddHttpClient<LocalizacaoService>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:8080/");
+});
+
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

@@ -1,6 +1,6 @@
 namespace Preventech.Core.Models;
 
-[Flags]
+//[Flags]
 public enum Perfil
 {
     NenhumaPermissao = 0,

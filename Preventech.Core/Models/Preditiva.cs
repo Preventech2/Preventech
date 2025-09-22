@@ -13,14 +13,18 @@ public class Preditiva
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
-    /// <summary>
-    /// Representa a frequência de manutenção preditiva
-    /// </summary>
-    /// 
+    [Column(TypeName = "bigint")]
     public DateTimeOffset Frequencia { get; set; }
+
+    /// <summary>
+    /// Última vez que essa manutenção foi realizada
+    /// </summary>
+    public DateTime UltimaRealizacao { get; set; }
 
     /// <summary>
     /// Equipamento referente à esta manutenção
     /// </summary>
     public Equipamento? Referente { get; set; }
+
+    public StatusManutencao Status { get; set; }
 }

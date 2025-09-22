@@ -72,25 +72,71 @@ namespace Preventech.Core.Controllers
         }
 
         [HttpGet("{campus}")]
-        public async Task<ActionResult<Localizacao>> GetDentroCampus(int campus)
+        public async Task<ApiResponse<List<Localizacao>>> GetDentroCampus(int campus)
         {
             try
             {
-                var localizacoes = await _context.Localizacoes
-                    .Where(loc => loc.Campus == campus)
-                    .ToListAsync();
+                var localizacoes = from loc in _context.Localizacoes
+                                   where loc.Campus == campus
+                                   select loc;
 
-                if (localizacoes == null)
+                if (localizacoes.Any())
                 {
-                    return NotFound($"campus c{campus} não encontrado.");
+                    return new ApiResponse<List<Localizacao>>
+                    {
+                        Success = false,
+                        Message = $"Campus {campus} não encontrado",
+                        Data = null
+                    };
                 }
 
-                return Ok(localizacoes);
+                return new ApiResponse<List<Localizacao>>
+                {
+                    Success = true,
+                    Message = $"Salas do campus recuperadas",
+                    Data = await localizacoes.ToListAsync()
+                };
             }
             catch (Exception ex)
             {
-                return BadRequest($"Erro ao buscar equipamento: {ex.Message}");
+                return new ApiResponse<List<Localizacao>>
+                {
+                    Success = false,
+                    Message = $"Erro ao buscar localização por campus: {ex.Message}",
+                    Data = null
+                };
             }
+        }
+
+        [HttpPost("cadastro/range")]
+        public async Task<ApiResponse<int>> AddPredio([FromBody] Localizacao locais)
+        {
+            try
+            {
+                var salas = from i in Enumerable.Range(1, locais.Andar + 1)
+                            from j in Enumerable.Range(1, locais.Numero + 1)
+                            select new Localizacao(locais.Campus, locais.Predio, i, j);
+
+                _context.Localizacoes.AddRange(salas);
+                await _context.SaveChangesAsync();
+                var qtd = salas.Count();
+                return new ApiResponse<int>
+                {
+                    Success = true,
+                    Message = $"{qtd} salas cadastradas no prédio {locais.Predio}",
+                    Data = qtd
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse<int>
+                {
+                    Success = false,
+                    Message = $"Erro ao cadastrar maquina: {ex.Message}",
+                    Data = 0
+                };
+            }
+
         }
     }
 }
