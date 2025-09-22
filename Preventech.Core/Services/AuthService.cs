@@ -22,6 +22,7 @@ public class AuthService
             var jsCode = $@"
                 (async () => {{
                     const usuarioData = {{
+                        Id: {usuario.Id},
                         Nome: '{usuario.Nome}',
                         Cpf: '{usuario.Cpf}',
                         Perfil: {(int)(usuario.Perfil ?? Perfil.NenhumaPermissao)}

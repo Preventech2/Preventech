@@ -26,6 +26,7 @@ namespace Preventech.Core.Controllers
 
             identity.AddClaim(new Claim(ClaimTypes.Name, usuario.Nome ?? String.Empty));
             identity.AddClaim(new Claim("Cpf", usuario.Cpf ?? String.Empty));
+            identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString() ?? String.Empty));
 
             foreach (var flag in Enum.GetValues<Perfil>())
             {

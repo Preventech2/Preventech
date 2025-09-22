@@ -1,6 +1,7 @@
 ﻿@using System.Security.Claims
 @using Microsoft.AspNetCore.Components.Authorization
 @using Preventech.Core.Models
+@using Preventech.Core.Services
 
 @rendermode InteractiveServer
 
@@ -47,7 +48,7 @@
 
 @code {
     private UserInfo? userInfo;
-    private string url = "/ordens-servico/user/";
+    private string url = "/ordens-servico/user";
 
     [CascadingParameter]
     private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;

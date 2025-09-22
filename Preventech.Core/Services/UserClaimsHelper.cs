@@ -33,7 +33,7 @@ public class UserClaimsHelper
     /// Extracts user information from ClaimsPrincipal
     /// </summary>
     /// <param name="user">The ClaimsPrincipal containing user claims</param>
-    /// <returns>UserInfo object with Name and Cpf</returns>
+    /// <returns>UserInfo object with Name, Cpf, and Id</returns>
     public static UserInfo ExtractUserInfoFromClaims(ClaimsPrincipal user)
     {
         var name = user.Identity?.Name 
@@ -43,6 +43,9 @@ public class UserClaimsHelper
         var cpf = user.Claims.FirstOrDefault(c => c.Type == "Cpf")?.Value
             ?? string.Empty;
 
+        var idClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+        var userId = !string.IsNullOrEmpty(idClaim) && int.TryParse(idClaim, out var id) ? id : 0;
+
         var roles = user.Claims
             .Where(c => c.Type == ClaimTypes.Role)
             .Select(c => c.Value)
@@ -50,6 +53,7 @@ public class UserClaimsHelper
 
         return new UserInfo
         {
+            Id = userId,
             Name = name,
             Cpf = cpf,
             Roles = roles,
@@ -73,6 +77,7 @@ public class UserClaimsHelper
 /// </summary>
 public class UserInfo
 {
+    public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Cpf { get; set; } = string.Empty;
     public List<string> Roles { get; set; } = new();
