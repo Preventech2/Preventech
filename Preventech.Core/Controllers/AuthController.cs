@@ -1,80 +1,65 @@
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
 using Preventech.Core.Constants;
-using Preventech.Core.DTOs;
 using Preventech.Core.Models;
 
 namespace Preventech.Core.Controllers
 {
-    [Route("api/authentication")]
+    [Route("api/auth")]
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly ILogger<AuthController> _logger;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-
-        public AuthController(IHttpContextAccessor httpContextAccessor, ILogger<AuthController> logger)
-        {
-            _logger = logger;
-            _httpContextAccessor = httpContextAccessor;
-        }
-
         [HttpPost("login")]
-        public ApiResponse<string> Login([FromBody] Usuario usuario)
+        [AllowAnonymous]
+        public async Task<IActionResult> Login([FromBody] Usuario usuario)
         {
-            try
+            if (usuario == null)
             {
-                var claims = new List<Claim>
-                {
-                    new(ClaimTypes.Name, usuario.Nome ?? string.Empty),
-                    new(ClaimTypes.Email, usuario.Email ?? string.Empty),
-                    new("Cpf", usuario.Cpf ?? string.Empty)
-                };
+                return BadRequest("Dados do usuário inválidos");
+            }
+            
+            var perfil = usuario.Perfil ?? Perfil.NenhumaPermissao;
+            var identity = new ClaimsIdentity(AuthConstants.CookieName);
 
-                foreach (var flag in Enum.GetValues<Perfil>())
+            identity.AddClaim(new Claim(ClaimTypes.Name, usuario.Nome ?? String.Empty));
+            identity.AddClaim(new Claim("Cpf", usuario.Cpf ?? String.Empty));
+
+            foreach (var flag in Enum.GetValues<Perfil>())
+            {
+                if (flag == Perfil.NenhumaPermissao) continue;
+                if (perfil.HasFlag(flag))
                 {
-                    if (flag != Perfil.NenhumaPermissao && usuario.Perfil.HasValue && usuario.Perfil.Value.HasFlag(flag))
-                    {
-                        claims.Add(new Claim(ClaimTypes.Role, flag.ToString()));
-                    }
+                    identity.AddClaim(new Claim(ClaimTypes.Role, flag.ToString()));
                 }
-
-                var identity = new ClaimsIdentity(claims, "CustomAuth");
-
-                var token = new JwtSecurityToken(
-                    issuer: AuthConstants.JwtIssuer,
-                    audience: AuthConstants.JwtAudience,
-                    claims: identity.Claims,
-                    expires: DateTime.UtcNow.AddHours(AuthConstants.JwtExpiryInHours),
-                    signingCredentials: new SigningCredentials(
-                        new SymmetricSecurityKey(Encoding.UTF8.GetBytes(AuthConstants.JwtSecretKey)),
-                        SecurityAlgorithms.HmacSha256)
-                );
-
-                var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
-                
-                return new ApiResponse<string>
-                {
-                    Success = true,
-                    Message = "User authenticated",
-                    Data = tokenString
-                };
             }
-            catch (Exception ex)
-            {
-                return new ApiResponse<string>
+
+            identity.AddClaim(new Claim(ClaimTypes.Sid, AuthConstants.Sid));
+            identity.AddClaim(new Claim(ClaimTypes.Expiration,
+                DateTime.Now.AddSeconds(AuthConstants.CookieExpiry).ToString()
+            ));
+
+            var principal = new ClaimsPrincipal(identity);
+            await HttpContext.SignInAsync(
+                AuthConstants.CookieName,
+                principal,
+                new AuthenticationProperties
                 {
-                    Success = false,
-                    Message = $"Erro ao fazer login: {ex.Message}",
-                    Data = null
-                };
-            }
+                    IsPersistent = true,
+                    ExpiresUtc = DateTime.UtcNow.AddSeconds(AuthConstants.CookieExpiry)
+                }
+            );
+            return Redirect("/");
         }
 
+        [HttpPost("logout")]
+        [Authorize]
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(AuthConstants.CookieName);
+            return Redirect("/");
+        }
     }
 }

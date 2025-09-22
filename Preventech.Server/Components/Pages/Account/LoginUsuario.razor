@@ -2,11 +2,9 @@
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @using Preventech.Core.DTOs
-@using Preventech.Server.Provider
 
 @rendermode InteractiveServer
 
-@inject CustomAuthStateProvider authStateProvider
 @inject NavigationManager navigationManager
 
 <h3>Login</h3>
@@ -40,14 +38,17 @@
     [Inject]
     private UsuarioService usuarioService { get; set; } = null!;
 
+    [Inject]
+    private AuthService authService { get; set; } = null!;
+
     private string mensagem = string.Empty;
 
     private async Task HandleValidSubmit()
     {
-        ApiResponse<string> response = await usuarioService.LoginUsuarioAsync(usuario);
-        if (response.Success)
+        ApiResponse<Usuario> response = await usuarioService.LoginUsuarioAsync(usuario);
+        if (response.Success && response.Data != null)
         {
-            navigationManager.NavigateTo($"/add-auth-cookie?Token={response.Data}", true);
+            await authService.Login(response.Data);
         }
         else
         {
