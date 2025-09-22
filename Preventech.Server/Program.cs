@@ -38,6 +38,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddScoped<OrdemServicoService>();
 
+builder.Services.AddHttpClient<PecaService>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:8080/");
+});
 builder.Services.AddHttpClient<EquipamentoService>(client =>
 {
     client.BaseAddress = new Uri("http://localhost:8080/");

@@ -7,14 +7,32 @@
 <h2>Cadastrar Peça</h2>
 
 <h1>Cadastrar Peça</h1>
+@if (!string.IsNullOrEmpty(mensagemResultado))
+{
+    <div class="alert @(sucesso ? "alert-success" : "alert-danger")" role="alert">
+        @mensagemResultado
+    </div>
+}
 
-<EditForm Model="peca" OnSubmit="FormData" FormName="cadastrar-Peca">
+<EditForm Model="peca" OnValidSubmit="FormData" FormName="cadastrar-Peca">
+    <DataAnnotationsValidator />
     <label>Nome:
         <InputText @bind-Value="peca!.Descricao" class="form-control"/>
     </label>
     <label>Quantidade:
         <InputNumber @bind-Value="peca!.Quantidade" class="form-control" />
     </label>
+    <button type="submit" class="btn btn-primary" disabled="@isProcessing">
+        @if (isProcessing)
+        {
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            <text>Cadastrando...</text>
+        }
+        else
+        {
+            <text>Cadastrar</text>
+        }
+    </button>
 </EditForm>
 
 @code
@@ -23,7 +41,7 @@
     private Peca? peca { get; set; } = null;
 
     [Inject]
-    PecaService pecaService { get; set; } = null;
+    PecaService pecaService { get; set; } = null!;
 
     private string mensagemResultado = string.Empty;
     private bool sucesso = false;
