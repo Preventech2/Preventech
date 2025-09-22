@@ -10,17 +10,35 @@
 @if (!string.IsNullOrEmpty(mensagemResultado))
 {
     <div class="alert @(sucesso ? "alert-success" : "alert-danger")" role="alert">
-        @mensagemResultado
-    </div>
+    @mensagemResultado
+</div>
 }
 
 <EditForm Model="equipamento" OnSubmit="FormData" FormName="cadastrar-Equipamento">
     <label>Nome:
-        <InputText @bind-Value="equipamento!.Nome" class="form-control"/>
+        <InputText @bind-Value="equipamento!.Nome" class="form-control" />
     </label>
     <label>Patrimônio:
-        <InputText @bind-Value="equipamento!.Patrimonio" class="form-control"/>
+        <InputText @bind-Value="equipamento!.Patrimonio" class="form-control" />
     </label>
+    @if (locais != null && locais.Any())
+    {
+        <div class="mb-3">
+            <label>Localização:
+                <InputSelect @bind-Value="localid">
+                    @foreach (var local in locais)
+                    {
+                        <option value="@local!.Id">@local.ToString()</option>
+                    }
+                </InputSelect>
+            </label>
+            <span>Não encontrou o local? <a href="/cadastrar/localizacao">Cadastre-o!</a></span>
+        </div>
+    }
+    else
+    {
+        <p><em>Carregando locais</em></p>
+    }
     <button type="submit" class="btn btn-primary" disabled="@isProcessing">
         @if (isProcessing)
         {
@@ -40,24 +58,39 @@
 
     [Inject]
     EquipamentoService equipamentoService { get; set; } = null!;
-    
+
+    [Inject]
+    LocalizacaoService localizacaoService { get; set; } = null!;
+
+    private IQueryable<Localizacao> locais = null!;
+
+    private int localid;
     private string mensagemResultado = string.Empty;
     private bool sucesso = false;
     private bool isProcessing = false;
 
-    protected override void OnInitialized() => equipamento ??= new Equipamento();
-    
+    protected override async Task OnInitializedAsync()
+    {
+        equipamento ??= new Equipamento();
+        var res = await localizacaoService.GetLocalizacoes();
+        sucesso = res.Success;
+        mensagemResultado = res.Message;
+        if (res.Data != null)
+            locais = res.Data.AsQueryable();
+    }
+
     private async Task FormData()
     {
         isProcessing = true;
         mensagemResultado = string.Empty;
         StateHasChanged();
-        equipamento!.Local = new(); // Garantir que Local não seja nulo
+        equipamento!.Local = locais.Where(l => l.Id == localid).First();
         try
         {
             // tem que mudar, atualmente o equipamentoService apenas chama a API e ela só retorna um sucesso
             // testando API
-            var resultado = await equipamentoService.AddEquipamentoAsync(equipamento!);     
+
+            var resultado = await equipamentoService.AddEquipamentoAsync(equipamento!);
 
             await jsr.InvokeVoidAsync("console.log", resultado);
             if (resultado != null && resultado.Success)

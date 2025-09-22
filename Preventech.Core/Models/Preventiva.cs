@@ -8,24 +8,29 @@ public class Preventiva
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public required int Id { get; set; }
+    public int Id { get; set; }
+
+    /// <summary>
+    /// Ultima realização da máquina referente
+    /// </summary>
+    public DateTime UltimaRealizacao { get; set; }
 
     /// <summary>
     /// Representa a frequência de manutenção preventiva
     /// </summary>
-
-    [Required]
-    public required DateTimeOffset Frequencia { get; set; }
+    
+    public DateTimeOffset Frequencia { get; set; }
 
     /// <summary>
     /// Arquivo que representa as boas práticas da manutenção 
     /// </summary>
-    [Required]
     [MaxLength(240)]
-    public required string ArquivoReferente { get; set; }
+    public string? ArquivoReferente { get; set; }
 
     /// <summary>
     /// Equipamento referente à esta manutenção
     /// </summary>
     public Equipamento? Referente { get; set; }
+
+    public StatusManutencao Status { get; set; }
 }

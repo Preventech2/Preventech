@@ -24,6 +24,10 @@ namespace Preventech.Core.Controllers
 
             try
             {
+                if (equipamento.Local != null && equipamento.Local!.Id > 0)
+                {
+                    _context.Entry(equipamento.Local).State = EntityState.Unchanged;
+                }
                 // Adiciona o equipamento ao contexto
                 _context.Equipamentos.Add(equipamento);
 
