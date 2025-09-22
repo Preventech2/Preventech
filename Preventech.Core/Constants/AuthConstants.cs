@@ -21,6 +21,6 @@ public class AuthConstants
     public const string CookieName = "AuthToken";
     public const bool CookieHttpOnly = true;
     public const SameSiteMode CookieSameSite = SameSiteMode.Strict; // Options: Lax, Strict,
-    public const int CookieExpiry = 10; // Expiração em segundos (1 hora)
+    public const int CookieExpiry = 3600; // Expiração em segundos (1 hora)
 
 }

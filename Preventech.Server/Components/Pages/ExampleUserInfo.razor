@@ -1,0 +1,37 @@
+@page "/example"
+@using Preventech.Core.Services
+@inject UserClaimsHelper UserClaimsHelper
+
+<h3>User Information Example</h3>
+
+@if (userInfo != null && userInfo.IsAuthenticated)
+{
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Welcome, @userInfo.DisplayName!</h5>
+            <p class="card-text">
+                <strong>Name:</strong> @userInfo.Name<br>
+                <strong>CPF:</strong> @userInfo.Cpf<br>
+                <strong>Roles:</strong> @string.Join(", ", userInfo.Roles)
+            </p>
+            
+            @if (userInfo.HasRole("EditarEquipamento"))
+            {
+                <button class="btn btn-primary">Edit Equipment</button>
+            }
+        </div>
+    </div>
+}
+else
+{
+    <p>User not authenticated</p>
+}
+
+@code {
+    private UserInfo? userInfo;
+
+    protected override async Task OnInitializedAsync()
+    {
+        userInfo = await UserClaimsHelper.GetCurrentUserInfoAsync();
+    }
+}
