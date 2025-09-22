@@ -57,7 +57,7 @@
         {
             // tem que mudar, atualmente o equipamentoService apenas chama a API e ela só retorna um sucesso
             // testando API
-            var resultado = await equipamentoService.AddEquipamentoAsync(equipamento!);     
+            ApiResponse<Equipamento>? resultado = await equipamentoService.AddEquipamentoAsync(equipamento!);     
 
             await jsr.InvokeVoidAsync("console.log", resultado);
             if (resultado != null && resultado.Success)

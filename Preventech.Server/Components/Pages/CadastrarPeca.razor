@@ -1,0 +1,63 @@
+@page "/cadastrar/peca"
+@rendermode InteractiveServer
+@inject IJSRuntime jSRuntime
+
+<PageTitle>Cadastrar Peça</PageTitle>
+
+<h2>Cadastrar Peça</h2>
+
+<h1>Cadastrar Peça</h1>
+
+<EditForm Model="peca" OnSubmit="FormData" FormName="cadastrar-Peca">
+    <label>Nome:
+        <InputText @bind-Value="peca!.Descricao" class="form-control"/>
+    </label>
+    <label>Quantidade:
+        <InputNumber @bind-Value="peca!.Quantidade" class="form-control" />
+    </label>
+</EditForm>
+
+@code
+{
+    [SupplyParameterFromForm]
+    private Peca? peca { get; set; } = null;
+
+    [Inject]
+    PecaService pecaService { get; set; } = null;
+
+    private string mensagemResultado = string.Empty;
+    private bool sucesso = false;
+    private bool isProcessing = false;
+
+    protected override void OnInitialized() => peca ??= new Peca();
+
+    private async Task FormData()
+    {
+        isProcessing = true;
+        StateHasChanged();
+        try {
+            ApiResponse<Peca>? resultado = await pecaService.AddPecaAsync(peca!);
+
+            await jSRuntime.InvokeVoidAsync("console.log", resultado);
+            if (resultado != null && resultado.Success)
+            {
+                mensagemResultado = resultado.Message;
+                sucesso = true;
+            }
+            else
+            {
+                mensagemResultado = "Erro inesperado ao cadastrar peça.";
+                sucesso = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            mensagemResultado = $"Erro: {ex.Message}";
+            sucesso = false;
+        }
+        finally{
+            isProcessing = false;
+            StateHasChanged();
+        }
+    }
+}
