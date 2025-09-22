@@ -37,5 +37,14 @@ public class Localizacao
     /// </summary>
     public int Numero { get; set; }
 
-    public override string ToString() => $"c{Campus}p{Predio}s{Numero}";
+    public Localizacao() { }
+
+    public Localizacao(int Campus, int Predio, int Andar, int Numero) {
+        this.Campus = Campus;
+        this.Predio = Predio;
+        this.Andar = Andar;
+        this.Numero = Numero;
+    } 
+    
+    public override string ToString() => $"c{Campus}p{Predio}s{Andar}{(Numero < 10 ? "0" : "")}{Numero}";
 }

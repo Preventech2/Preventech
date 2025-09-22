@@ -46,29 +46,29 @@ public class LocalizacaoService
         return result;
     }
 
-    public async Task<ApiResponse<Equipamento>?> AddLocalizacaoAsync(Localizacao local)
+    public async Task<ApiResponse<Localizacao>?> AddLocalizacaoAsync(Localizacao local)
     {
 
         var response = await _httpClient.PostAsJsonAsync("api/localizacao/cadastro", local);
         Console.WriteLine(response.StatusCode);
         if (response.IsSuccessStatusCode)
         {
-            return await response.Content.ReadFromJsonAsync<ApiResponse<Equipamento>>();
+            return await response.Content.ReadFromJsonAsync<ApiResponse<Localizacao>>();
         }
         else
         {
             var errorContent = await response.Content.ReadAsStringAsync();
-            throw new HttpRequestException($"Erro ao cadastrar equipamento: {response.StatusCode} - {errorContent}");
+            throw new HttpRequestException($"Erro ao cadastrar localizacao: {response.StatusCode} - {errorContent}");
         }
     }
 
-    public async Task<ApiResponse<Equipamento>?> AddLocalizacaoAsync(Localizacao inicial, Localizacao final)
+    public async Task<ApiResponse<int>?> AddLocalizacoesAsync(Localizacao final)
     {
 
-        var response = await _httpClient.PostAsJsonAsync("api/equipamentos/cadastro/range", new Localizacao[]{inicial, final});
+        var response = await _httpClient.PostAsJsonAsync("api/localizacao/cadastro/range", final);
         if (response.IsSuccessStatusCode)
         {
-            return await response.Content.ReadFromJsonAsync<ApiResponse<Equipamento>>();
+            return await response.Content.ReadFromJsonAsync<ApiResponse<int>>();
         }
         else
         {
