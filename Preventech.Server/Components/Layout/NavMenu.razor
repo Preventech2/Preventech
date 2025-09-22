@@ -4,13 +4,13 @@
 
 @rendermode InteractiveServer
 
-@inject CustomAuthStateProvider authStateService
+@inject UserClaimsHelper UserClaimsHelper
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <AuthorizeView>
             <Authorized>
-                <a class="navbar-brand" href="">@nomeUsuario</a>
+                <a class="navbar-brand" href="">@userInfo?.Name</a>
             </Authorized>
             <NotAuthorized>
                 <a class="navbar-brand" href="">Usuario</a>
@@ -32,7 +32,7 @@
     <AuthorizeView>
         <Authorized>
             @* Adicione aqui os links que o usuário autenticado pode ver. *@
-            @if (usuario != null)
+            @if (userInfo != null)
             
             {
                 <div class="nav-item px-3">
@@ -46,8 +46,7 @@
 </div>
 
 @code {
-    private Usuario? usuario = null;
-    private string nomeUsuario = "Usuário";
+    private UserInfo? userInfo;
     private string url = "/ordens-servico/user/";
 
     [CascadingParameter]
@@ -55,25 +54,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        usuario = await authStateService.GetUsuarioAsync();
-        url += usuario?.Id.ToString();
-        var authState = await AuthenticationStateTask;
-        var user = authState.User;
-
-        if (user.Identity?.IsAuthenticated == true)
-        {
-            // Get the name from ClaimTypes.Name (set in AuthController)
-            nomeUsuario = user.Identity.Name 
-                ?? user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value
-                ?? "Usuário";
-                
-            // You can also get other claims if needed:
-            // var cpf = user.Claims.FirstOrDefault(c => c.Type == "Cpf")?.Value;
-            // var roles = user.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToList();
-        }
-        else
-        {
-            nomeUsuario = "Usuário";
-        }
+        userInfo = await UserClaimsHelper.GetCurrentUserInfoAsync();
     }
 }

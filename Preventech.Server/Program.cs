@@ -30,6 +30,7 @@ builder.Services.AddControllers();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<AuthenticationStateProvider, CookieAuthStateProvider>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<UserClaimsHelper>();
 
 builder.Services.AddAuthentication(o =>
 {
