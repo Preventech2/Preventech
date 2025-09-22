@@ -89,10 +89,7 @@
     private string mensagemResultado = string.Empty;
     private bool sucesso = false;
     private bool isProcessing = false;
-
-    protected override async Task OnInitializedAsync() {
-        predio ??= new Locais();
-    } 
+    protected override void OnInitialized() => predio ??= new Locais();
 
     private async Task SubmitLoc()
     {

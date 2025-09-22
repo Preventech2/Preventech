@@ -20,26 +20,13 @@ public class UsuarioService(HttpClient httpClient, ILogger<UsuarioService> logge
         return result;
     }
 
-    public async Task<ApiResponse<string>> LoginUsuarioAsync(Usuario usuario)
+    public async Task<ApiResponse<Usuario>> LoginUsuarioAsync(Usuario usuario)
     {
         var response = await _httpClient.PostAsJsonAsync($"api/usuarios/login", usuario);
         var result = await response.Content.ReadFromJsonAsync<ApiResponse<Usuario>>()
         ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<Usuario> while login.");
 
-        if (result.Success)
-        {
-            response = await _httpClient.PostAsJsonAsync("api/authentication/login", result.Data);
-            var authResult = await response.Content.ReadFromJsonAsync<ApiResponse<string>>()
-            ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<string> while authenticating.");
-            return authResult;
-        }
-
-        return new ApiResponse<string>
-        {
-            Success = false,
-            Message = result.Message,
-            Data = null
-        };
+        return result;
     }
     
     public async Task<ApiResponse<List<Usuario>>> GetUsuariosAsync()

@@ -10,8 +10,11 @@
 <h3>LogoutUsuario</h3>
 
 @code {
-    protected override void OnInitialized()
+    [Inject]
+    private AuthService authService { get; set; } = null!;
+    
+    protected override async Task OnInitializedAsync()
     {
-        navigationManager.NavigateTo("/rem-auth-cookie", true);
+        await authService.Logout();
     }
 }

@@ -4,9 +4,8 @@
 @using Microsoft.AspNetCore.Components.QuickGrid
 @using Preventech.Core.DTOs
 
-@using Microsoft.AspNetCore.Authentication;
+@using Microsoft.AspNetCore.Authentication
 @inject CustomAuthStateProvider authStateService
-
 <PageTitle>Visualizar Ordem de Serviço</PageTitle>
  
 @if (ordem == null)
@@ -145,7 +144,7 @@ else {
             };
         }
 
-        Usuario? responseUser = await authStateService.GetUsuarioAsync();
+        Usuario? responseUser = new Usuario();
 
         if (responseUser != null)
         {

@@ -2,7 +2,6 @@
 @rendermode InteractiveServer
 
 @inject CustomAuthStateProvider authStateService
-
 <PageTitle>Cadastrar uma Ordem de Serviço</PageTitle>
 
 <h1>Cadastrar OS</h1>
@@ -96,7 +95,7 @@ else {
         ApiResponse<List<Equipamento>> response = await EquipService.GetEquipamentosAsync();
         equipamentos = response.Data?.AsQueryable() ?? new List<Equipamento>().AsQueryable();
 
-        Usuario? responseUser = await authStateService.GetUsuarioAsync();
+        Usuario? responseUser = new Usuario();
 
         if (responseUser != null)
         {

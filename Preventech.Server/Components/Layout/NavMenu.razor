@@ -1,11 +1,21 @@
-﻿@using Preventech.Server.Provider
+﻿@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@using Preventech.Core.Models
+
 @rendermode InteractiveServer
 
 @inject CustomAuthStateProvider authStateService
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">@NomeUsuario</a>
+        <AuthorizeView>
+            <Authorized>
+                <a class="navbar-brand" href="">@nomeUsuario</a>
+            </Authorized>
+            <NotAuthorized>
+                <a class="navbar-brand" href="">Usuario</a>
+            </NotAuthorized>
+        </AuthorizeView>
     </div>
 </div>
 
@@ -36,9 +46,8 @@
 </div>
 
 @code {
-    private string? NomeUsuario = null;
     private Usuario? usuario = null;
-
+    private string nomeUsuario = "Usuário";
     private string url = "/ordens-servico/user/";
 
     [CascadingParameter]
@@ -53,9 +62,18 @@
 
         if (user.Identity?.IsAuthenticated == true)
         {
-            // Tenta pegar a claim padrão do nome
-            NomeUsuario = user.Identity.Name 
-                ?? user.Claims.FirstOrDefault(c => c.Type == "name")?.Value;
+            // Get the name from ClaimTypes.Name (set in AuthController)
+            nomeUsuario = user.Identity.Name 
+                ?? user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value
+                ?? "Usuário";
+                
+            // You can also get other claims if needed:
+            // var cpf = user.Claims.FirstOrDefault(c => c.Type == "Cpf")?.Value;
+            // var roles = user.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToList();
+        }
+        else
+        {
+            nomeUsuario = "Usuário";
         }
     }
 }

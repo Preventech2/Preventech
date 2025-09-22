@@ -3,9 +3,12 @@ using Preventech.Core.DatabaseContexts;
 using Preventech.Core.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Components.Authorization;
-using Preventech.Server.Provider;
 using Quartz;
 using Preventech.Core.Constants;
+using Preventech.Server;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,19 +28,61 @@ builder.Services.AddControllers();
 
 // authorization and authentication services
 builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
-builder.Services.AddScoped<CustomAuthStateProvider>();
-builder.Services.AddAuthentication(AuthConstants.CookieName)
-    .AddCookie(AuthConstants.CookieName, options =>
-    {
-        options.LoginPath = "/login";
-        options.LogoutPath = "/logout";
-        options.AccessDeniedPath = "/access-denied";
-        options.ExpireTimeSpan = TimeSpan.FromHours(AuthConstants.CookieExpiryInHours);
-        options.SlidingExpiration = true;
-    });
+builder.Services.AddScoped<AuthenticationStateProvider, CookieAuthStateProvider>();
+builder.Services.AddScoped<AuthService>();
 
-builder.Services.AddHttpContextAccessor();
+builder.Services.AddAuthentication(o =>
+{
+    o.DefaultAuthenticateScheme = AuthConstants.CookieName;
+}).AddCookie(AuthConstants.CookieName, o =>
+{
+    o.LoginPath = "/login";
+    o.LogoutPath = "/logout";
+    o.AccessDeniedPath = "/login";
+    o.Cookie.Name = AuthConstants.CookieName;
+    o.Cookie.SameSite = AuthConstants.CookieSameSite;
+    o.ExpireTimeSpan = TimeSpan.FromSeconds(AuthConstants.CookieExpiry);
+    o.SlidingExpiration = false; // Define se o cookie deve ser renovado automaticamente
+    o.Events = new CookieAuthenticationEvents
+    {
+        OnValidatePrincipal = ctx =>
+        {
+            if (ctx.Principal?.Identity?.IsAuthenticated ?? false)
+            {
+                var Claims = ctx.Principal.Claims;
+                
+                // Verifica se o cookie expirou
+                var expirationClaim = Claims.FirstOrDefault(c => c.Type == ClaimTypes.Expiration)?.Value;
+                if (!string.IsNullOrEmpty(expirationClaim) && DateTime.TryParse(expirationClaim, out var expiration))
+                {
+                    if (DateTime.Now > expiration)
+                    {
+                        ctx.RejectPrincipal();
+                        return ctx.HttpContext.SignOutAsync(AuthConstants.CookieName);
+                    }
+                }
+
+                if (Claims == null)
+                {
+                    ctx.RejectPrincipal();
+                    return ctx.HttpContext.SignOutAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme);
+                }
+                else
+                {
+                    var sid = Claims.Where(c => c.Type == ClaimTypes.Sid).FirstOrDefault()?.Value ?? "";
+                    if (sid != "555")
+                    {
+                        ctx.RejectPrincipal();
+                        return ctx.HttpContext.SignOutAsync(
+                            CookieAuthenticationDefaults.AuthenticationScheme);
+                    }
+                }
+            }
+            return Task.CompletedTask;
+        }
+    };
+});
 
 // Configure PostgreSQL
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
