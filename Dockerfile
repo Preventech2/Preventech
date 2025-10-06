@@ -15,11 +15,13 @@ COPY ["Preventech.Server/Preventech.Server.csproj", "Preventech.Server/"]
 
 RUN dotnet restore "Preventech.Server/Preventech.Server.csproj"
 
-COPY . .
+COPY Preventech.sln Preventech.sln
+COPY Preventech.Server/ Preventech.Server/
+COPY Preventech.Core/ Preventech.Core/
 WORKDIR /src/Preventech.Server
 
 RUN dotnet build "Preventech.Server.csproj" -c Debug -o /app/build
-
+#RUN dotnet ef migrations add Docker --project Preventech.Core --startup-project Preventech.Server
 FROM build AS publish
 RUN dotnet publish "Preventech.Server.csproj" -c Debug -o /app/publish
 
@@ -32,6 +34,6 @@ ENV PATH="$PATH:/root/.dotnet/tools"
 
 COPY --from=publish /app/publish .
 
-RUN echo "0   0   *   *   * "
+RUN echo "0   0   *   *   * " 
 
 ENTRYPOINT ["dotnet", "Preventech.Server.dll"]

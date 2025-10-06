@@ -18,74 +18,91 @@ namespace Preventech.Core.Controllers
             _context = context;
         }
 
-        [HttpPost("cadastro")]
-        public async Task<ApiResponse<Equipamento>> CadastrarEquipamento([FromBody] Equipamento equipamento)
+        [HttpPost]
+        public async Task<ApiResponse<Localizacao>> CadastrarLocalizacao([FromBody] Localizacao localizacao)
         {
 
             try
             {
                 // Adiciona o equipamento ao contexto
-                _context.Equipamentos.Add(equipamento);
-
+                _context.Localizacoes.Add(localizacao);
                 // Salva as mudanças no banco de dados
                 await _context.SaveChangesAsync();
 
-                return new ApiResponse<Equipamento>
+                return new ApiResponse<Localizacao>
                 {
                     Success = true,
-                    Message = "Equipamento cadastrado com sucesso",
-                    Data = equipamento
+                    Message = "Localização cadastrado com sucesso",
+                    Data = localizacao
                 };
             }
             catch (Exception ex)
             {
-                return new ApiResponse<Equipamento>
+                return new ApiResponse<Localizacao>
                 {
                     Success = false,
-                    Message = $"Erro ao cadastrar equipamento: {ex.Message}",
+                    Message = $"Erro ao cadastrar localização: {ex.Message}",
+                    Data = null
+                };
+            }
+        }
+
+        [HttpPatch]
+        public async Task<ApiResponse<Localizacao>> EditarLocalizacao([FromBody] Localizacao localizacao)
+        {
+            try
+            {
+                if (await _context.Localizacoes.FindAsync(localizacao.Id) is Localizacao loc) {
+                    _context.Entry(loc).CurrentValues.SetValues(localizacao);
+                    await _context.SaveChangesAsync();
+                }
+
+                // Salva as mudanças no banco de dados
+
+                return new ApiResponse<Localizacao>
+                {
+                    Success = true,
+                    Message = "Localização editada com sucesso",
+                    Data = localizacao
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse<Localizacao>
+                {
+                    Success = false,
+                    Message = $"Erro ao cadastrar localização: {ex.Message}",
                     Data = null
                 };
             }
         }
 
         [HttpGet]
-        public async Task<ApiResponse<List<Localizacao>>> GetLocalizacao()
+        public async Task<ApiResponse<List<Localizacao>>> GetLocalizacoes(
+            string? Apelido,
+            int? Campus,
+            int? Predio,
+            int? Andar,
+            int? Sala)
         {
             try
             {
-                return new ApiResponse<List<Localizacao>>
-                {
-                    Success = true,
-                    Message = "Localizações recuperadas com sucesso",
-                    Data = await _context.Localizacoes.ToListAsync()
-                };
-            }
-            catch (Exception ex)
-            {
-                return new ApiResponse<List<Localizacao>>
-                {
-                    Success = false,
-                    Message = $"Erro ao buscar equipamentos: {ex.Message}",
-                    Data = null
-                };
-            }
-        }
+                var all = _context.Localizacoes.ToList();
 
-        [HttpGet("{campus}")]
-        public async Task<ApiResponse<List<Localizacao>>> GetDentroCampus(int campus)
-        {
-            try
-            {
-                var localizacoes = from loc in _context.Localizacoes
-                                   where loc.Campus == campus
-                                   select loc;
+                var locs = from loc in _context.Localizacoes
+                           where Apelido == null || loc.Apelido == Apelido
+                           where Campus == null || loc.Campus == Campus
+                           where Predio == null || loc.Predio == Predio
+                           where Andar == null || loc.Andar == Andar
+                           where Sala == null || loc.Numero == Sala
+                           select loc;
 
-                if (localizacoes.Any())
+                if (!locs.Any())
                 {
                     return new ApiResponse<List<Localizacao>>
                     {
                         Success = false,
-                        Message = $"Campus {campus} não encontrado",
+                        Message = $"Localizacao não encontrada",
                         Data = null
                     };
                 }
@@ -93,50 +110,21 @@ namespace Preventech.Core.Controllers
                 return new ApiResponse<List<Localizacao>>
                 {
                     Success = true,
-                    Message = $"Salas do campus recuperadas",
-                    Data = await localizacoes.ToListAsync()
+                    Message = $"Salas recuperadas",
+                    Data = await locs.ToListAsync()
                 };
+
             }
             catch (Exception ex)
             {
                 return new ApiResponse<List<Localizacao>>
                 {
                     Success = false,
-                    Message = $"Erro ao buscar localização por campus: {ex.Message}",
+                    Message = $"Erro ao buscar localização: {ex.Message}",
                     Data = null
                 };
             }
         }
 
-        [HttpPost("cadastro/range")]
-        public async Task<ApiResponse<int>> AddPredio([FromBody] Localizacao locais)
-        {
-            try
-            {
-                var salas = from i in Enumerable.Range(1, locais.Andar)
-                            from j in Enumerable.Range(1, locais.Numero)
-                            select new Localizacao(locais.Campus, locais.Predio, i, j);
-
-                _context.Localizacoes.AddRange(salas);
-                await _context.SaveChangesAsync();
-                var qtd = salas.Count();
-                return new ApiResponse<int>
-                {
-                    Success = true,
-                    Message = $"{qtd} salas cadastradas no prédio {locais.Predio}",
-                    Data = qtd
-                };
-            }
-            catch (Exception ex)
-            {
-                return new ApiResponse<int>
-                {
-                    Success = false,
-                    Message = $"Erro ao cadastrar maquina: {ex.Message}",
-                    Data = 0
-                };
-            }
-
-        }
     }
 }

@@ -17,34 +17,40 @@ public class Localizacao
     public int Id { get; set; }
 
     /// <summary>
+    /// Nome do qual essa localização em específico 
+    /// </summary>
+    public string? Apelido { get; set; } = string.Empty;
+
+    /// <summary>
     /// Número do campus
     /// </summary>
     /// 
-    public int Campus { get; set; }
+    public int Campus { get; set; } = 0;
 
     /// <summary>
     /// Número do prédio
     /// </summary>
-    public int Predio { get; set; }
+    public int Predio { get; set; } = 0;
 
     /// <summary>
     /// Número do andar
     /// </summary>
-    public int Andar { get; set; }
+    public int Andar { get; set; } = 0;
 
     /// <summary>
     /// Número da sala
     /// </summary>
-    public int Numero { get; set; }
+    public int Numero { get; set; } = 0;
 
     public Localizacao() { }
 
-    public Localizacao(int Campus, int Predio, int Andar, int Numero) {
+    public Localizacao(string Apelido, int Campus, int Predio, int Andar, int Numero) {
+        this.Apelido = Apelido;
         this.Campus = Campus;
         this.Predio = Predio;
         this.Andar = Andar;
         this.Numero = Numero;
     } 
     
-    public override string ToString() => $"c{Campus}p{Predio}s{Andar}{(Numero < 10 ? "0" : "")}{Numero}";
+    public override string ToString() => $"{(Apelido != null ? $"\"{Apelido}\" em " : "")}c{Campus}p{Predio}s{(Numero < 10 ? "0" : "")}{Numero}";
 }

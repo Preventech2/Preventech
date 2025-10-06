@@ -14,9 +14,9 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=Preventech;Username=preventech;Password=1234
     command: dotnet Preventech.Server.dll
-
   db:
-    image: postgres:alpine
+  # corrigir para atualizar para versão 18 do postgres
+    image: postgres:17-alpine
     restart: always
     environment:
       POSTGRES_DB: Preventech
@@ -30,6 +30,8 @@ services:
       retries: 5
       start_period: 30s
       timeout: 10s
+    volumes:
+      - pgdata:/var/lib/postgresql/data
     
 volumes:
-  pgdata: {}
+  pgdata: 

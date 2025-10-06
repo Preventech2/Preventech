@@ -5,7 +5,6 @@ using Preventech.Core.Models;
 using Preventech.Core.DatabaseContexts;
 using Preventech.Core.DTOs;
 using System.Runtime.InteropServices;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 namespace Preventech.Core.Controllers;
 
 [Route("api/manutencao")]
@@ -13,7 +12,7 @@ namespace Preventech.Core.Controllers;
 public class ManutencaoController
 {
     private ApplicationDbContext _context;
-    private DateTime UltimaVarredura;
+    private DateTime UltimaVarredura = DateTime.UnixEpoch;
 
     [DllImport("libc")]
     private static extern void signal(int signum, Action handler);
@@ -21,8 +20,6 @@ public class ManutencaoController
     public ManutencaoController(ApplicationDbContext context)
     {
         _context = context;
-        LeituraDiaria();
-        UltimaVarredura = DateTime.Today;
     }
 
     /// <summary>
@@ -44,7 +41,7 @@ public class ManutencaoController
 
     // Essas linhas são o coração da preventech inteira
     // teoricamente isso poderia ser uma procedure com pg_cron, mas
-    [HttpGet("varredura/")]
+    [HttpGet("varredura")]
     private async Task<ApiResponse<TimeSpan>> LeituraDiaria()
     {
         var hoje = DateTime.Today;
@@ -65,7 +62,7 @@ public class ManutencaoController
         foreach (var prev in _context!.Preventivas)
             prev.Status = Status(prev.UltimaRealizacao, prev.Frequencia);
 
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
         UltimaVarredura = DateTime.Now;
         var diff = UltimaVarredura - inicio;
         Console.WriteLine($"== Varredura completa em {diff}");

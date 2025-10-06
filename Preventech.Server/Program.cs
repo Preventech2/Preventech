@@ -51,7 +51,7 @@ builder.Services.AddAuthentication(o =>
             if (ctx.Principal?.Identity?.IsAuthenticated ?? false)
             {
                 var Claims = ctx.Principal.Claims;
-                
+
                 // Verifica se o cookie expirou
                 var expirationClaim = Claims.FirstOrDefault(c => c.Type == ClaimTypes.Expiration)?.Value;
                 if (!string.IsNullOrEmpty(expirationClaim) && DateTime.TryParse(expirationClaim, out var expiration))
@@ -131,7 +131,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseAntiforgery();
 
-app.UseAuthentication(); 
+app.UseAuthentication();
 app.UseAuthorization();
 
 // Map API controllers
@@ -140,5 +140,23 @@ app.MapControllers();
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+// faz cache de arquivos css -> menos requisições
+app.Use(async (context, next) =>
+{
+    string path = context.Request.Path;
+
+    if (path.EndsWith(".css") || path.EndsWith(".js") || path.EndsWith(".png"))
+    {
+        var tempo = 7 * 24 * 60 * 60;
+        context.Response.Headers.Append("Cache-Control", $"max-age={tempo}");
+    }
+    else
+    {
+        context.Response.Headers.Append("Cache-Control", "no-cache");
+        context.Response.Headers.Append("Cache-Control", "private, no-store");
+    }
+    await next();
+});
 
 app.Run();
