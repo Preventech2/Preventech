@@ -122,8 +122,19 @@ builder.Services.AddHttpClient<LocalizacaoService>(client =>
     client.BaseAddress = base_uri;
 });
 
-var app = builder.Build();
+builder.Services.AddScoped<DocumentoService>();
 
+builder.Services.AddHttpClient<DocumentoService>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:8080/");
+});
+
+builder.Services.AddHttpClient<RelatorioGeneratorService>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:8080/");
+});
+
+var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
