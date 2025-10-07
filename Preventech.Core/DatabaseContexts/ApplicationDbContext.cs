@@ -18,6 +18,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<Preventiva> Preventivas { get; set; }
     public DbSet<Preditiva> Preditivas { get; set; }
 
+    public DbSet<DocumentoAnexado> DocumentosAnexados { get; set; }
+
 
     //public DbSet<Peca> Pecas { get; set; }
 

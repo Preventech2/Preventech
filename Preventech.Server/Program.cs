@@ -9,6 +9,8 @@ using Preventech.Server;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
+using Preventech.Core.Services; 
+//using Preventech.Core.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -116,8 +118,19 @@ builder.Services.AddHttpClient<LocalizacaoService>(client =>
     client.BaseAddress = new Uri("http://localhost:8080/");
 });
 
-var app = builder.Build();
+builder.Services.AddScoped<DocumentoService>();
 
+builder.Services.AddHttpClient<DocumentoService>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:8080/");
+});
+
+builder.Services.AddHttpClient<RelatorioGeneratorService>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:8080/");
+});
+
+var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
