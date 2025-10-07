@@ -89,6 +89,7 @@ namespace Preventech.Core.Controllers
                 var ordem = await _context.OrdensServico
                     .Include(o => o.Requisitante)
                     .Include(o => o.TecnicoResponsavel)
+                    .Include(o => o.Arquivos)
                     .FirstOrDefaultAsync(e => e.Id == id);
 
                 return new ApiResponse<OrdemServico>

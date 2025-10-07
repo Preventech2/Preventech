@@ -19,6 +19,7 @@
     <label>Patrimônio:
         <InputText @bind-Value="equipamento!.Patrimonio" class="form-control" />
     </label>
+    <br />
     @if (locais != null && locais.Any())
     {
         <div class="mb-3">
@@ -30,7 +31,7 @@
                     }
                 </InputSelect>
             </label>
-            <span>Não encontrou o local? <a href="/cadastrar/localizacao">Cadastre-o!</a></span>
+            <span>Não encontrou o local? <a href="/localizacao/cadastrar" target="_blank">Cadastre-o!</a></span>
         </div>
     }
     else

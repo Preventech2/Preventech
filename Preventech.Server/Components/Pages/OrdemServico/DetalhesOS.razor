@@ -38,6 +38,18 @@ else
             }
     </p>
 
+    //@ordem.Arquivos.ToList().Count()
+
+    @foreach (var arquivo in @ordem.Arquivos)
+    {
+        <p>
+            <strong>Arquivo:</strong> 
+            <a href="api/documentos/@arquivo.Id/download" target="_blank" download="@arquivo.NomeArquivo">
+                @arquivo.NomeArquivo 
+                (@arquivo.DataEnvio.ToLocalTime()) </a>
+        </p>
+    }
+
 @if (ordem.TecnicoResponsavel == null) {
     <EditForm Model="ordem" OnSubmit="FormData" FormName="pegar-Ordem-Servico">
         <button type="submit" class="btn btn-primary" disabled="@isProcessing">
@@ -56,6 +68,37 @@ else
 
 else if (ordem.TecnicoResponsavel.Id == userInfo?.Id && ordem.Status != StatusOS.Concluida) {
     <div>
+        <EditForm Model="ordem" OnSubmit="FormAddDoc" FormName="adicionar-documento">
+            <div class="mb-3">
+                <label>Deseja anexar documentos?
+                    <InputFile OnChange="HandleFileSelection" multiple />
+                </label>
+                @if (arquivosParaUpload.Any())
+                {
+                    <p class="mt-2">Arquivos selecionados para upload:</p>
+                    <ul>
+                        @foreach (var file in arquivosParaUpload)
+                        {
+                            <li>@file.Name (@((file.Size / 1024).ToString("N0")) KB)</li>
+                        }
+                    </ul>
+                }
+                
+                <button type="submit" class="btn btn-success" disabled="@isProcessing"> 
+                    @if (isProcessing)
+                    {
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        <text>Anexando...</text>
+                    }
+                    else
+                    {
+                        <text>Anexar documento</text>
+                    }
+                </button>
+            </div>
+        </EditForm>
+    </div>
+    <div>
         <EditForm Model="ordem" OnSubmit="FormDataCancel" FormName="pegar-Ordem-Servico">
             <button type="submit" class="btn btn-danger" disabled="@isProcessing">
                 @if (isProcessing)
@@ -70,21 +113,51 @@ else if (ordem.TecnicoResponsavel.Id == userInfo?.Id && ordem.Status != StatusOS
             </button>
         </EditForm>
     </div>
-    <div>
-        <EditForm Model="ordem" OnSubmit="FormDataFinish" FormName="pegar-Ordem-Servico">
-            <button type="submit" class="btn btn-success" disabled="@isProcessing">
-                @if (isProcessing)
-                {
-                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                    <span class="visually-hidden">Processando...</span>
-                }
-                else
-                {
-                    <text>Concluir OS</text>
-                }
+    @if (!isShowingCompletionForm)
+    {
+        <div>
+            <button type="button" class="btn btn-success" @onclick="() => isShowingCompletionForm = true" disabled="@isProcessing">
+                Concluir OS (Detalhar Ações)
             </button>
-        </EditForm>     
-    </div>  
+        </div>
+    }
+    else {
+        <EditForm Model="ordem" OnSubmit="FormDataFinish" FormName="form-conclusao">
+            <div class="card my-3 p-3 border-success">
+                <h4>Relatório de Conclusão</h4>
+
+                <div class="mb-3">
+                    <label for="DescricaoSolucao" class="form-label">Descrição das Ações Realizadas:</label>
+                    <InputTextArea id="DescricaoSolucao" @bind-Value="ordem.DescricaoSolucao" rows="5" class="form-control" required />
+                    <ValidationMessage For="@(() => ordem.DescricaoSolucao)" />
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <button type="button" class="btn btn-secondary" @onclick="() => isShowingCompletionForm = false">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-success" disabled="@isProcessing">
+                        @if (isProcessing)
+                        {
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <text>Finalizando...</text>
+                        }
+                        else
+                        {
+                            <text>Concluir e Salvar</text>
+                        }
+                    </button>
+                </div>
+            </div>
+        </EditForm>
+    }
+}
+
+else if (ordem.Status == StatusOS.Concluida) {
+    <p><strong>Técnico Responsável:</strong> @ordem.TecnicoResponsavel.Nome</p>
+    <p><strong>Descrição da solução:</strong> @ordem.DescricaoSolucao</p>
+    <p><strong>Data de Conclusão:</strong> @ordem.DataConclusão</p>
+
 }
 
 else {
@@ -97,6 +170,7 @@ else {
     private OrdemServico ordem = null!;
     private Equipamento equipamento = null!;
     private UserInfo? userInfo = null;
+    private bool isShowingCompletionForm = false;
 
     [Parameter]
     public Guid id { get; set; }
@@ -106,6 +180,18 @@ else {
     
     [Inject]
     EquipamentoService EquipService { get; set; } = null!;
+
+    [Inject]
+    DocumentoService DocService { get; set; } = null!;
+
+    [Inject]
+    private EmailService emailService { get; set; } = null!;
+
+    [Inject]
+    private RelatorioGeneratorService RelatorioService { get; set; } = null!; 
+
+    private List<IBrowserFile> arquivosParaUpload = new List<IBrowserFile>();
+    private const long MAX_FILE_SIZE = 1024 * 1024 * 50; // 50MB
 
     private string mensagemResultado = string.Empty;
     private bool sucesso = false;
@@ -200,13 +286,137 @@ else {
 
     private async Task FormDataFinish()
     {
+        if (string.IsNullOrWhiteSpace(ordem.DescricaoSolucao))
+        {
+            // Isso será tratado pelo Blazor Validation, mas é bom como fallback.
+            mensagemResultado = "A Descrição das Ações é obrigatória para a conclusão.";
+            sucesso = false;
+            return;
+        }
+
         ordem!.Status = StatusOS.Concluida;
+        ordem!.DataConclusão = DateTime.UtcNow;
+
         isProcessing = true;
         
         Core.DTOs.ApiResponse<OrdemServico> response = await ordemService.UpdateOrdemServicoAsync(ordem.Id, ordem) ?? new Core.DTOs.ApiResponse<OrdemServico>();
         mensagemResultado = response.Message;
 
+        byte[] relatorioBytes = RelatorioService.GerarRelatorioPDF(ordem); 
+        string fileName = $"Relatorio_OS_{ordem.Id}.pdf";
+
+        string message = "Enviando email...";
+        
+        if (ordem.Requisitante != null && ordem.Requisitante.Email != null) {
+            message = "Enviando email para " + ordem.Requisitante.Nome;
+            string? email = ordem.Requisitante.Email;
+
+            string subject = "[Preventech] Ordem de Serviço Concluída";
+            string body = $"<p>Olá {ordem.Requisitante.Nome},</p>" +
+                $"<p>Sua Ordem de Serviço <strong>{ordem.Titulo}</strong> (ID: {ordem.Id}) " +
+                $"foi concluída com sucesso pelo técnico {ordem.TecnicoResponsavel.Nome}.</p>" +
+                (string.IsNullOrWhiteSpace(ordem.DescricaoSolucao) 
+                    ? "" 
+                    : $"<p><strong>Ações Realizadas:</strong><br>{ordem.DescricaoSolucao.Replace("\n", "<br>")}</p>") +
+                "<p>Você pode entrar em contato conosco para mais informações.</p>" +
+                "<p style='margin-top: 20px;'>Atenciosamente,<br>" +
+                "<strong>Equipe Preventech</strong></p>";
+
+            message = await emailService.SendEmailAttach(email, subject, body, relatorioBytes, fileName);
+            
+            mensagemResultado = "Notificamos o requisitante por email.";
+        }
+
+        else {
+            message = "Não foi possível enviar o email, requisitante sem email cadastrado.";
+        }
+
+        isShowingCompletionForm = false;
         isProcessing = false;
         sucesso = true;
+    }
+
+    private async Task FormAddDoc()
+    {
+        
+        isProcessing = true;
+        mensagemResultado = string.Empty;
+
+        if (userInfo == null || !userInfo.IsAuthenticated)
+        {
+            isProcessing = false;
+            mensagemResultado = "Erro de autenticação: Usuário não identificado.";
+            return;
+        }
+
+        if (!arquivosParaUpload.Any())
+        {
+            isProcessing = false;
+            mensagemResultado = "Nenhum arquivo selecionado para upload.";
+            return;
+        }
+
+        Guid ordemId = ordem.Id;
+        int arquivosComErro = 0;
+        string errosAcumulados = string.Empty;
+
+        foreach (var file in arquivosParaUpload)
+        {
+            Core.DTOs.ApiResponse<object> responseUpload = await DocService.UploadDocumentoAsync(ordemId, file);
+
+            if (!responseUpload.Success)
+            {
+                arquivosComErro++;
+                errosAcumulados += $"Erro ao fazer upload do arquivo {file.Name}: {responseUpload.Message}. ";
+            }
+        }
+
+        if (arquivosComErro == 0)
+        {
+            sucesso = true;
+            mensagemResultado = $"Todos os {arquivosParaUpload.Count} documentos anexados com sucesso!";
+        }
+        
+        else if (arquivosComErro == arquivosParaUpload.Count)
+        {
+            sucesso = false;
+            mensagemResultado = $"NENHUM arquivo foi anexado. Detalhes: {errosAcumulados}";
+        }
+        
+        else
+        {
+            sucesso = true; // Parcialmente bem-sucedido
+            mensagemResultado = $"Upload concluído. Alguns documentos falharam ({arquivosComErro} de {arquivosParaUpload.Count}). Detalhes: {errosAcumulados}";
+        }
+
+        // 3. Limpa a lista de arquivos temporários e recarrega a página para atualizar a lista de anexos
+        arquivosParaUpload.Clear();
+        await OnInitializedAsync();
+
+        isProcessing = false;
+    }
+
+    private void HandleFileSelection(InputFileChangeEventArgs e) 
+    {
+        arquivosParaUpload.Clear(); // Limpa seleção anterior
+        mensagemResultado = string.Empty;
+
+        foreach (var file in e.GetMultipleFiles()) 
+        {
+            if (file.Size <= MAX_FILE_SIZE) 
+            {
+                // ⭐ MUDANÇA: Apenas armazena a referência do IBrowserFile.
+                // O conteúdo real será lido durante o upload no DocService.
+                arquivosParaUpload.Add(file);
+            } 
+            else 
+            {
+                mensagemResultado = $"O arquivo {file.Name} excede o tamanho máximo permitido de {MAX_FILE_SIZE / (1024 * 1024)} MB. Remova-o para continuar.";
+                sucesso = false;
+                arquivosParaUpload.Clear(); // Opcional: Limpar tudo se houver um arquivo muito grande
+                break;
+            }
+        }
+        StateHasChanged(); // Força a atualização da UI para mostrar a lista de arquivos
     }
 }

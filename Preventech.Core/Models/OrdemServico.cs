@@ -37,6 +37,11 @@ public class OrdemServico
     public int? RequisitanteId { get; set; }
     public Usuario? Requisitante { get; set; }
     
+    public string? DescricaoSolucao { get; set; }
+    public DateTime? DataConclusão { get; set; }
+
+    public ICollection<DocumentoAnexado> Arquivos { get; set; } = new List<DocumentoAnexado>();
+    
     public static Guid GerarIdOrdem()
     {
         var agora = DateTimeOffset.Now;
