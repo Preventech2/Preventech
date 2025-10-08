@@ -1,17 +1,36 @@
+:root {
+    --preto: #31383E;
+    --cinza-escuro: #818F9C;
+    --cinza-claro: #C6CCD2;
+    --branco: #F4F5F6;
+    --azul-escuro: #0A62AE;
+    --azul: #85ABCC;
+    --azul-claro: #D7E4EF;
+    --vermelho-claro: #DB5757;
+    --vermelho: #D22D2D;
+    --verde-claro: #83DB57;
+    --verde: #64D22D;
+    --amarelo-claro: #FFCC33;
+    --amarelo: #FFBF00;
+}
+
 html,
 body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: Inter, monospace;
+    margin: 0;
+    padding: 0;
+    background-color: var(--cinza-claro);
 }
 
 a,
 .btn-link {
-    color: #006bb7;
+    color: var(--azul-escuro);
 }
 
 .btn-primary {
-    color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
+    color: var(--branco);
+    background-color: var(--cinza-escuro);
+    border-color: var(--azul-escuro);
 }
 
 .btn:focus,
@@ -19,7 +38,7 @@ a,
 .btn-link.nav-link:focus,
 .form-control:focus,
 .form-check-input:focus {
-    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.1rem var(--branco), 0 0 0 0.25rem var(--azul);
 }
 
 .content {
@@ -31,20 +50,20 @@ h1:focus {
 }
 
 .valid.modified:not([type=checkbox]) {
-    outline: 1px solid #26b050;
+    outline: 1px solid var(--verde-claro);
 }
 
 .invalid {
-    outline: 1px solid #e50000;
+    outline: 1px solid var(--vermelho);
 }
 
 .validation-message {
-    color: #e50000;
+    color: var(--vermelho);
 }
 
 .blazor-error-boundary {
     padding: 1rem 1rem 1rem 3.7rem;
-    color: white;
+    color: var(--branco);
 }
 
 .blazor-error-boundary::after {
@@ -52,7 +71,49 @@ h1:focus {
 }
 
 .darker-border-checkbox.form-check-input {
-    border-color: #929292;
+    border-color: var(--cinza-claro);
+}
+
+em {
+    font-weight: bolder;
+    color: var(--vermelho);
+    padding: .1rem;
+}
+
+form {
+    width: 30%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--azul);
+}
+
+form>div {
+    width: 80%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: .35rem 0;
+}
+
+form h2 {
+    margin: 0;
+}
+
+form input {
+    border: 1px solid var(--azul);
+}
+
+.fecha-form {
+    background-color: var(--vermelho-claro);
+    border: 0px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--branco);
+    margin: .1rem .1rem 0 auto;
+
 }
 
 .form-floating>.form-control-plaintext::placeholder,

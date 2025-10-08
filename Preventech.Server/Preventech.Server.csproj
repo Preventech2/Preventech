@@ -4,6 +4,8 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <RunAOTCompilation>true</RunAOTCompilation>
+    <WasmStripILAfterAOT>true</WasmStripILAfterAOT>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,5 +24,4 @@
   <ItemGroup>
     <ProjectReference Include="..\Preventech.Core\Preventech.Core.csproj" />
   </ItemGroup>
-
 </Project>

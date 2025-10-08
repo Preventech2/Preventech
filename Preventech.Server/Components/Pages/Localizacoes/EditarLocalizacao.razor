@@ -33,7 +33,6 @@
     <button type="submit" class="btn btn-primary" disabled="@isProcessing">
         @if (isProcessing)
         {
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
             <text>Filtrando...</text>
         }
         else
@@ -48,27 +47,26 @@
 @if (locais.Any())
 {
     <form>
-    <div class="mb-3">
-        <label>Localização:
-            <select @onchange="SelecionarFiltro">
-                @foreach (var local in locais)
-                    {
-                        <option value="@local!.Id">@local.ToString()</option>
-                    }
-                </select>
-            </label>
-            <span>Não encontrou o local? <a href="/localizacao/cadastrar">Cadastre-o!</a></span>
-        </div>
+    <label>Localização:
+        <select @onchange="SelecionarFiltro">
+            @foreach (var local in locais)
+                {
+                    <option value="@local!.Id">@local.ToString()</option>
+                }
+            </select>
+        </label>
+        <span>Não encontrou o local? <a href="/localizacao/cadastrar">Cadastre-o!</a></span>
     </form>
 }
 else
 {
     <p><em>Locais não selecionados</em></p>
-    
+
 }
 
-@if (local != null) {
-<EditForm Model="local" OnSubmit="EditarLoc" FormName="atualizar-local">
+@if (local != null)
+{
+    <EditForm Model="local" OnSubmit="EditarLoc" FormName="atualizar-local">
     <label data-tooltip="Nome dado à um local, caso aplicável. Exemplos: 'LABFUND' ou 'DGO'">Nome (opcional):
         <InputText @bind-Value="local!.Apelido" class="form-control" />
     </label>
@@ -86,16 +84,16 @@ else
     </label>
     <button type="submit" class="btn btn-primary" disabled="@isProcessingLoc">
         @if (isProcessingLoc)
-        {
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            <text>Editar...</text>
-        }
-        else
-        {
-            <text>Editar</text>
-        }
-    </button>
-</EditForm>
+            {
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <text>Editar...</text>
+            }
+            else
+            {
+                <text>Editar</text>
+            }
+        </button>
+    </EditForm>
 }
 
 
@@ -110,9 +108,6 @@ else
     LocalizacaoService localizacaoService { get; set; } = null!;
 
     private List<Localizacao> locais = new();
-
-    private int? localid;
-
     private string mensagemResultado = string.Empty;
     private bool sucesso = false;
     private bool isProcessing = false;
@@ -132,7 +127,11 @@ else
         try
         {
             var res = await localizacaoService.GetLocalizacoes(filtro!);
-            if (!res.Success)
+            if (res == null) {
+                mensagemResultado = "sem resposta";
+                sucesso = false;
+            }
+            else if (!res.Success)
             {
                 await jsr.InvokeVoidAsync("console.log", res.Message);
                 mensagemResultado = res.Message;
@@ -157,7 +156,7 @@ else
 
     private void SelecionarFiltro(ChangeEventArgs e)
     {
-        var res = int.Parse(e.Value.ToString());
+        var res = int.Parse(e.Value!.ToString());
         local = (from loc in locais where loc.Id == res select loc).First();
         StateHasChanged();
     }
@@ -171,9 +170,13 @@ else
         try
         {
             var res = await localizacaoService.EditarLocalizacaoAsync(local);
-            if (!res.Success)
+            if (res == null) {
+                mensagemResultado = "sem resposta";
+                sucesso = false;
+            }
+            else if (!res.Success)
             {
-                await jsr.InvokeVoidAsync("console.log", res.Message);
+                await jsr.InvokeVoidAsync("console.log", res!.Message);
                 mensagemResultado = res.Message;
                 sucesso = false;
             }

@@ -42,6 +42,11 @@ public class Localizacao
     /// </summary>
     public int Numero { get; set; } = 0;
 
+    /// <summary>
+    /// Técnico responsável pela sala
+    /// </summary>
+    public Usuario? Responsável { get; set; } = default;
+
     public Localizacao() { }
 
     public Localizacao(string Apelido, int Campus, int Predio, int Andar, int Numero) {

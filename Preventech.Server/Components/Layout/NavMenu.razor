@@ -8,17 +8,17 @@
 @inject UserClaimsHelper UserClaimsHelper
 
 <div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <AuthorizeView>
-            <Authorized>
-                <a class="navbar-brand" href="">@userInfo?.Name</a>
-            </Authorized>
-            <NotAuthorized>
-                <a class="navbar-brand" href="">Usuario</a>
-            </NotAuthorized>
-        </AuthorizeView>
-    </div>
+    <AuthorizeView>
+        <Authorized>
+            <a class="navbar-brand" href="">@userInfo?.Name</a>
+        </Authorized>
+        <NotAuthorized>
+            <a class="navbar-brand" href="">Usuario</a>
+        </NotAuthorized>
+    </AuthorizeView>
 </div>
+
+<br>
 
 <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
 
@@ -33,12 +33,25 @@
     <AuthorizeView>
         <Authorized>
             @* Adicione aqui os links que o usuário autenticado pode ver. *@
-            @if (userInfo != null)
-            
+            @if (userInfo != null && userInfo.HasRole("VisualizarOrdemServico"))
+
             {
                 <div class="nav-item pad-x">
-                    <NavLink class="nav-link" href="@url">
-                       <span class="bi bi-briefcase-fill" aria-hidden="true"></span> Minhas OSs
+                    <NavLink class="nav-link" href="/ordens-servico/user">
+                        <span class="bi bi-briefcase-fill" aria-hidden="true"></span> Minhas OSs
+                    </NavLink>
+                </div>
+            }
+            @if (userInfo != null && userInfo.HasRole("VisualizarLocalizacao"))
+            {
+                <div class="nav-item pad-x">
+                    <NavLink class="nav-link" href="/localizacao/cadastrar">
+                    <span class="bi bi-briefcase-fill" aria-hidden="true"></span>Cadastrar Localização
+                    </NavLink>
+                </div>
+                <div class="nav-item pad-x">
+                    <NavLink class="nav-link" href="/localizacao/editar">
+                    <span class="bi bi-briefcase-fill" aria-hidden="true"></span>Editar Localização
                     </NavLink>
                 </div>
             }
@@ -48,8 +61,6 @@
 
 @code {
     private UserInfo? userInfo;
-    private string url = "/ordens-servico/user";
-
     [CascadingParameter]
     private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
 

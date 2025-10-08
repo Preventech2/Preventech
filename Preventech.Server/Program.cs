@@ -19,14 +19,7 @@ builder.Services.AddRazorComponents()
 // Add API controller support
 builder.Services.AddControllers();
 
-// Configure HTTPS redirection
-//builder.Services.AddHttpsRedirection(options =>
-//{
-//    options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
-//    options.HttpsPort = 7111; // Porta HTTPS definida para suprimir o aviso de segurança
-//});
 
-// authorization and authentication services
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<AuthenticationStateProvider, CookieAuthStateProvider>();
 builder.Services.AddScoped<AuthService>();
@@ -148,6 +141,7 @@ app.Use(async (context, next) =>
 
     if (path.EndsWith(".css") || path.EndsWith(".js") || path.EndsWith(".png"))
     {
+        Console.WriteLine($"Fazendo cache do arquivo \"{path}\"");
         var tempo = 7 * 24 * 60 * 60;
         context.Response.Headers.Append("Cache-Control", $"max-age={tempo}");
     }

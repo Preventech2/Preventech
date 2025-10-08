@@ -9,7 +9,7 @@ WORKDIR /src
 ENV PATH=$PATH:/root/.dotnet/tools
 
 RUN dotnet tool install --global dotnet-ef
-
+RUN dotnet workload install wasm-tools
 COPY ["Preventech.Core/Preventech.Core.csproj", "Preventech.Core/"]
 COPY ["Preventech.Server/Preventech.Server.csproj", "Preventech.Server/"]
 
@@ -20,10 +20,10 @@ COPY Preventech.Server/ Preventech.Server/
 COPY Preventech.Core/ Preventech.Core/
 WORKDIR /src/Preventech.Server
 
-RUN dotnet build "Preventech.Server.csproj" -c Debug -o /app/build
+RUN dotnet build "Preventech.Server.csproj" -c Release -o /app/build
 #RUN dotnet ef migrations add Docker --project Preventech.Core --startup-project Preventech.Server
 FROM build AS publish
-RUN dotnet publish "Preventech.Server.csproj" -c Debug -o /app/publish
+RUN dotnet publish "Preventech.Server.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
