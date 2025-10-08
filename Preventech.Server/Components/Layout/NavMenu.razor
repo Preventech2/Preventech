@@ -39,7 +39,13 @@
                 <p>@item</p>
             }
             @* Adicione aqui os links que o usuário autenticado pode ver. *@
+            <div class="nav-item pad-x">
+                <NavLink class="nav-link" href="/admin/painel">
+                    <span class="bi bi-briefcase-fill" aria-hidden="true"></span> Admin
+                </NavLink>
+            </div>
             @if (userInfo != null && userInfo.HasRole("VisualizarOrdemServico"))
+
             {
                 <div class="nav-item pad-x">
                     <NavLink class="nav-link" href="/ordens-servico/user">
