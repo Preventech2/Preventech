@@ -16,19 +16,11 @@
     <ValidationSummary />
 
     <div class="mb-3">
-        <label for="cpf" class="form-label">CPF</label>
+        <label for="cpf" class="form-label">Cpf</label>
         <InputText id="cpf" class="form-control" @bind-Value="usuario.Cpf" />
     </div>
-    <div class="mb-3">
-        <label for="perfis" class="form-label">Perfis</label><br />
-        @foreach (Perfil flag in Enum.GetValues(typeof(Perfil)))
-        {
-            if (flag != Perfil.NenhumaPermissao)
-            {
-                <PerfilCheckbox @bind-Value="usuario.Perfil" Flag="flag" />
-            }
-        }
-    </div>
+    
+    <SelecionarGrupo @bind-Grupo="usuario.Grupo" />
     <button type="submit" class="btn btn-primary">Convidar</button>
 </EditForm>
 

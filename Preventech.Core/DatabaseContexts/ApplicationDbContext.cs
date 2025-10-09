@@ -13,6 +13,7 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<Equipamento> Equipamentos { get; set; }
     public DbSet<Usuario> Usuarios { get; set; }
+    public DbSet<GrupoPerfil> GruposPerfis { get; set; }
     public DbSet<OrdemServico> OrdensServico { get; set; }
     public DbSet<Localizacao> Localizacoes { get; set; }
     public DbSet<Preventiva> Preventivas { get; set; }

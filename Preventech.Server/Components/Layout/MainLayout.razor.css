@@ -105,3 +105,9 @@ main {
     padding-left: 1rem;
     padding-right: 1rem;
 }
+
+.content {
+    background-color: #D7E4EF;
+    width: 100%;
+    height: auto;
+}

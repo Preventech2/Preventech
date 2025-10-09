@@ -1,42 +1,68 @@
-﻿@using System.Text.RegularExpressions
-
-<input type="checkbox" checked="@IsChecked" @onchange="OnCheckboxChanged" />
-<label>@FormattedFlagName</label>
+﻿<div class="mb-3">
+    @foreach (Perfil perfil in perfis)
+    {
+        <div class="form-check">
+            <input type="checkbox" 
+                class="form-check-input" 
+                id="perfil-@((int)perfil)"
+                checked="@IsPermissionSet(perfil)"
+                @onchange="@((ChangeEventArgs e) => TogglePermission(perfil, (bool)e.Value!))" />
+            <label class="form-check-label" for="perfil-@((int)perfil)">
+                @GetPermissionDisplayName(perfil)
+            </label>
+        </div>
+    }
+</div>
 
 @code {
-    [Parameter]
-    public Perfil Flag { get; set; }
+    [Parameter, EditorRequired]
+    public GrupoPerfil grupoPerfil { get; set; } = null!;
 
-    [Parameter]
-    public Perfil? Value { get; set; }
+    [Parameter, EditorRequired]
+    public EventCallback<GrupoPerfil> grupoPerfilChanged { get; set; }
 
-    [Parameter]
-    public EventCallback<Perfil?> ValueChanged { get; set; }
+    public List<Perfil> perfis { get; set; } = new List<Perfil>();
 
-    // Exibe o nome formatado do perfil
-    private string FormattedFlagName => FormatFlagName(Flag);
-
-    // Define se o checkbox está marcado
-    private bool IsChecked => Value.HasValue && Value.Value.HasFlag(Flag);
-
-    // Formata o nome do perfil para exibição
-    private static string FormatFlagName(Perfil perfil)
+    protected override void OnInitialized()
     {
-        string? nome = perfil.ToString();
-        return Regex.Replace(nome, "(?<!^)([A-Z])", " $1");
+        // Filtra apenas as permissões individuais (exclui combinações como All, Admin, etc.)
+        perfis = Enum.GetValues<Perfil>()
+            .Where(p => p != Perfil.NenhumaPermissao && 
+                       p != Perfil.All)
+            .ToList();
+
+        if(grupoPerfil.Permissoes == null)
+        {
+            grupoPerfil.Permissoes = Perfil.NenhumaPermissao;
+        }
     }
 
-    // Manipula a mudança do checkbox
-    private async Task OnCheckboxChanged(ChangeEventArgs e)
+    private bool IsPermissionSet(Perfil perfil)
     {
-        bool isChecked = e.Value is bool b && b;
-        Perfil? newValue = Value ?? default;
+        return (grupoPerfil.Permissoes & perfil) == perfil;
+    }
 
+    private async Task TogglePermission(Perfil perfil, bool isChecked)
+    {
         if (isChecked)
-            newValue |= Flag;
+        {
+            // Adiciona a permissão (OR bitwise)
+            grupoPerfil.Permissoes |= perfil;
+        }
         else
-            newValue &= ~Flag;
+        {
+            // Remove a permissão (AND com NOT bitwise)
+            grupoPerfil.Permissoes &= ~perfil;
+        }
 
-        await ValueChanged.InvokeAsync(newValue);
+        // Notifica o componente pai sobre a mudança
+        await grupoPerfilChanged.InvokeAsync(grupoPerfil);
+    }
+
+    private string GetPermissionDisplayName(Perfil perfil)
+    {
+        string name = perfil.ToString();
+        // Adiciona espaços antes de letras maiúsculas (exceto a primeira letra)
+        return System.Text.RegularExpressions.Regex.Replace(name, "(\\B[A-Z])", " $1");
     }
 }

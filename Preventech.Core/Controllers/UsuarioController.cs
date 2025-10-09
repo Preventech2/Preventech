@@ -28,6 +28,21 @@ namespace Preventech.Core.Controllers
 
             try
             {
+                // verifica se usuario com este cpf já existe
+                var usuarioExistente = await _context.Usuarios
+                    .Where(u => u.Cpf == usuario.Cpf)
+                    .FirstOrDefaultAsync();
+
+                if(usuarioExistente != null)
+                {
+                    return new ApiResponse<Usuario>
+                    {
+                        Success = false,
+                        Message = "Você já está cadastrado.",
+                        Data = usuarioExistente
+                    };
+                }
+
                 // Adiciona o usuario ao contexto
                 _context.Usuarios.Add(usuario);
 
@@ -69,6 +84,7 @@ namespace Preventech.Core.Controllers
             {
                 // Procura usuario por cpf
                 Usuario? usuarioEncontrado = await _context.Usuarios
+                                .Include(u => u.Grupo) // Inclui o grupo na consulta
                                 .Where(user => user.Cpf == usuario.Cpf
                                 // Em caso de uso de criptografia, deve-se criptografar/descriptografar antes a senha
                                 && user.Senha == usuario.Senha)
@@ -107,7 +123,9 @@ namespace Preventech.Core.Controllers
         {
             try
             {
-                var usuarios = await _context.Usuarios.ToListAsync();
+                var usuarios = await _context.Usuarios
+                    .Include(u => u.Grupo) // Inclui o grupo na consulta
+                    .ToListAsync();
                 return new ApiResponse<List<Usuario>>
                 {
                     Success = true,
@@ -121,6 +139,136 @@ namespace Preventech.Core.Controllers
                 {
                     Success = false,
                     Message = $"Erro ao buscar usuários: {ex.Message}",
+                    Data = null
+                };
+            }
+        }
+
+        [HttpPost]
+        public async Task<ApiResponse<Usuario>> GetUsuarioByCpf([FromBody] Usuario usuario)
+        {
+            if (usuario == null || string.IsNullOrEmpty(usuario.Cpf))
+            {
+                return new ApiResponse<Usuario>
+                {
+                    Success = false,
+                    Message = "Dados do usuário inválidos",
+                    Data = null
+                };
+            }
+
+            try
+            {
+                var usuarioEncontrado = await _context.Usuarios
+                    .Include(u => u.Grupo) // Inclui o grupo na consulta
+                    .Where(u => u.Cpf == usuario.Cpf)
+                    .FirstOrDefaultAsync();
+
+                if (usuarioEncontrado == null)
+                {
+                    return new ApiResponse<Usuario>
+                    {
+                        Success = false,
+                        Message = "Usuário não encontrado.",
+                        Data = null
+                    };
+                }
+
+                return new ApiResponse<Usuario>
+                {
+                    Success = true,
+                    Message = "Usuário encontrado com sucesso.",
+                    Data = usuarioEncontrado
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse<Usuario>
+                {
+                    Success = false,
+                    Message = $"Erro ao buscar usuário: {ex.Message}",
+                    Data = null
+                };
+            }
+        }
+
+        [HttpPost("add-grupo")]
+        public async Task<ApiResponse<Usuario>> AddGrupoInUsuario([FromBody] Usuario usuario)
+        {
+            if (usuario == null || string.IsNullOrEmpty(usuario.Cpf))
+            {
+                return new ApiResponse<Usuario>
+                {
+                    Success = false,
+                    Message = "CPF do usuário é obrigatório",
+                    Data = null
+                };
+            }
+
+            try
+            {
+                // Verifica se o usuário existe e carrega o grupo atual
+                var usuarioExistente = await _context.Usuarios
+                    .Include(u => u.Grupo) // Carrega o grupo atual
+                    .Where(u => u.Cpf == usuario.Cpf)
+                    .FirstOrDefaultAsync();
+
+                if (usuarioExistente == null)
+                {
+                    return new ApiResponse<Usuario>
+                    {
+                        Success = false,
+                        Message = "Usuário não encontrado.",
+                        Data = null
+                    };
+                }
+
+                // Se nenhum grupo foi fornecido ou o grupo é vazio, remove a associação
+                if (usuario.Grupo == null || string.IsNullOrEmpty(usuario.Grupo.Nome))
+                {
+                    usuarioExistente.Grupo = null;
+                }
+                else
+                {
+                    // Verifica se o grupo existe no banco
+                    var novoGrupo = await _context.GruposPerfis
+                        .Where(g => g.Nome == usuario.Grupo.Nome)
+                        .FirstOrDefaultAsync();
+
+                    // Se o grupo fornecido não existe, retorna erro
+                    if (novoGrupo == null)
+                    {
+                        return new ApiResponse<Usuario>
+                        {
+                            Success = false,
+                            Message = "Grupo não encontrado.",
+                            Data = null
+                        };
+                    }
+
+                    // Atualiza a associação do grupo
+                    usuarioExistente.Grupo = novoGrupo;
+                }
+
+                // Salva as mudanças no banco de dados
+                await _context.SaveChangesAsync();
+                
+                return new ApiResponse<Usuario>
+                {
+                    Success = true,
+                    Message = usuarioExistente.Grupo != null ?
+                        $"Usuário associado ao grupo '{usuarioExistente.Grupo.Nome}' com sucesso." :
+                        "Usuário removido do grupo com sucesso.",
+                    Data = usuarioExistente
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao modificar grupo do usuário: {ex.Message}");
+                return new ApiResponse<Usuario>
+                {
+                    Success = false,
+                    Message = $"Erro ao modificar grupo do usuário: {ex.Message}",
                     Data = null
                 };
             }
@@ -141,6 +289,24 @@ namespace Preventech.Core.Controllers
 
             try
             {
+                // Se um grupo foi fornecido, busca o grupo existente
+                if (usuario.Grupo != null && !string.IsNullOrEmpty(usuario.Grupo.Nome))
+                {
+                    var grupoExistente = await _context.GruposPerfis
+                        .Where(g => g.Nome == usuario.Grupo.Nome)
+                        .FirstOrDefaultAsync();
+
+                    if (grupoExistente != null)
+                    {
+                        usuario.Grupo = grupoExistente;
+                        _context.Entry(grupoExistente).State = EntityState.Unchanged;
+                    }
+                    else
+                    {
+                        usuario.Grupo = null; // Remove referência inválida
+                    }
+                }
+
                 // Adiciona o usuario ao contexto
                 _context.Usuarios.Add(usuario);
 

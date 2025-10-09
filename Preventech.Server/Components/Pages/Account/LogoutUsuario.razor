@@ -12,9 +12,12 @@
 @code {
     [Inject]
     private AuthService authService { get; set; } = null!;
-    
-    protected override async Task OnInitializedAsync()
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await authService.Logout();
+        if (firstRender)
+        {
+            await authService.Logout();
+        }
     }
 }

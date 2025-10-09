@@ -11,7 +11,7 @@
     <div class="container-fluid">
         <AuthorizeView>
             <Authorized>
-                <a class="navbar-brand" href="">@userInfo?.Name</a>
+                <a class="navbar-brand" href="">@FormatName(userInfo?.Name)</a>
             </Authorized>
             <NotAuthorized>
                 <a class="navbar-brand" href="">Usuario</a>
@@ -33,15 +33,16 @@
     <AuthorizeView>
         <Authorized>
             @* Adicione aqui os links que o usuário autenticado pode ver. *@
-            @if (userInfo != null)
-            
-            {
-                <div class="nav-item pad-x">
-                    <NavLink class="nav-link" href="@url">
-                       <span class="bi bi-briefcase-fill" aria-hidden="true"></span> Minhas OSs
-                    </NavLink>
-                </div>
-            }
+            <div class="nav-item pad-x">
+                <NavLink class="nav-link" href="@url">
+                    <span class="bi bi-briefcase-fill" aria-hidden="true"></span> Minhas OSs
+                </NavLink>
+            </div>
+            <div class="nav-item pad-x">
+                <NavLink class="nav-link" href="/admin/painel">
+                    <span class="bi bi-briefcase-fill" aria-hidden="true"></span> Admin
+                </NavLink>
+            </div>
         </Authorized>
     </AuthorizeView>
 </div>
@@ -52,6 +53,14 @@
 
     [CascadingParameter]
     private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
+
+    private string FormatName(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return "Usuario";
+        string[]? parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return parts[0] + ' ' + (parts.Length > 1 ? parts[^1] : "");
+    }
 
     protected override async Task OnInitializedAsync()
     {

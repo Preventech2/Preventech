@@ -9,8 +9,6 @@ using Preventech.Server;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
-using Preventech.Core.Services; 
-//using Preventech.Core.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -91,8 +89,6 @@ builder.Services.AddAuthentication(o =>
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddScoped<OrdemServicoService>();
-
 builder.Services.AddHttpClient<EquipamentoService>(client =>
 {
     client.BaseAddress = new Uri("http://localhost:8080/");
@@ -103,7 +99,18 @@ builder.Services.AddHttpClient<UsuarioService>(client =>
     client.BaseAddress = new Uri("http://localhost:8080/");
 });
 
+builder.Services.AddScoped<OrdemServicoService>();
 builder.Services.AddHttpClient<OrdemServicoService>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:8080/");
+});
+
+builder.Services.AddHttpClient<LocalizacaoService>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:8080/");
+});
+
+builder.Services.AddHttpClient<GrupoPerfilService>(client =>
 {
     client.BaseAddress = new Uri("http://localhost:8080/");
 });
@@ -119,7 +126,6 @@ builder.Services.AddHttpClient<LocalizacaoService>(client =>
 });
 
 builder.Services.AddScoped<DocumentoService>();
-
 builder.Services.AddHttpClient<DocumentoService>(client =>
 {
     client.BaseAddress = new Uri("http://localhost:8080/");
@@ -142,10 +148,10 @@ if (!app.Environment.IsDevelopment())
 
 //app.UseHttpsRedirection();
 
-app.UseAntiforgery();
-
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseAntiforgery();
 
 // Map API controllers
 app.MapControllers();

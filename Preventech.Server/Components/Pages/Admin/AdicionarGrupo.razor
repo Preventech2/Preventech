@@ -1,0 +1,25 @@
+﻿@page "/admin/adicionar-grupo"
+
+@rendermode InteractiveServer
+
+<h3>Adicionar Grupo</h3>
+
+<GrupoEditForm @bind-Grupo="@grupoPerfil" 
+                ButtonText="Adicionar Grupo"
+                OnValidSubmit="HandleValidSubmit" />
+
+@code {
+    private GrupoPerfil grupoPerfil = new GrupoPerfil();
+
+    [Inject]
+    private GrupoPerfilService grupoPerfilService { get; set; } = null!;
+
+    private async Task HandleValidSubmit()
+    {
+        ApiResponse<GrupoPerfil>? response = await grupoPerfilService.AddGrupoPerfilAsync(grupoPerfil);
+        if (response != null && response.Success)
+        {
+            grupoPerfil = new GrupoPerfil();
+        }
+    }
+}
