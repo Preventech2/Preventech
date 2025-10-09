@@ -20,6 +20,15 @@ public class UsuarioService(HttpClient httpClient, ILogger<UsuarioService> logge
         return result;
     }
 
+    public async Task<ApiResponse<Usuario>> AddGrupoInUsuarioAsync(Usuario usuario)
+    {
+        var response = await _httpClient.PostAsJsonAsync("api/usuarios/add-grupo", usuario);
+        var result = await response.Content.ReadFromJsonAsync<ApiResponse<Usuario>>()
+        ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<Usuario> while adding group.");
+        Console.WriteLine($"Response Message: {result.ToString()}");
+        return result;
+    }
+
     public async Task<ApiResponse<Usuario>> LoginUsuarioAsync(Usuario usuario)
     {
         var response = await _httpClient.PostAsJsonAsync($"api/usuarios/login", usuario);
@@ -34,6 +43,14 @@ public class UsuarioService(HttpClient httpClient, ILogger<UsuarioService> logge
         var response = await _httpClient.GetAsync("api/usuarios");
         var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<Usuario>>>()
         ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<List<Usuario>>.");
+        return result;
+    }
+
+    public async Task<ApiResponse<Usuario>> GetUsuarioByCpfAsync(Usuario usuario)
+    {
+        var response = await _httpClient.PostAsJsonAsync($"api/usuarios/", usuario);
+        var result = await response.Content.ReadFromJsonAsync<ApiResponse<Usuario>>()
+        ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<Usuario>.");
         return result;
     }
 

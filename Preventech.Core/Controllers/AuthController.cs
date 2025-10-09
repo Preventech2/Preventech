@@ -21,7 +21,7 @@ namespace Preventech.Core.Controllers
                 return BadRequest("Dados do usuário inválidos");
             }
             
-            var perfil = usuario.Perfil ?? Perfil.NenhumaPermissao;
+            var perfil = usuario.Grupo?.Permissoes ?? Perfil.NenhumaPermissao;
             var identity = new ClaimsIdentity(AuthConstants.CookieName);
 
             identity.AddClaim(new Claim(ClaimTypes.Name, usuario.Nome ?? String.Empty));
@@ -30,7 +30,7 @@ namespace Preventech.Core.Controllers
 
             foreach (var flag in Enum.GetValues<Perfil>())
             {
-                if (flag == Perfil.NenhumaPermissao) continue;
+                if (flag == Perfil.NenhumaPermissao || flag == Perfil.All) continue;
                 if (perfil.HasFlag(flag))
                 {
                     identity.AddClaim(new Claim(ClaimTypes.Role, flag.ToString()));

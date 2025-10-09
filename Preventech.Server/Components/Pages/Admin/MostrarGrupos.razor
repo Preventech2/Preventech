@@ -1,0 +1,56 @@
+﻿@page "/admin/grupos"
+
+@rendermode InteractiveServer
+
+@inject GrupoPerfilService grupoPerfilService
+@inject NavigationManager navigationManager
+
+<h3>Grupos</h3> 
+
+@if (gruposPerfis.Any()) 
+{
+    <QuickGrid TGridItem="GrupoPerfil" Items="@gruposPerfis" Context="item">
+        <PropertyColumn Property="@(item => item.Nome)" Title="Nome do Grupo" />
+        <PropertyColumn Property="@(item => GetPermissionDisplayName(item.Permissoes))" Title="Permissões" />
+        <TemplateColumn Title="Ações" Context="item">
+            <button @onclick="() => EditarGrupo(item.Nome)">Editar</button>
+        </TemplateColumn>
+    </QuickGrid>
+    <div>
+        <button @onclick='() => navigationManager.NavigateTo("/admin/adicionar-grupo")'>
+            Adicionar Grupo
+        </button>
+    </div>
+} 
+else 
+{
+    <section>
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        <p><em>Cadastrando...</em></p>
+    </section>
+}
+
+@code {
+    IQueryable<GrupoPerfil> gruposPerfis = new List<GrupoPerfil>().AsQueryable();
+
+    protected override async Task OnInitializedAsync()
+    {
+        ApiResponse<List<GrupoPerfil>> response = await grupoPerfilService.GetGruposPerfisAsync();
+        gruposPerfis = response.Data?.AsQueryable() ?? new List<GrupoPerfil>().AsQueryable();
+    }
+
+    public void EditarGrupo(String? name)
+    {
+        if (name != null)
+        {
+            navigationManager.NavigateTo($"/admin/editar-grupo/{name}");
+        }
+    }
+
+    private string GetPermissionDisplayName(Perfil? flag)
+    {
+        string name = flag.ToString() ?? "Nenhuma Permissão";
+        // Adiciona espaços antes de letras maiúsculas (exceto a primeira letra)
+        return System.Text.RegularExpressions.Regex.Replace(name, "(\\B[A-Z])", " $1");
+    }
+}

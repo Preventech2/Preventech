@@ -24,5 +24,5 @@ public class Usuario
     [MaxLength(50)]
     public string? Senha { get; set; }
 
-    public Perfil? Perfil { get; set; }
+    public GrupoPerfil? Grupo { get; set; }
 }

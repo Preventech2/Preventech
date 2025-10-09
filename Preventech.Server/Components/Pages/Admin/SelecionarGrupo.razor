@@ -1,0 +1,67 @@
+﻿@using Microsoft.AspNetCore.Mvc.ModelBinding
+
+@rendermode InteractiveServer
+
+<div class="mb-3">
+    <label for="grupo" class="form-label">Grupo</label>
+    <InputSelect id="grupo" class="form-control" @bind-Value="selectedValue">
+        <option value="">Selecione um grupo</option>
+        @foreach (var grupo in gruposPerfis)
+        {
+            <option value="@grupo.Nome">@grupo.Nome</option>
+        }
+    </InputSelect>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public GrupoPerfil Grupo { get; set; } = new GrupoPerfil();
+
+    [Parameter, EditorRequired]
+    public EventCallback<GrupoPerfil> GrupoChanged { get; set; }
+
+    public List<GrupoPerfil> gruposPerfis { get; set; } = new List<GrupoPerfil>();
+
+    [Inject]
+    private GrupoPerfilService grupoPerfilService { get; set; } = null!;
+
+    private string? selectedValue
+    {
+        get => Grupo?.Nome ?? string.Empty;
+        set
+        {
+            if (Grupo?.Nome != value)
+            {
+                if (!string.IsNullOrEmpty(value))
+                {
+                    // Encontra o grupo selecionado na lista
+                    GrupoPerfil? grupoSelecionado = gruposPerfis.FirstOrDefault(g => g.Nome == value);
+
+                    if (grupoSelecionado != null)
+                    {
+                        // Atualiza o parâmetro Grupo
+                        Grupo = grupoSelecionado;
+
+                        // Notifica o componente pai sobre a mudança
+                        GrupoChanged.InvokeAsync(grupoSelecionado);
+                    }
+                }
+                else
+                {
+                    // Se valor vazio, define grupo como null
+                    Grupo = null!;
+                    GrupoChanged.InvokeAsync(null!);
+                }
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        ApiResponse<List<GrupoPerfil>> response = await grupoPerfilService.GetGruposPerfisAsync();
+        if (response.Success && response.Data != null)
+        {
+            gruposPerfis = response.Data;
+        }
+    }
+}

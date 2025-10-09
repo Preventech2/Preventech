@@ -3,14 +3,14 @@
 
 @rendermode InteractiveServer
 
+@inject NavigationManager navigationManager
+@inject AuthService authService
+@inject UsuarioService usuarioService
+@inject EmailService emailService
+
 <h3>Cadastro</h3>
 
-@if (!string.IsNullOrEmpty(mensagem))
-{
-    <div class="alert alert-info" role="alert">
-        @mensagem
-    </div>
-}
+<MostrarMensagem @bind-Mensagem="mensagem" />
 
 <EditForm Model="usuario" OnValidSubmit="OnSubmit">
     <DataAnnotationsValidator />
@@ -18,7 +18,8 @@
 
     <div class="mb-3">
         <label for="cpf" class="form-label">Cpf</label>
-        <InputText id="cpf" type="text" class="form-control" maxlength="14" @bind-Value="viewCpf" @oninput="FormatCpf" />
+        @* <InputText id="cpf" type="text" class="form-control" maxlength="14" @bind-Value="viewCpf" @oninput="FormatCpf" /> *@
+        <CpfInput id="cpf" @bind-Cpf="usuario.Cpf" />
     </div>
     <div class="mb-3">
         <label for="nome" class="form-label">Nome</label>
@@ -32,8 +33,17 @@
         <label for="senha" class="form-label">Senha</label>
         <InputText id="senha" type="password" class="form-control" @bind-Value="usuario.Senha" />
     </div>
-    <button type="submit" class="btn btn-primary">Cadastrar</button>
-
+    <button type="submit" class="btn btn-primary" disabled="@isProcessing">
+        @if (isProcessing)
+        {
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            <text>Cadastrando...</text>
+        }
+        else
+        {
+            <text>Cadastrar</text>
+        }
+    </button>
 </EditForm>
 
 @code {
@@ -41,45 +51,43 @@
     public Usuario usuario { get; set; } = new Usuario();
 
     private string viewCpf = string.Empty;
-
-    [Inject]
-    private UsuarioService usuarioService { get; set; } = null!;
-
-    [Inject]
-    private EmailService emailService { get; set; } = null!;
+    private bool isProcessing = false;
 
     private string mensagem = string.Empty;
 
-    private void FormatCpf(ChangeEventArgs e)
-    {
-        string digits = new string(e.Value?.ToString()?.Where(char.IsDigit).ToArray() ?? Array.Empty<char>());
-        
-        if (digits.Length > 11) {
-            digits = digits.Substring(0, 11);
-            Console.WriteLine("CPF com 11 dígitos atingido:" + digits);
-        }
-
-        usuario.Cpf = digits;
-        
-        if (digits.Length >= 4)
-            digits = digits.Insert(3, ".");
-        if (digits.Length >= 8)
-            digits = digits.Insert(7, ".");
-        if (digits.Length >= 12)
-            digits = digits.Insert(11, "-");
-
-        viewCpf = digits;
-    }
-
     public async Task OnSubmit()
     {
-        SendEmail();
+        isProcessing = true;
         ApiResponse<Usuario> response = await usuarioService.AddUsuarioAsync(usuario) ?? new ApiResponse<Usuario>();
         mensagem = response.Message;
+        if (response.Success && response.Data != null)
+        {
+            mensagem = "Usuário cadastrado com sucesso!";
+            SendEmail();
+
+            response = await usuarioService.LoginUsuarioAsync(response.Data);
+            if (response.Success && response.Data != null)
+            {
+                await authService.Login(response.Data);
+                navigationManager.NavigateTo("/");
+            }
+            else
+            {
+                mensagem = response.Message ?? "Erro ao fazer login.";
+                usuario = new Usuario(); // Limpa os campos
+            }
+        }
+        else
+        {
+            mensagem = response.Message ?? "Erro ao cadastrar usuário.";
+        }
+
+        usuario = new Usuario();
+        isProcessing = false;
     }
 
     public void SendEmail()
     {
-        emailService.SendEmail(usuario.Email!, "Bem-vindo ao Preventech", "Seu cadastro foi realizado com sucesso!");
+        emailService.SendEmail(usuario.Email!, "[Preventech] Bem-vindo!", "Seu cadastro foi realizado com sucesso!");
     }
 }

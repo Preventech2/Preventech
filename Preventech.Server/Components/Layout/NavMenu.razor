@@ -8,14 +8,16 @@
 @inject UserClaimsHelper UserClaimsHelper
 @inject IJSRuntime jsr
 <div class="top-row ps-3 navbar navbar-dark">
-    <AuthorizeView>
-        <Authorized>
-            <a class="navbar-brand" href="">@userInfo?.Name</a>
-        </Authorized>
-        <NotAuthorized>
-            <a class="navbar-brand" href="">Usuario</a>
-        </NotAuthorized>
-    </AuthorizeView>
+    <div class="container-fluid">
+        <AuthorizeView>
+            <Authorized>
+                <a class="navbar-brand" href="">@FormatName(userInfo?.Name)</a>
+            </Authorized>
+            <NotAuthorized>
+                <a class="navbar-brand" href="">Usuario</a>
+            </NotAuthorized>
+        </AuthorizeView>
+    </div>
 </div>
 
 <br>
@@ -77,10 +79,15 @@
     private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
 
     protected async Task AtivarModal(int num) {
-
-        jsr.InvokeVoidAsync("console.log", num);
         modal = num;
         StateHasChanged();
+    }
+    private string FormatName(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return "Usuario";
+        string[]? parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return parts[0] + ' ' + (parts.Length > 1 ? parts[^1] : "");
     }
 
     protected override async Task OnInitializedAsync()
