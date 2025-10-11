@@ -2,11 +2,11 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using Preventech.Core.Models
 @using Preventech.Core.Services
-
+@using Preventech.Server.Components.Modals
 @rendermode InteractiveServer
 
 @inject UserClaimsHelper UserClaimsHelper
-
+@inject IJSRuntime jsr
 <div class="top-row ps-3 navbar navbar-dark">
     <AuthorizeView>
         <Authorized>
@@ -32,9 +32,12 @@
     </nav>
     <AuthorizeView>
         <Authorized>
+            @foreach (var item in userInfo.Roles)
+            {
+                <p>@item</p>
+            }
             @* Adicione aqui os links que o usuário autenticado pode ver. *@
             @if (userInfo != null && userInfo.HasRole("VisualizarOrdemServico"))
-
             {
                 <div class="nav-item pad-x">
                     <NavLink class="nav-link" href="/ordens-servico/user">
@@ -42,30 +45,47 @@
                     </NavLink>
                 </div>
             }
-            @if (userInfo != null && userInfo.HasRole("VisualizarLocalizacao"))
+            @if (userInfo != null && userInfo.HasRole("VisualizarLaboratorio"))
             {
                 <div class="nav-item pad-x">
-                    <NavLink class="nav-link" href="/localizacao/cadastrar">
-                    <span class="bi bi-briefcase-fill" aria-hidden="true"></span>Cadastrar Localização
-                    </NavLink>
+                    <button class="nav-link" @onclick="@(_ => AtivarModal(1))">Cadastrar Localização</button>
                 </div>
                 <div class="nav-item pad-x">
-                    <NavLink class="nav-link" href="/localizacao/editar">
-                    <span class="bi bi-briefcase-fill" aria-hidden="true"></span>Editar Localização
-                    </NavLink>
+                    <button class="nav-link" @onclick="@(_ => AtivarModal(2))">Editar Localização</button>
+                </div>
+            }
+            @if (userInfo != null && userInfo.HasRole("EditarEquipamento"))
+            {
+                <div class="nav-item pad-x">
+                    <button class="nav-link" @onclick="@(_ => AtivarModal(3))">Cadastrar Equipamento</button>
                 </div>
             }
         </Authorized>
     </AuthorizeView>
 </div>
-
+<div id="nav-modais">
+    <Preventech.Server.Components.Modals.Localizacoes.Cadastrar Aberto="@(modal == 1)" Resetar=@resetar/>
+    <Preventech.Server.Components.Modals.Localizacoes.Editar    Aberto="@(modal == 2)" Resetar=@resetar/>
+    <Preventech.Server.Components.Modals.Equipamento.Cadastrar  Aberto="@(modal == 3)" Resetar=@resetar/>
+</div>
 @code {
+
+    private async Task resetar() => modal = 0;
+    private int modal = 0;
     private UserInfo? userInfo;
     [CascadingParameter]
     private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
+
+    protected async Task AtivarModal(int num) {
+
+        jsr.InvokeVoidAsync("console.log", num);
+        modal = num;
+        StateHasChanged();
+    }
 
     protected override async Task OnInitializedAsync()
     {
         userInfo = await UserClaimsHelper.GetCurrentUserInfoAsync();
     }
+
 }

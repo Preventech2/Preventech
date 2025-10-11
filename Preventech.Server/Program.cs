@@ -9,6 +9,9 @@ using Preventech.Server;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel;
+using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -82,31 +85,41 @@ builder.Services.AddAuthentication(o =>
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo("/var/local"))
+    .SetApplicationName("preventech")
+    .UseCryptographicAlgorithms(new AuthenticatedEncryptorConfiguration{
+        EncryptionAlgorithm = EncryptionAlgorithm.AES_256_CBC,
+        ValidationAlgorithm = ValidationAlgorithm.HMACSHA512
+    });
+
 builder.Services.AddScoped<OrdemServicoService>();
+
+Uri base_uri = new ("http://localhost:8080/");
 
 builder.Services.AddHttpClient<EquipamentoService>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:8080/");
+    client.BaseAddress = base_uri;
 });
 
 builder.Services.AddHttpClient<UsuarioService>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:8080/");
+    client.BaseAddress = base_uri;
 });
 
 builder.Services.AddHttpClient<OrdemServicoService>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:8080/");
+    client.BaseAddress = base_uri;
 });
 
 builder.Services.AddHttpClient<EmailService>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:8080/");
+    client.BaseAddress = base_uri;
 });
 
 builder.Services.AddHttpClient<LocalizacaoService>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:8080/");
+    client.BaseAddress = base_uri;
 });
 
 var app = builder.Build();

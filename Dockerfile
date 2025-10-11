@@ -16,8 +16,8 @@ COPY ["Preventech.Server/Preventech.Server.csproj", "Preventech.Server/"]
 RUN dotnet restore "Preventech.Server/Preventech.Server.csproj"
 
 COPY Preventech.sln Preventech.sln
-COPY Preventech.Server/ Preventech.Server/
 COPY Preventech.Core/ Preventech.Core/
+COPY Preventech.Server/ Preventech.Server/
 WORKDIR /src/Preventech.Server
 
 RUN dotnet build "Preventech.Server.csproj" -c Release -o /app/build

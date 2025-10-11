@@ -9,8 +9,9 @@
     </div>
 }
 
-<EditForm Model="@usuario" OnValidSubmit="HandleValidSubmit">
+<EditForm Model="@usuario" OnValidSubmit="HandleValidSubmit" FormName="adicionar-perfis">
     <DataAnnotationsValidator />
+    <AntiforgeryToken />
     <ValidationSummary />
 
     <div class="mb-3">
