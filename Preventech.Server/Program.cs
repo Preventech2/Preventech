@@ -140,6 +140,11 @@ builder.Services.AddHttpClient<RelatorioGeneratorService>(client =>
     client.BaseAddress = new Uri("http://localhost:8080/");
 });
 
+builder.Services.AddHttpClient<HabilidadeSistemaService>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:8080/");
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

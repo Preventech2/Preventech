@@ -56,8 +56,6 @@ namespace Preventech.Core.Controllers
                 var existingGrupoPerfil = await _context.GruposPerfis.FindAsync(grupoPerfil.Id);
                 if (existingGrupoPerfil == null)
                 {
-                    Console.WriteLine($"Group not found with ID: {grupoPerfil.Id}");
-
                     return new ApiResponse<GrupoPerfil>
                     {
                         Success = false,
@@ -79,8 +77,6 @@ namespace Preventech.Core.Controllers
                         Data = null
                     };
                 }
-
-                Console.WriteLine($"Editing group: {grupoPerfil.Nome} with permissions: {grupoPerfil.Permissoes}");
 
                 existingGrupoPerfil.Nome = grupoPerfil.Nome;
                 existingGrupoPerfil.Permissoes = grupoPerfil.Permissoes;
