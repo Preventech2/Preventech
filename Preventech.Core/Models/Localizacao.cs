@@ -14,7 +14,7 @@ public class Localizacao
     /// </summary>
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; set; }
+    public int Id { get; set; } = int.MinValue;
 
     /// <summary>
     /// Nome do qual essa localização em específico 
@@ -42,14 +42,20 @@ public class Localizacao
     /// </summary>
     public int Numero { get; set; } = 0;
 
+    /// <summary>
+    /// Técnico responsável pela sala
+    /// </summary>
+    public Usuario? Responsavel { get; set; } = default;
+
     public Localizacao() { }
 
-    public Localizacao(string Apelido, int Campus, int Predio, int Andar, int Numero) {
+    public Localizacao(string Apelido, int Campus, int Predio, int Andar, int Numero, Usuario Responsavel) {
         this.Apelido = Apelido;
         this.Campus = Campus;
         this.Predio = Predio;
         this.Andar = Andar;
         this.Numero = Numero;
+        this.Responsavel = Responsavel;
     } 
     
     public override string ToString() => $"{(Apelido != null ? $"\"{Apelido}\" em " : "")}c{Campus}p{Predio}s{(Numero < 10 ? "0" : "")}{Numero}";
