@@ -94,12 +94,6 @@
         string[]? parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         return parts[0] + ' ' + (parts.Length > 1 ? parts[^1] : "");
     }
-    protected async Task AtivarModal(int num) {
-
-        jsr.InvokeVoidAsync("console.log", num);
-        modal = num;
-        StateHasChanged();
-    }
 
     protected override async Task OnInitializedAsync()
     {

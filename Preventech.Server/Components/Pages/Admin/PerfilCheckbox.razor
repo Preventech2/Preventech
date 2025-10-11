@@ -16,10 +16,10 @@
 
 @code {
     [Parameter, EditorRequired]
-    public GrupoPerfil grupoPerfil { get; set; } = null!;
+    public GrupoPerfil Grupo { get; set; } = null!;
 
     [Parameter, EditorRequired]
-    public EventCallback<GrupoPerfil> grupoPerfilChanged { get; set; }
+    public EventCallback<GrupoPerfil> GrupoChanged { get; set; }
 
     public List<Perfil> perfis { get; set; } = new List<Perfil>();
 
@@ -31,15 +31,15 @@
                        p != Perfil.All)
             .ToList();
 
-        if(grupoPerfil.Permissoes == null)
+        if(Grupo.Permissoes == null)
         {
-            grupoPerfil.Permissoes = Perfil.NenhumaPermissao;
+            Grupo.Permissoes = Perfil.NenhumaPermissao;
         }
     }
 
     private bool IsPermissionSet(Perfil perfil)
     {
-        return (grupoPerfil.Permissoes & perfil) == perfil;
+        return (Grupo.Permissoes & perfil) == perfil;
     }
 
     private async Task TogglePermission(Perfil perfil, bool isChecked)
@@ -47,16 +47,16 @@
         if (isChecked)
         {
             // Adiciona a permissão (OR bitwise)
-            grupoPerfil.Permissoes |= perfil;
+            Grupo.Permissoes |= perfil;
         }
         else
         {
             // Remove a permissão (AND com NOT bitwise)
-            grupoPerfil.Permissoes &= ~perfil;
+            Grupo.Permissoes &= ~perfil;
         }
 
         // Notifica o componente pai sobre a mudança
-        await grupoPerfilChanged.InvokeAsync(grupoPerfil);
+        await GrupoChanged.InvokeAsync(Grupo);
     }
 
     private string GetPermissionDisplayName(Perfil perfil)

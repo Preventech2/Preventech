@@ -20,11 +20,11 @@
     </div>
     <div class="mb-3">
         <label for="perfis" class="form-label">Perfis</label><br />
-        @foreach (Perfil flag in Enum.GetValues(typeof(Perfil)))
+        @foreach (Perfil flag in Enum.GetValues<Perfil>())
         {
             if (flag != Perfil.NenhumaPermissao)
             {
-                <PerfilCheckbox @bind-Value="usuario.Perfil" Flag="flag" />
+                <PerfilCheckbox @bind-Grupo="usuario.Grupo" Flag="flag" />
             }
         }
     </div>
@@ -41,9 +41,9 @@
 
     private async Task HandleValidSubmit()
     {
-        throw new NotImplementedException();
-        
-        @* ApiResponse<Usuario> response = await usuarioService.InviteUsuarioAsync(usuario);
-        mensagem = response.Message; *@
+        // TODO: Implement the submission logic
+        // ApiResponse<Usuario> response = await usuarioService.InviteUsuarioAsync(usuario);
+        // mensagem = response.Message;
+        await Task.CompletedTask;
     }
 }

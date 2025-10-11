@@ -79,7 +79,7 @@
             return;
         }
         tecnicos = from tecnico in restec!.Data
-                   where tecnico.Perfil != null && tecnico.Perfil! != 0
+                   where tecnico.Grupo != null && tecnico.Grupo.Permissoes! != 0
                    select tecnico;
 
         return;
