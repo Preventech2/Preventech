@@ -6,8 +6,10 @@
 @rendermode InteractiveServer
 
 @inject NavigationManager navigationManager
+@inject AuthService authService
+@inject UsuarioService usuarioService
 
-<h3>Login</h3>
+<HeaderTitle Title="Login" />
 
 <MostrarMensagem @bind-Mensagem="@mensagem" />
 
@@ -23,28 +25,32 @@
         <label for="senha" class="form-label">Senha</label>
         <InputText id="senha" type="password" class="form-control" @bind-Value="usuario.Senha" />
     </div>
-    <button type="submit" class="btn btn-primary">Entrar</button>
+    <button type="submit" class="btn btn-primary" disabled="@isProcessing">
+        @if (isProcessing)
+        {
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        }
+        else
+        {
+            <text>Entrar</text>
+        }
+    </button>
     <p><a href="/signup">Não tem uma conta? Cadastre-se</a></p>
 </EditForm>
 
 @code {
     private Usuario usuario = new Usuario();
 
-    [Inject]
-    private UsuarioService usuarioService { get; set; } = null!;
-
-    [Inject]
-    private AuthService authService { get; set; } = null!;
-
     private string mensagem = string.Empty;
     private string viewCpf = string.Empty;
+    private bool isProcessing = false;
 
     private async Task HandleValidSubmit()
     {
+        isProcessing = true;
         ApiResponse<Usuario> response = await usuarioService.LoginUsuarioAsync(usuario);
         if (response.Success && response.Data != null)
         {
-            Console.WriteLine($"Usuario pertence ao grupo: {response.Data.Grupo?.Nome}");
             await authService.Login(response.Data);
         }
         else
@@ -52,5 +58,6 @@
             mensagem = response.Message ?? "Erro ao fazer login.";
             usuario = new Usuario(); // Limpa os campos
         } 
+        isProcessing = false;
     }
 }

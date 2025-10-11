@@ -30,6 +30,7 @@
             </NavLink>
         </div>
     </nav>
+    
     <AuthorizeView>
         <Authorized>
             @* Adicione aqui os links que o usuário autenticado pode ver. *@
@@ -38,11 +39,19 @@
                     <span class="bi bi-briefcase-fill" aria-hidden="true"></span> Minhas OSs
                 </NavLink>
             </div>
-            <div class="nav-item pad-x">
-                <NavLink class="nav-link" href="/admin/painel">
-                    <span class="bi bi-briefcase-fill" aria-hidden="true"></span> Admin
-                </NavLink>
-            </div>
+        </Authorized>
+    </AuthorizeView>
+
+    <AuthorizeView Roles="@PerfilExtension.Admin">
+        <Authorized>
+            @* Adicione aqui os links que o usuário com papel Admin pode ver. *@
+            <nav class="nav flex-column">
+                <div class="nav-item pad-x">
+                    <NavLink class="nav-link" href="/admin/painel" Match="NavLinkMatch.All">
+                        <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Admin
+                    </NavLink>
+                </div>
+            </nav>
         </Authorized>
     </AuthorizeView>
 </div>

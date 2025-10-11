@@ -32,10 +32,14 @@ builder.Services.AddScoped<AuthenticationStateProvider, CookieAuthStateProvider>
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<UserClaimsHelper>();
 
+// Header service para gerenciar títulos das páginas
+builder.Services.AddSingleton<HeaderService>();
+
 builder.Services.AddAuthentication(o =>
 {
     o.DefaultAuthenticateScheme = AuthConstants.CookieName;
-}).AddCookie(AuthConstants.CookieName, o =>
+})
+.AddCookie(AuthConstants.CookieName, o =>
 {
     o.LoginPath = "/login";
     o.LogoutPath = "/logout";

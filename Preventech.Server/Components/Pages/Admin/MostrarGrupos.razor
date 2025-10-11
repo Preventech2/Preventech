@@ -11,7 +11,7 @@
 {
     <QuickGrid TGridItem="GrupoPerfil" Items="@gruposPerfis" Context="item">
         <PropertyColumn Property="@(item => item.Nome)" Title="Nome do Grupo" />
-        <PropertyColumn Property="@(item => GetPermissionDisplayName(item.Permissoes))" Title="Permissões" />
+        <PropertyColumn Property="@(item => PerfilExtension.ToBeautifulString(item.Permissoes ?? Perfil.NenhumaPermissao))" Title="Permissões" />
         <TemplateColumn Title="Ações" Context="item">
             <button @onclick="() => EditarGrupo(item.Nome)">Editar</button>
         </TemplateColumn>

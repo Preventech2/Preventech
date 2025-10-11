@@ -18,7 +18,6 @@
 
     <div class="mb-3">
         <label for="cpf" class="form-label">Cpf</label>
-        @* <InputText id="cpf" type="text" class="form-control" maxlength="14" @bind-Value="viewCpf" @oninput="FormatCpf" /> *@
         <CpfInput id="cpf" @bind-Cpf="usuario.Cpf" />
     </div>
     <div class="mb-3">
@@ -37,7 +36,6 @@
         @if (isProcessing)
         {
             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            <text>Cadastrando...</text>
         }
         else
         {

@@ -4,16 +4,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Preventech.Core.Models;
 
-public class GrupoPerfil
+public class HabilidadeSistema
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
-    [Required]
-    [StringLength(100)]
+    [Key]
     public string? Nome { get; set; }
-
-    [Required]
-    public Perfil? Permissoes { get; set; } = Perfil.NenhumaPermissao;
 }

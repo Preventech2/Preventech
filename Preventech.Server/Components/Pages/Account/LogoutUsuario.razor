@@ -4,15 +4,11 @@
 @rendermode InteractiveServer
 
 @inject NavigationManager navigationManager
+@inject AuthService authService
 
 <PageTitle>Logout</PageTitle>
 
-<h3>LogoutUsuario</h3>
-
 @code {
-    [Inject]
-    private AuthService authService { get; set; } = null!;
-
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)

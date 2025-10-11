@@ -8,7 +8,7 @@
                 checked="@IsPermissionSet(perfil)"
                 @onchange="@((ChangeEventArgs e) => TogglePermission(perfil, (bool)e.Value!))" />
             <label class="form-check-label" for="perfil-@((int)perfil)">
-                @GetPermissionDisplayName(perfil)
+                @PerfilExtension.ToBeautifulString(perfil)
             </label>
         </div>
     }
@@ -57,12 +57,5 @@
 
         // Notifica o componente pai sobre a mudança
         await grupoPerfilChanged.InvokeAsync(grupoPerfil);
-    }
-
-    private string GetPermissionDisplayName(Perfil perfil)
-    {
-        string name = perfil.ToString();
-        // Adiciona espaços antes de letras maiúsculas (exceto a primeira letra)
-        return System.Text.RegularExpressions.Regex.Replace(name, "(\\B[A-Z])", " $1");
     }
 }

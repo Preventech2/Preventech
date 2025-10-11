@@ -7,7 +7,7 @@ article {
 
 a {
     text-decoration: none;
-    width: clamp(150px, 50%, 300px);
+    width: clamp(150px, 50%, 250px);
 }
 
 section {

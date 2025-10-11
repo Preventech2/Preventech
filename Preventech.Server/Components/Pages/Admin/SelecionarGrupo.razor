@@ -2,6 +2,8 @@
 
 @rendermode InteractiveServer
 
+@inject GrupoPerfilService grupoPerfilService
+
 <div class="mb-3">
     <label for="grupo" class="form-label">Grupo</label>
     <InputSelect id="grupo" class="form-control" @bind-Value="selectedValue">
@@ -21,9 +23,6 @@
     public EventCallback<GrupoPerfil> GrupoChanged { get; set; }
 
     public List<GrupoPerfil> gruposPerfis { get; set; } = new List<GrupoPerfil>();
-
-    [Inject]
-    private GrupoPerfilService grupoPerfilService { get; set; } = null!;
 
     private string? selectedValue
     {

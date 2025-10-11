@@ -4,7 +4,7 @@
 
 @inject NavigationManager navigationManager
 
-<PageTitle>Home</PageTitle>
+<HeaderTitle Title="Home" />
 
 <h1>Bem vindo ao Preventech!</h1>
 
@@ -16,10 +16,8 @@
             <li><a href="/cadastrar/equipamento">Cadastrar Equipamento</a></li>
             <li><a href="/equipamentos">Equipamentos</a></li>
             <li><a href="/cadastrar/usuario">Cadastrar Usuário</a></li>
-            <li><a href="/usuarios">Usuários</a></li>
             <li><a href="/cadastrar/ordem-servico">Cadastrar Ordem de Serviço</a></li>
             <li><a href="/ordens-servico">Visualizar Ordens de Serviço</a></li>
-            <li><a href="/enviar-email">Enviar Email</a></li>
         </ul>
     </Authorized>
     <NotAuthorized>
@@ -27,15 +25,8 @@
     </NotAuthorized>
 </AuthorizeView>
 
-<p>
-    <AuthorizeView Roles="VisualizarOrdemDeServico">
-        <Authorized>
-            <!-- Conteúdo permitido -->
-            Top Secret
-        </Authorized>
-        <NotAuthorized>
-            <!-- Conteúdo negado -->
-            Conteudo restrito
-        </NotAuthorized>
-    </AuthorizeView>
-</p>
+<AuthorizeView Roles="@PerfilExtension.VisualizarLaboratorio">
+    <Authorized>
+        <h5>Laboratórios</h5>
+    </Authorized>
+</AuthorizeView>
