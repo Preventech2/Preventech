@@ -1,44 +1,28 @@
-﻿@page "/cadastrar/equipamento"
-@rendermode InteractiveServer
-@inject IJSRuntime jsr
+﻿<EditForm class="modal" style="@(Aberto ? "" : "display: none;")" Model="equipamento" FormName="cadastrar-Equipamento">
+    <button class="fecha-form" @onclick="Recarregar">x</button>
 
-<PageTitle>Cadastrar um equipamento</PageTitle>
-
-<h1>Cadastrar Equipamento</h1>
-@if (!string.IsNullOrEmpty(mensagemResultado))
-{
-    <div class="alert @(sucesso ? "alert-success" : "alert-danger")" role="alert">
-    @mensagemResultado
-</div>
-}
-
-<EditForm Model="equipamento" OnSubmit="FormData" FormName="cadastrar-Equipamento">
-    <label>Nome:
-        <InputText @bind-Value="equipamento!.Nome" class="form-control" />
-    </label>
-    <label>Patrimônio:
-        <InputText @bind-Value="equipamento!.Patrimonio" class="form-control" />
-    </label>
-    <br />
+    <label>Nome:</label>
+    <InputText @bind-Value="equipamento!.Nome" class="form-control" />
+    <label>Patrimônio:</label>
+    <InputText @bind-Value="equipamento!.Patrimonio" class="form-control" />
     @if (locais != null && locais.Any())
     {
         <div class="mb-3">
-            <label>Localização:
-                <InputSelect @bind-Value="localid">
-                    @foreach (var local in locais)
-                    {
-                        <option value="@local!.Id">@local.ToString()</option>
-                    }
-                </InputSelect>
-            </label>
-            <span>Não encontrou o local? <a href="/localizacao/cadastrar" target="_blank">Cadastre-o!</a></span>
+            <label>Localização:</label>
+            <InputSelect @bind-Value="localid">
+                @foreach (var local in locais)
+                {
+                    <option value="@local!.Id">@local.ToString()</option>
+                }
+            </InputSelect>
+            <span>Não encontrou o local? <a href="/cadastrar/localizacao">Cadastre-o!</a></span>
         </div>
     }
     else
     {
         <p><em>Carregando locais</em></p>
     }
-    <button type="submit" class="btn btn-primary" disabled="@isProcessing">
+    <button type="submit" @onclick="FormData" class="btn btn-primary" disabled="@isProcessing" autofocus>
         @if (isProcessing)
         {
             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
@@ -52,6 +36,12 @@
 </EditForm>
 
 @code {
+    [Parameter] 
+    public EventCallback Resetar { get; set; }
+
+    [Parameter]
+    public bool Aberto { get; set; } = false;
+
     [SupplyParameterFromForm]
     private Equipamento? equipamento { get; set; } = null;
 
@@ -91,7 +81,6 @@
 
             var resultado = await equipamentoService.AddEquipamentoAsync(equipamento!);
 
-            await jsr.InvokeVoidAsync("console.log", resultado);
             if (resultado != null && resultado.Success)
             {
                 mensagemResultado = resultado.Message;
@@ -113,5 +102,10 @@
             isProcessing = false;
             StateHasChanged();
         }
+    }
+
+    private async Task Recarregar(EventArgs ev) {
+        Aberto = false;
+        Resetar.InvokeAsync();
     }
 }

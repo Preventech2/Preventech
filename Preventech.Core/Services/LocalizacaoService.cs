@@ -67,7 +67,7 @@ public class LocalizacaoService
         }
     }
 
-    public async Task<ApiResponse<Localizacao>> EditarLocalizacaoAsync(Localizacao loc) {
+    public async Task<ApiResponse<Localizacao>?> EditarLocalizacaoAsync(Localizacao loc) {
         var response = await _httpClient.PatchAsJsonAsync("api/localizacao/", loc);
         if (response.IsSuccessStatusCode)
         {

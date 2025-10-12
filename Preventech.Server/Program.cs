@@ -9,6 +9,9 @@ using Preventech.Server;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel;
+using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,14 +22,7 @@ builder.Services.AddRazorComponents()
 // Add API controller support
 builder.Services.AddControllers();
 
-// Configure HTTPS redirection
-//builder.Services.AddHttpsRedirection(options =>
-//{
-//    options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
-//    options.HttpsPort = 7111; // Porta HTTPS definida para suprimir o aviso de segurança
-//});
 
-// authorization and authentication services
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<AuthenticationStateProvider, CookieAuthStateProvider>();
 builder.Services.AddScoped<AuthService>();
@@ -93,20 +89,32 @@ builder.Services.AddAuthentication(o =>
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo("/var/local"))
+    .SetApplicationName("preventech")
+    .UseCryptographicAlgorithms(new AuthenticatedEncryptorConfiguration{
+        EncryptionAlgorithm = EncryptionAlgorithm.AES_256_CBC,
+        ValidationAlgorithm = ValidationAlgorithm.HMACSHA512
+    });
+
+builder.Services.AddScoped<OrdemServicoService>();
+
+Uri base_uri = new ("http://localhost:8080/");
+
 builder.Services.AddHttpClient<EquipamentoService>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:8080/");
+    client.BaseAddress = base_uri;
 });
 
 builder.Services.AddHttpClient<UsuarioService>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:8080/");
+    client.BaseAddress = base_uri;
 });
 
 builder.Services.AddScoped<OrdemServicoService>();
 builder.Services.AddHttpClient<OrdemServicoService>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:8080/");
+    client.BaseAddress = base_uri;
 });
 
 builder.Services.AddHttpClient<LocalizacaoService>(client =>
@@ -121,12 +129,12 @@ builder.Services.AddHttpClient<GrupoPerfilService>(client =>
 
 builder.Services.AddHttpClient<EmailService>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:8080/");
+    client.BaseAddress = base_uri;
 });
 
 builder.Services.AddHttpClient<LocalizacaoService>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:8080/");
+    client.BaseAddress = base_uri;
 });
 
 builder.Services.AddScoped<DocumentoService>();
@@ -176,6 +184,7 @@ app.Use(async (context, next) =>
 
     if (path.EndsWith(".css") || path.EndsWith(".js") || path.EndsWith(".png"))
     {
+        Console.WriteLine($"Fazendo cache do arquivo \"{path}\"");
         var tempo = 7 * 24 * 60 * 60;
         context.Response.Headers.Append("Cache-Control", $"max-age={tempo}");
     }
