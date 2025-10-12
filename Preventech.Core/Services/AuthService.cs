@@ -5,25 +5,21 @@ using Preventech.Core.Models;
 
 namespace Preventech.Core.Services;
 
-public class AuthService
+public class AuthService(IJSRuntime jsRuntime)
 {
-    private readonly IJSRuntime _jsRuntime;
-
-    public AuthService(IJSRuntime jsRuntime)
+    private readonly IJSRuntime _jsRuntime = jsRuntime;
+    private readonly JsonSerializerOptions _jsonOptions = new()
     {
-        _jsRuntime = jsRuntime;
-    }
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = false
+    };
 
     public async Task<bool> Login(Usuario usuario)
     {
         try
         {
             // Serializa o usuário completo automaticamente
-            var usuarioJson = JsonSerializer.Serialize(usuario, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                WriteIndented = false
-            });
+            var usuarioJson = JsonSerializer.Serialize(usuario, _jsonOptions);
             
             var jsCode = $@"
                 (async () => {{

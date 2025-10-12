@@ -1,8 +1,11 @@
-<InputText id="@id" type="text" class="form-control" maxlength="14" @bind-Value="CpfView" @oninput="FormatCpf" />
+<InputText id="@id" Disabled="@Disabled" type="text" class="form-control" maxlength="14" @bind-Value="CpfView" @oninput="FormatCpf" />
 
 @code {
     [Parameter]
     public string id { get; set; } = String.Empty;
+
+    [Parameter]
+    public bool Disabled { get; set; } = false;
 
     [Parameter, EditorRequired]
     public string Cpf { get; set; } = String.Empty;
@@ -18,7 +21,6 @@
         
         if (digits.Length > 11) {
             digits = digits.Substring(0, 11);
-            Console.WriteLine("CPF com 11 dígitos atingido:" + digits);
         }
 
         // change the bound Cpf value
@@ -34,5 +36,11 @@
 
         // update the view value
         CpfView = digits;
+    }
+
+    protected override void OnInitialized()
+    {
+        // Ensure CpfView is in sync with Cpf when parameters are set
+        FormatCpf(new ChangeEventArgs { Value = Cpf });
     }
 }

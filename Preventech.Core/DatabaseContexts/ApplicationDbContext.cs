@@ -20,6 +20,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Preditiva> Preditivas { get; set; }
     public DbSet<DocumentoAnexado> DocumentosAnexados { get; set; }
     public DbSet<HabilidadeSistema> HabilidadesSistema { get; set; }
+    public DbSet<Habilidade> Habilidades { get; set; }
 
 
     //public DbSet<Peca> Pecas { get; set; }

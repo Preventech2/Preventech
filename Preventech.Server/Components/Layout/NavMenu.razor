@@ -11,7 +11,7 @@
     <div class="container-fluid">
         <AuthorizeView>
             <Authorized>
-                <a class="navbar-brand" href="">@FormatName(userInfo?.Name)</a>
+                <a class="navbar-brand" href="meu-perfil">@userInfo?.DisplayName()</a>
             </Authorized>
             <NotAuthorized>
                 <a class="navbar-brand" href="">Usuario</a>
@@ -62,14 +62,6 @@
 
     [CascadingParameter]
     private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
-
-    private string FormatName(string? name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-            return "Usuario";
-        string[]? parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        return parts[0] + ' ' + (parts.Length > 1 ? parts[^1] : "");
-    }
 
     protected override async Task OnInitializedAsync()
     {

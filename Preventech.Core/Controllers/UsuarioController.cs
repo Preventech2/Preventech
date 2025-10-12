@@ -147,7 +147,7 @@ namespace Preventech.Core.Controllers
         [HttpPost]
         public async Task<ApiResponse<Usuario>> GetUsuarioByCpf([FromBody] Usuario usuario)
         {
-            if (usuario == null || string.IsNullOrEmpty(usuario.Cpf))
+            if (usuario == null || string.IsNullOrWhiteSpace(usuario.Cpf))
             {
                 return new ApiResponse<Usuario>
                 {
@@ -195,7 +195,7 @@ namespace Preventech.Core.Controllers
         [HttpPost("add-grupo")]
         public async Task<ApiResponse<Usuario>> AddGrupoInUsuario([FromBody] Usuario usuario)
         {
-            if (usuario == null || string.IsNullOrEmpty(usuario.Cpf))
+            if (usuario == null || string.IsNullOrWhiteSpace(usuario.Cpf))
             {
                 return new ApiResponse<Usuario>
                 {
@@ -224,7 +224,7 @@ namespace Preventech.Core.Controllers
                 }
 
                 // Se nenhum grupo foi fornecido ou o grupo é vazio, remove a associação
-                if (usuario.Grupo == null || string.IsNullOrEmpty(usuario.Grupo.Nome))
+                if (usuario.Grupo == null || string.IsNullOrWhiteSpace(usuario.Grupo.Nome))
                 {
                     usuarioExistente.Grupo = null;
                 }
@@ -264,7 +264,6 @@ namespace Preventech.Core.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erro ao modificar grupo do usuário: {ex.Message}");
                 return new ApiResponse<Usuario>
                 {
                     Success = false,
@@ -290,7 +289,7 @@ namespace Preventech.Core.Controllers
             try
             {
                 // Se um grupo foi fornecido, busca o grupo existente
-                if (usuario.Grupo != null && !string.IsNullOrEmpty(usuario.Grupo.Nome))
+                if (usuario.Grupo != null && !string.IsNullOrWhiteSpace(usuario.Grupo.Nome))
                 {
                     var grupoExistente = await _context.GruposPerfis
                         .Where(g => g.Nome == usuario.Grupo.Nome)

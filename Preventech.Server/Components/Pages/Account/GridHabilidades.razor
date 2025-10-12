@@ -1,0 +1,25 @@
+﻿@using Microsoft.AspNetCore.Components.QuickGrid
+@using Preventech.Core.Models
+@rendermode InteractiveServer
+
+<section>
+    <QuickGrid Items="@habilidades.AsQueryable()" TGridItem="Habilidade">
+        <PropertyColumn Title="Categoria" Property="@(item => item.Categoria!.Nome)" />
+        <PropertyColumn Title="Descricao" Property="@(item => item.Descricao)" />
+    </QuickGrid>
+    <button @onclick="AdicionarHabilidade">Adicionar Habilidade</button>
+</section>
+
+@code {
+    private List<Habilidade> habilidades = new List<Habilidade>
+    {
+        new Habilidade { Categoria = new HabilidadeSistema { Nome = "Categoria 1" }, Descricao = "Descrição 1" },
+        new Habilidade { Categoria = new HabilidadeSistema { Nome = "Categoria 2" }, Descricao = "Descrição 2" },
+        new Habilidade { Categoria = new HabilidadeSistema { Nome = "Categoria 3" }, Descricao = "Descrição 3" }
+    };
+    
+    private void AdicionarHabilidade(MouseEventArgs args)
+    {
+        throw new NotImplementedException();
+    }
+}

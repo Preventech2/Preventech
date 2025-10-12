@@ -1,0 +1,62 @@
+﻿@rendermode InteractiveServer
+
+@inject UserClaimsHelper UserClaimsHelper
+@inject UsuarioService UsuarioService
+
+@if (IsAuthenticated)
+{
+    <EditForm Model="usuario" OnInvalidSubmit="OnValidSubmitHandler">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label for="cpf" class="form-label">CPF</label>
+            <CpfInput id="cpf" @bind-Cpf="usuario.Cpf" Disabled="@IsDisabled" />
+        </div>
+        <div class="mb-3">
+            <label for="nome" class="form-label">Nome</label>
+            <InputText id="nome" class="form-control" @bind-Value="usuario.Nome" Disabled="@IsDisabled" />
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <InputText id="email" class="form-control" @bind-Value="usuario.Email" Disabled="@IsDisabled" />
+        </div>
+        <div class="mb-3">
+            <label for="grupo" class="form-label">Grupo</label>
+            <InputText id="grupo" class="form-control" @bind-Value="usuario.Grupo!.Nome" Disabled="@IsDisabled" />
+        </div>
+    </EditForm>
+}
+else
+{
+    <p><em>Carregando informações do usuário...</em></p>
+}
+
+@code {
+    private Usuario usuario = new Usuario();
+    private bool IsAuthenticated = false;
+    private bool IsDisabled = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        UserInfo? userInfo = await UserClaimsHelper.GetCurrentUserInfoAsync();
+
+        if (userInfo != null)
+        {
+            usuario.Cpf = userInfo.Cpf;
+            usuario.Nome = userInfo.Nome;
+            usuario.Email = userInfo.Email;
+            usuario.Grupo = new GrupoPerfil { Nome = userInfo.Grupo };
+            IsAuthenticated = userInfo.IsAuthenticated;
+        }
+        else
+        {
+            IsAuthenticated = false;
+        }
+    }
+    
+    private void OnValidSubmitHandler(EditContext args)
+    {
+        throw new NotImplementedException();
+    }
+}

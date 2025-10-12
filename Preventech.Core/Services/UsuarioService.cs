@@ -25,7 +25,6 @@ public class UsuarioService(HttpClient httpClient, ILogger<UsuarioService> logge
         var response = await _httpClient.PostAsJsonAsync("api/usuarios/add-grupo", usuario);
         var result = await response.Content.ReadFromJsonAsync<ApiResponse<Usuario>>()
         ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<Usuario> while adding group.");
-        Console.WriteLine($"Response Message: {result.ToString()}");
         return result;
     }
 

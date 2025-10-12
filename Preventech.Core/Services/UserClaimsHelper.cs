@@ -3,14 +3,9 @@ using Microsoft.AspNetCore.Components.Authorization;
 
 namespace Preventech.Core.Services;
 
-public class UserClaimsHelper
+public class UserClaimsHelper(AuthenticationStateProvider authStateProvider)
 {
-    private readonly AuthenticationStateProvider _authStateProvider;
-
-    public UserClaimsHelper(AuthenticationStateProvider authStateProvider)
-    {
-        _authStateProvider = authStateProvider;
-    }
+    private readonly AuthenticationStateProvider _authStateProvider = authStateProvider;
 
     /// <summary>
     /// Gets the current user's information from claims
@@ -25,7 +20,7 @@ public class UserClaimsHelper
         {
             return null;
         }
-
+       
         return ExtractUserInfoFromClaims(user);
     }
 
@@ -43,6 +38,12 @@ public class UserClaimsHelper
         var cpf = user.Claims.FirstOrDefault(c => c.Type == "Cpf")?.Value
             ?? string.Empty;
 
+        var email = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value
+            ?? string.Empty;
+
+        var grupo = user.Claims.FirstOrDefault(c => c.Type == "Grupo")?.Value
+            ?? string.Empty;
+
         var idClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
         var userId = !string.IsNullOrEmpty(idClaim) && int.TryParse(idClaim, out var id) ? id : 0;
 
@@ -54,8 +55,10 @@ public class UserClaimsHelper
         return new UserInfo
         {
             Id = userId,
-            Name = name,
             Cpf = cpf,
+            Nome = name,
+            Email = email,
+            Grupo = grupo,
             Roles = roles,
             IsAuthenticated = user.Identity?.IsAuthenticated ?? false
         };
@@ -78,9 +81,11 @@ public class UserClaimsHelper
 public class UserInfo
 {
     public int Id { get; set; }
-    public string Name { get; set; } = string.Empty;
     public string Cpf { get; set; } = string.Empty;
-    public List<string> Roles { get; set; } = new();
+    public string Nome { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Grupo { get; set; } = string.Empty;
+    public List<string> Roles { get; set; } = [];
     public bool IsAuthenticated { get; set; }
 
     /// <summary>
@@ -95,7 +100,15 @@ public class UserInfo
     }
 
     /// <summary>
-    /// Gets a display name for the user (Name or "Usuário" if empty)
+    /// Gets a display name for the user (Nome or "Usuário" if empty)
     /// </summary>
-    public string DisplayName => !string.IsNullOrEmpty(Name) ? Name : "Usuário";
+    public string DisplayName()
+    {
+        if (string.IsNullOrWhiteSpace(Nome))
+            return "Usuario";
+
+        // Mostra primeiro e último nome
+        string[]? parts = Nome.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return parts[0] + ' ' + (parts.Length > 1 ? parts[^1] : "");
+    }
 }

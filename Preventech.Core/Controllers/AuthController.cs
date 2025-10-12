@@ -24,9 +24,11 @@ namespace Preventech.Core.Controllers
             var perfil = usuario.Grupo?.Permissoes ?? Perfil.NenhumaPermissao;
             var identity = new ClaimsIdentity(AuthConstants.CookieName);
 
-            identity.AddClaim(new Claim(ClaimTypes.Name, usuario.Nome ?? String.Empty));
-            identity.AddClaim(new Claim("Cpf", usuario.Cpf ?? String.Empty));
-            identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString() ?? String.Empty));
+            identity.AddClaim(new Claim(ClaimTypes.Name, usuario.Nome ?? string.Empty));
+            identity.AddClaim(new Claim("Cpf", usuario.Cpf ?? string.Empty));
+            identity.AddClaim(new Claim(ClaimTypes.Email, usuario.Email ?? string.Empty));
+            identity.AddClaim(new Claim("Grupo", usuario.Grupo?.Nome ?? string.Empty));
+            identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString() ?? string.Empty));
 
             foreach (var flag in Enum.GetValues<Perfil>())
             {

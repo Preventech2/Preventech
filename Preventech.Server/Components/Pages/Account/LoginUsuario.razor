@@ -52,6 +52,7 @@
         if (response.Success && response.Data != null)
         {
             await authService.Login(response.Data);
+            navigationManager.NavigateTo("/");
         }
         else
         {

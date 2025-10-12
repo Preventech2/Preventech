@@ -8,9 +8,9 @@
 {
     <div class="card">
         <div class="card-body">
-            <h5 class="card-title">Welcome, @userInfo.DisplayName!</h5>
+            <h5 class="card-title">Welcome, @userInfo.DisplayName()!</h5>
             <p class="card-text">
-                <strong>Name:</strong> @userInfo.Name<br>
+                <strong>Name:</strong> @userInfo.Nome<br>
                 <strong>CPF:</strong> @userInfo.Cpf<br>
                 <strong>Roles:</strong> @string.Join(", ", userInfo.Roles)
             </p>

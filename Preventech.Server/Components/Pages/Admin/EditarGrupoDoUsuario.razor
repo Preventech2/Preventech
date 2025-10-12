@@ -99,7 +99,6 @@ else
 
     private async Task EditarGrupo()
     {
-        Console.WriteLine("Começando a editar grupo");
         ApiResponse<Usuario> response = await usuarioService.AddGrupoInUsuarioAsync(usuario);
         if (response.Success)
         {
@@ -111,7 +110,6 @@ else
         {
             mensagem = response.Message;
         }
-        Console.WriteLine($"retornado: {response.Message}");
     }
 
     private void Cancelar()
