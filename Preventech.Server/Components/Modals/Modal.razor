@@ -1,0 +1,28 @@
+﻿@rendermode InteractiveServer
+
+<main class="@(IsActive ? "modal-opened" : "modal-closed")">
+    <section class="modal-section">
+        <span class="modal-close" @onclick="CloseModal">&times;</span>
+        <div class="modal-content">
+            @ChildContent
+        </div>
+    </section>
+</main>
+
+@code {
+    [Parameter]
+    public bool IsActive { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsActiveChanged { get; set; }
+
+    @* Recebe um Edit form ou outros conteudos que podem ser colocados no Modal *@
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private async Task CloseModal()
+    {
+        IsActive = false;
+        await IsActiveChanged.InvokeAsync(IsActive);
+    }
+}

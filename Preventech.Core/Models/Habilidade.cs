@@ -11,9 +11,12 @@ public class Habilidade
     public int Id { get; set; }
 
     [Required]
-    public HabilidadeSistema? Categoria { get; set; }
+    public HabilidadeSistema? Categoria { get; set; } = new HabilidadeSistema();
+
+    [Required]
+    public Usuario? Usuario { get; set; } = new Usuario();
 
     [Required]
     [MaxLength(200)]
-    public string? Descricao { get; set; }
+    public string? Descricao { get; set; } = string.Empty;
 }

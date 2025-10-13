@@ -25,10 +25,37 @@ namespace Preventech.Core.Controllers
             };
         }
 
+        [HttpGet("{id}")]
+        public async Task<ApiResponse<Habilidade>> GetById(int id)
+        {
+            var habilidade = await _context.Habilidades
+                .Include(h => h.Categoria) // Inclui a navegação para Categoria
+                .FirstOrDefaultAsync(h => h.Id == id);
+
+            if (habilidade == null)
+            {
+                return new ApiResponse<Habilidade>
+                {
+                    Success = false,
+                    Message = "Habilidade não encontrada",
+                    Data = null
+                };
+            }
+
+            return new ApiResponse<Habilidade>
+            {
+                Success = true,
+                Message = "Habilidade recuperada com sucesso",
+                Data = habilidade
+            };
+        }
+
         [HttpPost("cadastro")]
         public async Task<ApiResponse<Habilidade>> AddHabilidade([FromBody] Habilidade habilidade)
         {
             if (habilidade.Categoria == null 
+                || habilidade.Usuario == null
+                || string.IsNullOrWhiteSpace(habilidade.Usuario.Cpf)
                 || string.IsNullOrWhiteSpace(habilidade.Categoria.Nome)
                 || string.IsNullOrWhiteSpace(habilidade.Descricao))
             {
@@ -42,6 +69,32 @@ namespace Preventech.Core.Controllers
 
             try
             {
+                // Buscando a categoria pelo ID para garantir que ela existe
+                var categoria = await _context.HabilidadesSistema.FindAsync(habilidade.Categoria.Id);
+                if (categoria == null)
+                {
+                    return new ApiResponse<Habilidade>
+                    {
+                        Success = false,
+                        Message = "Categoria não encontrada",
+                        Data = null
+                    };
+                }
+
+                var usuario = await _context.Usuarios
+                    .FirstOrDefaultAsync(u => u.Cpf == habilidade.Usuario.Cpf);
+                if (usuario == null)
+                {
+                    return new ApiResponse<Habilidade>
+                    {
+                        Success = false,
+                        Message = "Usuário não encontrado",
+                        Data = null
+                    };
+                }
+
+                habilidade.Categoria = categoria;
+                habilidade.Usuario = usuario;
                 _context.Habilidades.Add(habilidade);
                 await _context.SaveChangesAsync();
 

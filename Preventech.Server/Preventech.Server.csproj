@@ -25,4 +25,9 @@
   <ItemGroup>
     <ProjectReference Include="..\Preventech.Core\Preventech.Core.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Components\Modals\HabilidadeSistema\" />
+    <Folder Include="Components\Modals\Habilidade\" />
+  </ItemGroup>
 </Project>

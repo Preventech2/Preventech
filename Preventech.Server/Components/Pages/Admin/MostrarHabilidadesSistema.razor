@@ -1,0 +1,84 @@
+@page "/admin/habilidades-sistema"
+
+@rendermode InteractiveServer
+
+@inject HabilidadeSistemaService habilidadeSistemaService
+
+<HeaderTitle Title="Habilidades do Sistema" />
+
+<PageSection>
+    <section class="header-section">
+        <h2>Habilidades do Sistema</h2>
+        <button @onclick="AdicionarHabilidadeSistema">Adicionar</button>
+    </section>
+    <section class="body-section">
+        @if (habilidades?.Any() == true) 
+        {
+            <QuickGrid TGridItem="HabilidadeSistema" Items="@habilidades" Context="item">
+                <PropertyColumn Property="@(item => item.Nome)" Title="Nome da Habilidade" />
+                <TemplateColumn Title="Ações" Context="item">
+                    <button @onclick="() => EditarHabilidadeSistema(item.Id)">Editar</button>
+                </TemplateColumn>
+            </QuickGrid>
+        } 
+        else if (habilidades != null) 
+        {
+            <div>
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <p><em>Carregando...</em></p>
+            </div>
+        }
+        else
+        {
+            <p>Nenhuma habilidade do sistema encontrada. Tente cadastrar algumas.</p>
+        }
+    </section>
+</PageSection>
+
+<ModalAdicionarHabilidadeSistema IsActive="@IsAddModalActive" OnHabilidadeAdicionada="OnHabilidadeAdicionada" />
+<ModalEditarHabilidadeSistema IsActive="@IsEditModalActive" @bind-HabilidadeId="@habilidadeEdicaoId" OnHabilidadeEditada="OnHabilidadeEditada" />
+
+@code {
+    IQueryable<HabilidadeSistema>? habilidades = new List<HabilidadeSistema>().AsQueryable();
+    private bool IsAddModalActive { get; set; } = false;
+    private bool IsEditModalActive { get; set; } = false;
+    private int habilidadeEdicaoId { get; set; } = 0;
+
+    public void EditarHabilidadeSistema(int id)
+    {
+        if (id <= 0 || IsAddModalActive) return;
+
+        habilidadeEdicaoId = id;
+        IsEditModalActive = true;
+    }
+
+    public async Task OnHabilidadeEditada()
+    {
+        IsEditModalActive = false;
+        await UpdateGrid();
+    }
+
+    public void AdicionarHabilidadeSistema(MouseEventArgs e)
+    {
+        if (IsEditModalActive) return;
+
+        IsAddModalActive = true;
+    }
+
+    public async Task OnHabilidadeAdicionada()
+    {
+        IsAddModalActive = false;
+        await UpdateGrid();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await UpdateGrid();
+    }
+
+    public async Task UpdateGrid()
+    {
+        ApiResponse<List<HabilidadeSistema>> response = await habilidadeSistemaService.GetAllHabilidadesAsync();
+        habilidades = response.Data?.AsQueryable().Any() == true ? response.Data.AsQueryable() : null;
+    }
+}

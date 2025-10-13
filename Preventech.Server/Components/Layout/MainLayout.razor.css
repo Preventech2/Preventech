@@ -119,12 +119,12 @@ main {
 }
 
 .pad-x {
-    padding-left: 1rem;
-    padding-right: 1rem;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
 }
 
 .content {
     background-color: #D7E4EF;
-    width: 100%;
+    width: auto;
     height: auto;
 }

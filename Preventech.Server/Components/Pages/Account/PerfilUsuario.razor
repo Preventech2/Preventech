@@ -4,8 +4,60 @@
 
 <EditFormUser />
 
-<GridHabilidades />
+<PageSection>
+    <section class="header-section">
+        <h2>Habilidades</h2>
+        <button @onclick="AdicionarHabilidade">Adicionar</button>
+    </section>
+    <section class="body-section">
+        <GridHabilidades @bind-NeedUpdate="GridHabilidadesNeedUpdate" />
+    </section>
+</PageSection>
+
+<ModalAdicionarHabilidade IsActive="@IsAddModalActive" OnHabilidadeAdicionada="OnHabilidadeAdicionada" />
+<ModalAdicionarHabilidade IsActive="@IsEditModalActive" @bind-HabilidadeId="@habilidadeEdicaoId" OnHabilidadeEditada="OnHabilidadeEditada" />
 
 @code {
+    private bool IsAddModalActive { get; set; } = false;
+    private bool IsEditModalActive { get; set; } = false;
+    private int habilidadeEdicaoId { get; set; } = 0;
+    private bool GridHabilidadesNeedUpdate { get; set; } = false;
 
+    public void EditarHabilidade(int id)
+    {
+        if (id <= 0 || IsAddModalActive) return;
+
+        habilidadeEdicaoId = id;
+        IsEditModalActive = true;
+    }
+
+    public async Task OnHabilidadeEditada()
+    {
+        IsEditModalActive = false;
+        await UpdateGrid();
+    }
+
+    public void AdicionarHabilidade(MouseEventArgs e)
+    {
+        if (IsEditModalActive) return;
+
+        IsAddModalActive = true;
+    }
+
+    public async Task OnHabilidadeAdicionada()
+    {
+        IsAddModalActive = false;
+        await UpdateGrid();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await UpdateGrid();
+    }
+
+    public async Task UpdateGrid()
+    {
+        GridHabilidadesNeedUpdate = true;
+        StateHasChanged();
+    }
 }

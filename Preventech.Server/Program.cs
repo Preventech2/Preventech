@@ -97,9 +97,9 @@ builder.Services.AddDataProtection()
         ValidationAlgorithm = ValidationAlgorithm.HMACSHA512
     });
 
-builder.Services.AddScoped<OrdemServicoService>();
-
 Uri base_uri = new ("http://localhost:8080/");
+
+builder.Services.AddScoped<OrdemServicoService>();
 
 builder.Services.AddHttpClient<EquipamentoService>(client =>
 {
@@ -119,12 +119,12 @@ builder.Services.AddHttpClient<OrdemServicoService>(client =>
 
 builder.Services.AddHttpClient<LocalizacaoService>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:8080/");
+    client.BaseAddress = base_uri;
 });
 
 builder.Services.AddHttpClient<GrupoPerfilService>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:8080/");
+    client.BaseAddress = base_uri;
 });
 
 builder.Services.AddHttpClient<EmailService>(client =>
@@ -140,17 +140,22 @@ builder.Services.AddHttpClient<LocalizacaoService>(client =>
 builder.Services.AddScoped<DocumentoService>();
 builder.Services.AddHttpClient<DocumentoService>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:8080/");
+    client.BaseAddress = base_uri;
 });
 
 builder.Services.AddHttpClient<RelatorioGeneratorService>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:8080/");
+    client.BaseAddress = base_uri;
 });
 
 builder.Services.AddHttpClient<HabilidadeSistemaService>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:8080/");
+    client.BaseAddress = base_uri;
+});
+
+builder.Services.AddHttpClient<HabilidadeService>(client =>
+{
+    client.BaseAddress = base_uri;
 });
 
 var app = builder.Build();

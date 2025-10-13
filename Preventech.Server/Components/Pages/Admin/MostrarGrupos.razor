@@ -5,7 +5,7 @@
 @inject GrupoPerfilService grupoPerfilService
 @inject NavigationManager navigationManager
 
-<h3>Grupos</h3> 
+<HeaderTitle Title="Grupos" />
 
 @if (gruposPerfis.Any()) 
 {
@@ -24,10 +24,10 @@
 } 
 else 
 {
-    <section>
+    <div>
         <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
         <p><em>Cadastrando...</em></p>
-    </section>
+    </div>
 }
 
 @code {

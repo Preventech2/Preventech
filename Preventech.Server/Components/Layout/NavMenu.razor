@@ -35,10 +35,6 @@
     
     <AuthorizeView>
         <Authorized>
-            @foreach (var item in userInfo.Roles)
-            {
-                <p>@item</p>
-            }
             @* Adicione aqui os links que o usuário autenticado pode ver. *@
         </Authorized>
     </AuthorizeView>
@@ -53,37 +49,51 @@
                     </NavLink>
                 </div>
             </nav>
-            @if (userInfo != null && userInfo.HasRole("VisualizarOrdemServico"))
-            {
+        </Authorized>
+    </AuthorizeView>
+
+    <AuthorizeView Roles="@PerfilExtension.VisualizarOrdemDeServico">
+        <Authorized>
+            <nav class="nav flex-column">
                 <div class="nav-item pad-x">
                     <NavLink class="nav-link" href="/ordens-servico/user">
                         <span class="bi bi-briefcase-fill" aria-hidden="true"></span> Minhas OSs
                     </NavLink>
                 </div>
-            }
-            @if (userInfo != null && userInfo.HasRole("VisualizarLaboratorio"))
-            {
+            </nav>
+        </Authorized>
+    </AuthorizeView>
+
+    <AuthorizeView Roles="@PerfilExtension.VisualizarOrdemDeServico">
+        <Authorized>
+            <nav class="nav flex-column">
                 <div class="nav-item pad-x">
                     <button class="nav-link" @onclick="@(_ => AtivarModal(1))">Cadastrar Localização</button>
                 </div>
                 <div class="nav-item pad-x">
                     <button class="nav-link" @onclick="@(_ => AtivarModal(2))">Editar Localização</button>
                 </div>
-            }
-            @if (userInfo != null && userInfo.HasRole("EditarEquipamento"))
-            {
+            </nav>
+        </Authorized>
+    </AuthorizeView>
+
+    <AuthorizeView Roles="@PerfilExtension.VisualizarOrdemDeServico">
+        <Authorized>
+            <nav class="nav flex-column">
                 <div class="nav-item pad-x">
                     <button class="nav-link" @onclick="@(_ => AtivarModal(3))">Cadastrar Equipamento</button>
                 </div>
-            }
+            </nav>
         </Authorized>
     </AuthorizeView>
 </div>
+
 <div id="nav-modais">
     <Preventech.Server.Components.Modals.Localizacoes.Cadastrar Aberto="@(modal == 1)" Resetar=@resetar/>
     <Preventech.Server.Components.Modals.Localizacoes.Editar    Aberto="@(modal == 2)" Resetar=@resetar/>
     <Preventech.Server.Components.Modals.Equipamento.Cadastrar  Aberto="@(modal == 3)" Resetar=@resetar/>
 </div>
+
 @code {
 
     private async Task resetar() => modal = 0;
@@ -95,13 +105,6 @@
     protected async Task AtivarModal(int num) {
         modal = num;
         StateHasChanged();
-    }
-    private string FormatName(string? name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-            return "Usuario";
-        string[]? parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        return parts[0] + ' ' + (parts.Length > 1 ? parts[^1] : "");
     }
 
     protected override async Task OnInitializedAsync()

@@ -17,11 +17,19 @@ public class HabilidadeSistemaService(HttpClient httpClient)
         return result;
     }
 
-    public async Task<ApiResponse<List<HabilidadeSistema>>> AddHabilidadeSistemaAsync(HabilidadeSistema habilidade)
+    public async Task<ApiResponse<HabilidadeSistema>> GetHabilidadeByIdAsync(int id)
+    {
+        var response = await _httpClient.GetAsync($"api/habilidades-sistema/{id}");
+        var result = await response.Content.ReadFromJsonAsync<ApiResponse<HabilidadeSistema>>()
+        ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<HabilidadeSistema>.");
+        return result;
+    }
+
+    public async Task<ApiResponse<HabilidadeSistema>> AddHabilidadeSistemaAsync(HabilidadeSistema habilidade)
     {
         var response = await _httpClient.PostAsJsonAsync("api/habilidades-sistema/cadastro", habilidade);
-        var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<HabilidadeSistema>>>()
-        ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<List<HabilidadeSistema>>.");
+        var result = await response.Content.ReadFromJsonAsync<ApiResponse<HabilidadeSistema>>()
+        ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<HabilidadeSistema>.");
         return result;
     }
 

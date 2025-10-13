@@ -25,6 +25,28 @@ namespace Preventech.Core.Controllers
             };
         }
 
+        [HttpGet("{id}")]
+        public async Task<ApiResponse<HabilidadeSistema>> GetById(int id)
+        {
+            var habilidade = await _context.HabilidadesSistema.FindAsync(id);
+            if (habilidade == null)
+            {
+                return new ApiResponse<HabilidadeSistema>
+                {
+                    Success = false,
+                    Message = "Habilidade não encontrada",
+                    Data = null
+                };
+            }
+
+            return new ApiResponse<HabilidadeSistema>
+            {
+                Success = true,
+                Message = "Habilidade recuperada com sucesso",
+                Data = habilidade
+            };
+        }
+
         [HttpPost("cadastro")]
         public async Task<ApiResponse<HabilidadeSistema>> AddHabilidadeSistema([FromBody] HabilidadeSistema habilidade)
         {

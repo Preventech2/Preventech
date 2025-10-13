@@ -1,0 +1,14 @@
+.page-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: auto;
+    width: 100%;
+    border-radius: 7.5px;
+    background-color: var(--branco);
+}
+
+.page-section {
+    width: 100%;
+    padding: 10px;
+}
