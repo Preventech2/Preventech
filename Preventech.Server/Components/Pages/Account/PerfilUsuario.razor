@@ -1,5 +1,9 @@
 ﻿@page "/meu-perfil"
 
+@attribute [Authorize]
+
+@rendermode InteractiveServer
+
 <HeaderTitle Title="Meu Perfil" />
 
 <EditFormUser />
@@ -10,12 +14,12 @@
         <button @onclick="AdicionarHabilidade">Adicionar</button>
     </section>
     <section class="body-section">
-        <GridHabilidades @bind-NeedUpdate="GridHabilidadesNeedUpdate" />
+        <GridHabilidades EditarHabilidade="@EditarHabilidade" @bind-NeedUpdate="GridHabilidadesNeedUpdate" />
     </section>
 </PageSection>
 
 <ModalAdicionarHabilidade IsActive="@IsAddModalActive" OnHabilidadeAdicionada="OnHabilidadeAdicionada" />
-<ModalAdicionarHabilidade IsActive="@IsEditModalActive" @bind-HabilidadeId="@habilidadeEdicaoId" OnHabilidadeEditada="OnHabilidadeEditada" />
+<ModalEditarHabilidade IsActive="@IsEditModalActive" @bind-HabilidadeId="@habilidadeEdicaoId" OnHabilidadeEditada="OnHabilidadeEditada" />
 
 @code {
     private bool IsAddModalActive { get; set; } = false;
@@ -34,7 +38,7 @@
     public async Task OnHabilidadeEditada()
     {
         IsEditModalActive = false;
-        await UpdateGrid();
+        UpdateGrid();
     }
 
     public void AdicionarHabilidade(MouseEventArgs e)
@@ -47,15 +51,15 @@
     public async Task OnHabilidadeAdicionada()
     {
         IsAddModalActive = false;
-        await UpdateGrid();
+        UpdateGrid();
     }
 
     protected override async Task OnInitializedAsync()
     {
-        await UpdateGrid();
+        UpdateGrid();
     }
 
-    public async Task UpdateGrid()
+    public void UpdateGrid()
     {
         GridHabilidadesNeedUpdate = true;
         StateHasChanged();

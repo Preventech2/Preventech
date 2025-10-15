@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Components.Authorization;
+using Preventech.Core.Models;
 
 namespace Preventech.Core.Services;
 
@@ -110,5 +111,19 @@ public class UserInfo
         // Mostra primeiro e último nome
         string[]? parts = Nome.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         return parts[0] + ' ' + (parts.Length > 1 ? parts[^1] : "");
+    }
+
+    /// <summary>
+    /// Gets a instance of usuario
+    /// </summary>
+    public Usuario GetUsuario()
+    {
+        return new Usuario
+        {
+            Id = this.Id,
+            Cpf = this.Cpf,
+            Nome = this.Nome,
+            Email = this.Email
+        };
     }
 }

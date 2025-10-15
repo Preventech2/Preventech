@@ -10,7 +10,6 @@ public class HabilidadeSistema
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; } = 0;
 
-    [Required]
     [MaxLength(100)]
     public string? Nome { get; set; } = string.Empty;
 }

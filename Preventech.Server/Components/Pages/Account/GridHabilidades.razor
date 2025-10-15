@@ -4,12 +4,13 @@
 @rendermode InteractiveServer
 
 @inject HabilidadeService HabilidadeService
+@inject UserClaimsHelper UserClaimsHelper
 
 <QuickGrid Items="@habilidades.AsQueryable()" TGridItem="Habilidade">
     <PropertyColumn Title="Categoria" Property="@(item => item.Categoria!.Nome)" />
     <PropertyColumn Title="Descricao" Property="@(item => item.Descricao)" />
     <TemplateColumn Title="Ações" Context="item">
-        <button @onclick="() => EditarHabilidade(item.Id)">Editar</button>
+        <button @onclick="() => EditarHabilidade.InvokeAsync(item.Id)">Editar</button>
         <button @onclick="() => RemoverHabilidade(item.Id)">Remover</button>
     </TemplateColumn>
 </QuickGrid>
@@ -18,7 +19,14 @@
     [Parameter]
     public bool NeedUpdate { get; set; } = false;
 
+    [Parameter]
+    public EventCallback<bool> NeedUpdateChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<int> EditarHabilidade { get; set; }
+
     private List<Habilidade> habilidades = new List<Habilidade>();
+    private UserInfo UserInfo = null!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -27,7 +35,8 @@
 
     private async Task LoadHabilidades()
     {
-        ApiResponse<List<Habilidade>> response = await HabilidadeService.GetAllHabilidadesAsync();
+        UserInfo = await UserClaimsHelper.GetCurrentUserInfoAsync() ?? new UserInfo();
+        ApiResponse<List<Habilidade>> response = await HabilidadeService.GetAllHabilidadesByUsuarioAsync(UserInfo.GetUsuario());
         if (response.Success && response.Data != null)
         {
             habilidades = response.Data;
@@ -38,14 +47,22 @@
         }
     }
 
-    private void EditarHabilidade(int id)
-    {
-        // TODO: Implement edit logic here, e.g., navigate to edit page or open a dialog
-    }
-
     private async Task RemoverHabilidade(int id)
     {
-        // TODO: Implement remove logic here, e.g., call service to remove and reload list
+        if (id <= 0) return;
+
+        Habilidade habilidadeToRemove = new Habilidade { Id = id };
+        ApiResponse<Habilidade> response = await HabilidadeService.DeleteHabilidadeAsync(habilidadeToRemove);
+        if (response.Success)
+        {
+            await LoadHabilidades();
+            NeedUpdate = true;
+            await NeedUpdateChanged.InvokeAsync(NeedUpdate);
+        }
+        else
+        {
+            // Handle error
+        }
     }
 
     protected override async Task OnParametersSetAsync()

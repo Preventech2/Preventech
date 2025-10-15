@@ -10,13 +10,10 @@ public class Habilidade
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
-    [Required]
-    public HabilidadeSistema? Categoria { get; set; } = new HabilidadeSistema();
+    public HabilidadeSistema? Categoria { get; set; } = null;
 
-    [Required]
-    public Usuario? Usuario { get; set; } = new Usuario();
+    public Usuario? Usuario { get; set; } = null;
 
-    [Required]
     [MaxLength(200)]
     public string? Descricao { get; set; } = string.Empty;
 }

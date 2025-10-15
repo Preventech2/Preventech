@@ -1,5 +1,7 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
 using Preventech.Core.DatabaseContexts;
 using Preventech.Core.DTOs;
@@ -16,7 +18,7 @@ namespace Preventech.Core.Controllers
         [HttpGet]
         public ApiResponse<List<Habilidade>> GetAll()
         {
-            var habilidades = _context.Habilidades.ToList();
+            var habilidades = _context.Habilidades.Include(h => h.Categoria).ToList();
             return new ApiResponse<List<Habilidade>>
             {
                 Success = true,
@@ -50,19 +52,68 @@ namespace Preventech.Core.Controllers
             };
         }
 
+        [HttpPost]
+        public async Task<ApiResponse<List<Habilidade>>> GetByUsuario([FromBody] Usuario usuario)
+        {
+            try
+            {
+                if (usuario == null || string.IsNullOrWhiteSpace(usuario.Cpf))
+                {
+                    return new ApiResponse<List<Habilidade>>
+                    {
+                        Success = false,
+                        Message = "Dados do usuário inválidos",
+                        Data = null
+                    };
+                }
+
+                var habilidades = await _context.Habilidades
+                    .Include(h => h.Categoria) // Inclui a navegação para Categoria
+                    .Where(h => h.Usuario!.Cpf == usuario.Cpf)
+                    .ToListAsync();
+
+                if (habilidades == null)
+                {
+                    return new ApiResponse<List<Habilidade>>
+                    {
+                        Success = false,
+                        Message = "Habilidade não encontrada",
+                        Data = null
+                    };
+                }
+
+                return new ApiResponse<List<Habilidade>>
+                {
+                    Success = true,
+                    Message = "Habilidade recuperada com sucesso",
+                    Data = habilidades
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse<List<Habilidade>>
+                {
+                    Success = false,
+                    Message = $"Erro ao buscar habilidade: {ex.Message}",
+                    Data = null
+                };
+            }
+        }
+
         [HttpPost("cadastro")]
         public async Task<ApiResponse<Habilidade>> AddHabilidade([FromBody] Habilidade habilidade)
         {
-            if (habilidade.Categoria == null 
+            if (habilidade == null
+                || habilidade.Categoria == null
                 || habilidade.Usuario == null
                 || string.IsNullOrWhiteSpace(habilidade.Usuario.Cpf)
-                || string.IsNullOrWhiteSpace(habilidade.Categoria.Nome)
+                || habilidade.Categoria.Id <= 0
                 || string.IsNullOrWhiteSpace(habilidade.Descricao))
             {
                 return new ApiResponse<Habilidade>
                 {
                     Success = false,
-                    Message = "A categoria é obrigatória",
+                    Message = "Categoria, usuário e descrição são obrigatórios",
                     Data = null
                 };
             }

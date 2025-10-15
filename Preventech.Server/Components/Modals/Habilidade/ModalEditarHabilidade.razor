@@ -1,0 +1,142 @@
+@namespace Preventech.Server.Components.Modals
+
+@rendermode InteractiveServer
+
+@inject HabilidadeService HabilidadeService
+@inject HabilidadeSistemaService HabilidadeSistemaService
+@inject UserClaimsHelper UserClaimsHelper
+
+<Modal @bind-IsActive="IsActive">
+    <MostrarMensagem @bind-Mensagem="mensagem" />
+    <h3>Adicionar Habilidade</h3>
+    <EditForm Model="@editarHabilidade" OnValidSubmit="@EditarHabilidade">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        @if (editarHabilidade.Categoria != null)
+        {
+            <div class="form-group">
+                <label for="categoria">Categoria</label>
+                <InputSelect @bind-Value="@editarHabilidade.Categoria.Id" class="form-control">
+                    <option value="0">Selecionar categoria</option>
+                    @foreach (var hab in habilidadesSistema)
+                    {
+                        <option value="@hab.Id">@hab.Nome</option>
+                    }
+                </InputSelect>
+            </div>
+        }
+
+        <div class="form-group">
+            <label for="descricao">Descrição</label>
+            <InputText id="descricao" class="form-control" @bind-Value="@editarHabilidade.Descricao" />
+            <ValidationMessage For="@(() => editarHabilidade.Descricao)" />
+        </div>
+
+        <button type="submit" class="btn btn-primary" disabled="@IsProcessing">Adicionar</button>
+    </EditForm>
+
+    <section class="info-section">
+        <p>Essas habilidades definem quais capacidades específicas os usuários possuem.</p>
+        <p>Adicione com base nas necessidades das manutenções.</p>
+    </section>
+</Modal>
+
+@code {
+    [Parameter]
+    public bool IsActive { get; set; }
+
+    [Parameter]
+    public EventCallback OnHabilidadeEditada { get; set; }
+
+    [Parameter]
+    public int HabilidadeId { get; set; }
+
+    [Parameter]
+    public EventCallback<int> HabilidadeIdChanged { get; set; }
+
+    private int _previousHabilidadeId = 0;
+    private bool _previousIsActive = false;
+
+    List<HabilidadeSistema> habilidadesSistema = new List<HabilidadeSistema>();
+
+    private Habilidade editarHabilidade = new Habilidade();
+
+    public string mensagem = string.Empty;
+    private bool IsProcessing { get; set; } = false;
+    private UserInfo UserInfo = new UserInfo();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CarregarHabilidade();
+        UserInfo = await UserClaimsHelper.GetCurrentUserInfoAsync() ?? new UserInfo();
+        habilidadesSistema = (await HabilidadeSistemaService.GetAllHabilidadesAsync()).Data ?? new List<HabilidadeSistema>();
+        _previousIsActive = IsActive;
+        _previousHabilidadeId = HabilidadeId;
+    }
+
+    private async Task CarregarHabilidade()
+    {
+        ApiResponse<Habilidade> response = await HabilidadeService.GetHabilidadeByIdAsync(HabilidadeId);
+        if (response.Success && response.Data != null)
+        {
+            editarHabilidade = response.Data;
+        }
+        else
+        {
+            mensagem = response.Message;
+            editarHabilidade = new Habilidade();
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Verifica se o modal foi ativado (false -> true)
+        bool modalFoiAtivado = !_previousIsActive && IsActive;
+        
+        // Verifica se o HabilidadeId mudou
+        bool idMudou = _previousHabilidadeId != HabilidadeId;
+
+        // Recarrega se o modal foi ativado OU se o ID mudou
+        if (modalFoiAtivado || idMudou)
+        {
+            await CarregarHabilidade();
+        }
+
+        // Atualiza os valores anteriores
+        _previousIsActive = IsActive;
+        _previousHabilidadeId = HabilidadeId;
+    }
+
+    private async Task EditarHabilidade()
+    {
+        IsProcessing = true;
+        if(editarHabilidade?.Categoria == null || editarHabilidade.Categoria.Id <= 0)
+        {
+            mensagem = "Por favor, selecione uma categoria válida.";
+            IsProcessing = false;
+            return;
+        }
+
+        try
+        {
+            ApiResponse<Habilidade> response = await HabilidadeService.EditHabilidadeAsync(editarHabilidade);
+            
+            if (response.Success)
+            {
+                mensagem = response.Message;
+                await OnHabilidadeEditada.InvokeAsync(null);
+            }
+            else
+            {
+                mensagem = response.Message;
+            }
+        }
+        catch (Exception ex)
+        {
+            mensagem = $"Erro na requisição: {ex.Message}";
+        }
+        
+        IsProcessing = false;
+    }
+}

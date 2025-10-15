@@ -10,10 +10,8 @@ public class GrupoPerfil
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
-    [Required]
     [StringLength(100)]
     public string? Nome { get; set; }
 
-    [Required]
     public Perfil? Permissoes { get; set; } = Perfil.NenhumaPermissao;
 }

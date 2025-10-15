@@ -92,7 +92,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo("/var/local"))
     .SetApplicationName("preventech")
-    .UseCryptographicAlgorithms(new AuthenticatedEncryptorConfiguration{
+    .UseCryptographicAlgorithms(new AuthenticatedEncryptorConfiguration
+    {
         EncryptionAlgorithm = EncryptionAlgorithm.AES_256_CBC,
         ValidationAlgorithm = ValidationAlgorithm.HMACSHA512
     });

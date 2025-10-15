@@ -10,7 +10,6 @@ public class Usuario
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
-    [Required]
     [StringLength(11)]
     public string? Cpf { get; set; }
 
