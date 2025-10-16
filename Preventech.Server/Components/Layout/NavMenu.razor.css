@@ -113,6 +113,14 @@
     display: block;
 }
 
+footer {
+    position: absolute;
+    bottom: 0;
+    color: var(--cinza-claro);
+    padding: 0.5rem;
+    font-size: 0.75rem;
+}
+
 @media (min-width: 641px) {
     .navbar-toggler {
         display: none;
@@ -123,7 +131,7 @@
         display: block;
 
         /* Allow sidebar to scroll for tall menus */
-        height: calc(100vh - 3.5rem);
+        /* height: calc(100% - 3.5rem); */
         overflow-y: auto;
     }
 }

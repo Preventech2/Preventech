@@ -329,5 +329,68 @@ namespace Preventech.Core.Controllers
                 };
             }
         }
+    
+        [HttpPost("editar")]
+        public async Task<ApiResponse<Usuario>> UpdateUsuarioAsync([FromBody] Usuario usuario)
+        {
+            Console.WriteLine("Entrando na controller");
+            if (usuario == null
+                || string.IsNullOrWhiteSpace(usuario.Cpf)
+                || string.IsNullOrWhiteSpace(usuario.Nome)
+                || string.IsNullOrWhiteSpace(usuario.Email))
+            {
+                return new ApiResponse<Usuario>
+                {
+                    Success = false,
+                    Message = "Dados do usuário inválidos",
+                    Data = null
+                };
+            }
+            
+            try
+            {
+                var usuarioExistente = await _context.Usuarios
+                    .Include(u => u.Grupo) // Inclui o grupo na consulta
+                    .Where(u => u.Cpf == usuario.Cpf)
+                    .FirstOrDefaultAsync();
+
+                if (usuarioExistente == null)
+                {
+                    return new ApiResponse<Usuario>
+                    {
+                        Success = false,
+                        Message = "Usuário não encontrado",
+                        Data = null
+                    };
+                }
+
+                // Atualiza os campos do usuário existente
+                usuarioExistente.Nome = usuario.Nome;
+                usuarioExistente.Email = usuario.Email;
+                // if (!string.IsNullOrWhiteSpace(usuario.Senha))
+                // {
+                //     usuarioExistente.Senha = usuario.Senha; // Atualiza a senha somente se fornecida
+                // }
+
+                // Salva as mudanças no banco de dados
+                await _context.SaveChangesAsync();
+
+                return new ApiResponse<Usuario>
+                {
+                    Success = true,
+                    Message = "Usuário atualizado com sucesso",
+                    Data = usuarioExistente
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse<Usuario>
+                {
+                    Success = false,
+                    Message = $"Erro ao atualizar usuário: {ex.Message}",
+                    Data = null
+                };
+            }
+        }
     }
 }

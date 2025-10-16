@@ -36,7 +36,7 @@ public class UsuarioService(HttpClient httpClient, ILogger<UsuarioService> logge
 
         return result;
     }
-    
+
     public async Task<ApiResponse<List<Usuario>>> GetUsuariosAsync()
     {
         var response = await _httpClient.GetAsync("api/usuarios");
@@ -56,6 +56,14 @@ public class UsuarioService(HttpClient httpClient, ILogger<UsuarioService> logge
     public async Task<ApiResponse<Usuario>> InviteUsuarioAsync(Usuario usuario)
     {
         var response = await _httpClient.PostAsJsonAsync("api/usuarios/invite", usuario);
+        var result = await response.Content.ReadFromJsonAsync<ApiResponse<Usuario>>()
+        ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<Usuario>.");
+        return result;
+    }
+
+    public async Task<ApiResponse<Usuario>> UpdateUsuarioAsync(Usuario usuario)
+    {
+        var response = await _httpClient.PostAsJsonAsync($"api/usuarios/editar", usuario);
         var result = await response.Content.ReadFromJsonAsync<ApiResponse<Usuario>>()
         ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<Usuario>.");
         return result;

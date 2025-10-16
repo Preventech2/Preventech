@@ -12,14 +12,14 @@ public class UserClaimsHelper(AuthenticationStateProvider authStateProvider)
     /// Gets the current user's information from claims
     /// </summary>
     /// <returns>UserInfo object with Name and Cpf, or null if not authenticated</returns>
-    public async Task<UserInfo?> GetCurrentUserInfoAsync()
+    public async Task<UserInfo> GetCurrentUserInfoAsync()
     {
         var authState = await _authStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
         if (user?.Identity?.IsAuthenticated != true)
         {
-            return null;
+            return new UserInfo { IsAuthenticated = false };
         }
        
         return ExtractUserInfoFromClaims(user);
@@ -42,7 +42,7 @@ public class UserClaimsHelper(AuthenticationStateProvider authStateProvider)
         var email = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value
             ?? string.Empty;
 
-        var grupo = user.Claims.FirstOrDefault(c => c.Type == "Grupo")?.Value
+        var nomeGrupo = user.Claims.FirstOrDefault(c => c.Type == "Grupo")?.Value
             ?? string.Empty;
 
         var idClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
@@ -53,13 +53,27 @@ public class UserClaimsHelper(AuthenticationStateProvider authStateProvider)
             .Select(c => c.Value)
             .ToList();
 
+        GrupoPerfil Grupo = new()
+        {
+            Nome = nomeGrupo,
+            Permissoes = Perfil.NenhumaPermissao
+        };
+
+        foreach(var role in roles)
+        {
+            if (Enum.TryParse<Perfil>(role, out var perfil))
+            {
+                Grupo.Permissoes |= perfil;
+            }
+        }
+
         return new UserInfo
         {
             Id = userId,
             Cpf = cpf,
             Nome = name,
             Email = email,
-            Grupo = grupo,
+            Grupo = Grupo,
             Roles = roles,
             IsAuthenticated = user.Identity?.IsAuthenticated ?? false
         };
@@ -85,7 +99,7 @@ public class UserInfo
     public string Cpf { get; set; } = string.Empty;
     public string Nome { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
-    public string Grupo { get; set; } = string.Empty;
+    public GrupoPerfil Grupo { get; set; } = new GrupoPerfil();
     public List<string> Roles { get; set; } = [];
     public bool IsAuthenticated { get; set; }
 
@@ -116,6 +130,17 @@ public class UserInfo
     /// <summary>
     /// Gets a instance of usuario
     /// </summary>
+    public string DisplayFormattedCpf()
+    {
+        if (string.IsNullOrWhiteSpace(Cpf) || Cpf.Length != 11)
+            return Cpf;
+
+        return Convert.ToUInt64(Cpf).ToString(@"000\.000\.000\-00");
+    }
+
+    /// <summary>
+    /// Gets a instance of usuario
+    /// </summary>
     public Usuario GetUsuario()
     {
         return new Usuario
@@ -123,7 +148,9 @@ public class UserInfo
             Id = this.Id,
             Cpf = this.Cpf,
             Nome = this.Nome,
-            Email = this.Email
+            Email = this.Email,
+            Senha = string.Empty,
+            Grupo = this.Grupo
         };
     }
 }

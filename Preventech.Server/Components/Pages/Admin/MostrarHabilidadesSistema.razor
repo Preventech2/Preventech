@@ -9,7 +9,7 @@
 <PageSection>
     <section class="header-section">
         <h2>Habilidades do Sistema</h2>
-        <button @onclick="AdicionarHabilidadeSistema">Adicionar</button>
+        <button class="btn btn-primary" @onclick="AdicionarHabilidadeSistema">Adicionar</button>
     </section>
     <section class="body-section">
         @if (habilidades?.Any() == true) 
@@ -17,7 +17,7 @@
             <QuickGrid TGridItem="HabilidadeSistema" Items="@habilidades" Context="item">
                 <PropertyColumn Property="@(item => item.Nome)" Title="Nome da Habilidade" />
                 <TemplateColumn Title="Ações" Context="item">
-                    <button @onclick="() => EditarHabilidadeSistema(item.Id)">Editar</button>
+                    <button class="btn btn-secondary" @onclick="() => EditarHabilidadeSistema(item.Id)">Editar</button>
                 </TemplateColumn>
             </QuickGrid>
         } 

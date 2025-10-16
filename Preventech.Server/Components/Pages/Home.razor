@@ -32,28 +32,6 @@
     <Authorized>
         <PageSection>
             <h5>Laboratórios</h5>
-            <button @onclick="OpenModal">Adicionar</button>
-            <Modal @bind-IsActive="isModalActive">
-                <h6>Conteúdo do Modal</h6>
-                <button @onclick="CloseModal">Cancelar</button>
-                <button>Confirmar</button>
-            </Modal>
-
-            <Preventech.Server.Components.Pages.Account.GridHabilidades />
         </PageSection>
     </Authorized>
 </AuthorizeView>
-
-@code {
-    private bool isModalActive = false;
-
-    private void OpenModal()
-    {
-        isModalActive = true;
-    }
-
-    private void CloseModal()
-    {
-        isModalActive = false;
-    }
-}

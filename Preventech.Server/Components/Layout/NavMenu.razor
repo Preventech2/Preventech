@@ -70,6 +70,8 @@
                 <div class="nav-item pad-x">
                     <button class="nav-link" @onclick="@(_ => AtivarModal(1))">Cadastrar Localização</button>
                 </div>
+            </nav>
+            <nav class="nav flex-column">
                 <div class="nav-item pad-x">
                     <button class="nav-link" @onclick="@(_ => AtivarModal(2))">Editar Localização</button>
                 </div>
@@ -87,6 +89,7 @@
         </Authorized>
     </AuthorizeView>
 </div>
+<footer>Powered by Preventech</footer>
 
 <div id="nav-modais">
     <Preventech.Server.Components.Modals.Localizacoes.Cadastrar Aberto="@(modal == 1)" Resetar=@resetar/>

@@ -21,6 +21,9 @@
 }
 
 main {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
     flex: 1;
 }
 
@@ -127,4 +130,5 @@ main {
     background-color: #D7E4EF;
     width: auto;
     height: auto;
+    flex: 1;
 }

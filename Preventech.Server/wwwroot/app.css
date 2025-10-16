@@ -19,12 +19,11 @@ body {
     font-family: Inter, monospace;
     margin: 0;
     padding: 0;
-    background-color: var(--cinza-claro);
-    min-height: 100%;
+    background-color: var(--azul-claro);
 }
 
 body {
-    height: 100%;
+    min-height: 100vh;
     min-width: 100%;
 }
 

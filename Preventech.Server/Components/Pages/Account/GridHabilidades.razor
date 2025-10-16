@@ -10,8 +10,8 @@
     <PropertyColumn Title="Categoria" Property="@(item => item.Categoria!.Nome)" />
     <PropertyColumn Title="Descricao" Property="@(item => item.Descricao)" />
     <TemplateColumn Title="Ações" Context="item">
-        <button @onclick="() => EditarHabilidade.InvokeAsync(item.Id)">Editar</button>
-        <button @onclick="() => RemoverHabilidade(item.Id)">Remover</button>
+        <button class="btn btn-secondary" @onclick="() => EditarHabilidade.InvokeAsync(item.Id)">Editar</button>
+        <button class="btn btn-danger" @onclick="() => RemoverHabilidade(item.Id)">Remover</button>
     </TemplateColumn>
 </QuickGrid>
 

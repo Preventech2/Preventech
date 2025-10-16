@@ -6,12 +6,14 @@
 
 <HeaderTitle Title="Meu Perfil" />
 
-<EditFormUser />
+<PageSection>
+    <EditFormUser />
+</PageSection>
 
 <PageSection>
     <section class="header-section">
         <h2>Habilidades</h2>
-        <button @onclick="AdicionarHabilidade">Adicionar</button>
+        <button class="btn btn-primary" @onclick="AdicionarHabilidade">Adicionar</button>
     </section>
     <section class="body-section">
         <GridHabilidades EditarHabilidade="@EditarHabilidade" @bind-NeedUpdate="GridHabilidadesNeedUpdate" />
