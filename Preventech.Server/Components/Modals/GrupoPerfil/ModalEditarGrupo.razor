@@ -1,0 +1,119 @@
+@namespace Preventech.Server.Components.Modals
+@using System.Threading.Tasks
+
+@rendermode InteractiveServer
+
+@inject GrupoPerfilService GrupoPerfilService
+@inject UserClaimsHelper UserClaimsHelper
+
+<Modal IsActive="@IsActive" IsActiveChanged="@OnIsActiveChanged">
+    <MostrarMensagem @bind-Mensagem="mensagem" />
+    <h3 class="m-0">Editar Grupo</h3>
+    <EditForm class="edit-form" Model="@editarGrupo" OnValidSubmit="@EditarGrupo">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-group">
+            <label for="nome">Nome</label>
+            <InputText id="nome" class="form-control" @bind-Value="@editarGrupo.Nome" />
+            <ValidationMessage For="@(() => editarGrupo.Nome)" />
+        </div>
+
+        <div class="form-group">
+            <label for="descricao" class="form-label">Permissões</label>
+            <PerfilCheckbox @bind-Grupo="editarGrupo" />
+        </div>
+
+        <button type="submit" class="btn btn-primary" disabled="@IsProcessing">Editar</button>
+    </EditForm>
+</Modal>
+
+@code {
+    [Parameter]
+    public bool IsActive { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsActiveChanged { get; set; }
+
+    [Parameter]
+    public EventCallback OnGrupoEditado { get; set; }
+
+    [Parameter]
+    public int GrupoId { get; set; }
+
+    [Parameter]
+    public EventCallback<int> GrupoIdChanged { get; set; }
+
+    private GrupoPerfil editarGrupo = new GrupoPerfil();
+
+    public string mensagem = string.Empty;
+    private bool IsProcessing { get; set; } = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CarregarGrupo();
+    }
+
+    private async Task CarregarGrupo()
+    {
+        mensagem = string.Empty;
+        ApiResponse<GrupoPerfil> response = await GrupoPerfilService.GetGrupoPerfilByIdAsync(GrupoId);
+        if (response.Success && response.Data != null)
+        {
+            editarGrupo = response.Data;
+        }
+        else
+        {
+            mensagem = response.Message;
+            editarGrupo = new GrupoPerfil();
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Recarrega se o modal foi ativado
+        if (IsActive)
+        {
+            await CarregarGrupo();
+        }
+    }
+
+    private async Task EditarGrupo()
+    {
+        IsProcessing = true;
+        if(editarGrupo == null || string.IsNullOrWhiteSpace(editarGrupo.Nome))
+        {
+            mensagem = "Por favor, selecione um nome válido.";
+            IsProcessing = false;
+            return;
+        }
+
+        try
+        {
+            ApiResponse<GrupoPerfil>? response = await GrupoPerfilService.EditGrupoPerfilAsync(editarGrupo);
+
+            if (response != null && response.Success)
+            {
+                mensagem = response.Message;
+                await OnGrupoEditado.InvokeAsync(null);
+            }
+            else
+            {
+                mensagem = response?.Message ?? "Erro ao editar o grupo.";
+            }
+        }
+        catch (Exception ex)
+        {
+            mensagem = $"Erro na requisição: {ex.Message}";
+        }
+        
+        IsProcessing = false;
+    }
+
+    // Informa ao componente pai a mudança do estado do Modal
+    private async Task OnIsActiveChanged(bool isActive)
+    {
+        IsActive = isActive;
+        await IsActiveChanged.InvokeAsync(IsActive);
+    }
+}

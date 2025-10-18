@@ -9,9 +9,11 @@
 <QuickGrid Items="@habilidades.AsQueryable()" TGridItem="Habilidade">
     <PropertyColumn Title="Categoria" Property="@(item => item.Categoria!.Nome)" />
     <PropertyColumn Title="Descricao" Property="@(item => item.Descricao)" />
-    <TemplateColumn Title="Ações" Context="item">
-        <button class="btn btn-secondary" @onclick="() => EditarHabilidade.InvokeAsync(item.Id)">Editar</button>
-        <button class="btn btn-danger" @onclick="() => RemoverHabilidade(item.Id)">Remover</button>
+    <TemplateColumn Class="col-actions-2" Title="Ações" Context="item">
+        <section style="display: flex; gap: 0.5rem;">
+            <button class="btn-icon" @onclick="() => EditarHabilidade.InvokeAsync(item.Id)"><img class="icon" src="img/edit-icon.svg" alt="" /></button>
+            <button class="btn-icon" @onclick="() => RemoverHabilidade(item.Id)"><img class="icon" src="img/rem-icon.svg" alt="" /></button>
+        </section>
     </TemplateColumn>
 </QuickGrid>
 

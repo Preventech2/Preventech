@@ -6,10 +6,10 @@
 @inject HabilidadeSistemaService HabilidadeSistemaService
 @inject UserClaimsHelper UserClaimsHelper
 
-<Modal @bind-IsActive="IsActive">
+<Modal IsActive="@IsActive" IsActiveChanged="@OnIsActiveChanged">
     <MostrarMensagem @bind-Mensagem="mensagem" />
     <h3>Adicionar Habilidade</h3>
-    <EditForm Model="@novaHabilidade" OnValidSubmit="@AdicionarHabilidade">
+    <EditForm class="edit-form" Model="@novaHabilidade" OnValidSubmit="@AdicionarHabilidade">
         <DataAnnotationsValidator />
         <ValidationSummary />
 
@@ -32,16 +32,14 @@
 
         <button type="submit" class="btn btn-primary" disabled="@IsProcessing">Adicionar</button>
     </EditForm>
-
-    <section class="info-section">
-        <p>Essas habilidades definem quais capacidades específicas os usuários possuem.</p>
-        <p>Adicione com base nas necessidades das manutenções.</p>
-    </section>
 </Modal>
 
 @code {
     [Parameter]
     public bool IsActive { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsActiveChanged { get; set; }
 
     [Parameter]
     public EventCallback OnHabilidadeAdicionada { get; set; }
@@ -63,6 +61,7 @@
 
     private void InitializeNovaHabilidade()
     {
+        mensagem = string.Empty;
         novaHabilidade = new Habilidade
         {
             Usuario = new Usuario 
@@ -89,6 +88,13 @@
             return;
         }
 
+        if(string.IsNullOrWhiteSpace(novaHabilidade.Descricao))
+        {
+            mensagem = "A descrição é obrigatória.";
+            IsProcessing = false;
+            return;
+        }
+
         try
         {
             ApiResponse<Habilidade> response = await HabilidadeService.AddHabilidadeAsync(novaHabilidade);
@@ -110,5 +116,13 @@
         }
         
         IsProcessing = false;
+    }
+
+    // Informa ao componente pai a mudança do estado do Modal
+    private async Task OnIsActiveChanged(bool isActive)
+    {
+        InitializeNovaHabilidade();
+        IsActive = isActive;
+        await IsActiveChanged.InvokeAsync(IsActive);
     }
 }

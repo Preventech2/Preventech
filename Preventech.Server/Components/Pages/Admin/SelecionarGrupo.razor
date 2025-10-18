@@ -5,14 +5,23 @@
 @inject GrupoPerfilService grupoPerfilService
 
 <div class="mb-3">
-    <label for="grupo" class="form-label">Grupo</label>
-    <InputSelect id="grupo" class="form-control" @bind-Value="selectedValue">
-        <option value="">Selecione um grupo</option>
+    <label for="grupo" class="form-label fw-semibold small">
+        <i class="bi bi-people-fill me-2"></i>Grupo
+    </label>
+    <InputSelect id="grupo" class="form-select shadow-sm" @bind-Value="selectedValue">
+        <option value="">Sem grupo</option>
         @foreach (var grupo in gruposPerfis)
         {
             <option value="@grupo.Nome">@grupo.Nome</option>
         }
     </InputSelect>
+    @if (!string.IsNullOrEmpty(selectedValue))
+    {
+        <div class="form-text text-success mt-2 small">
+            <i class="bi bi-check-circle-fill me-1"></i>
+            Grupo selecionado: <strong>@selectedValue</strong>
+        </div>
+    }
 </div>
 
 @code {

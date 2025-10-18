@@ -7,50 +7,83 @@
 
 <HeaderTitle Title="Grupos" />
 
-@if (gruposPerfis.Any()) 
-{
-    <QuickGrid TGridItem="GrupoPerfil" Items="@gruposPerfis" Context="item">
-        <PropertyColumn Property="@(item => item.Nome)" Title="Nome do Grupo" />
-        <PropertyColumn Property="@(item => PerfilExtension.ToBeautifulString(item.Permissoes ?? Perfil.NenhumaPermissao))" Title="Permissões" />
-        <TemplateColumn Title="Ações" Context="item">
-            <button @onclick="() => EditarGrupo(item.Nome)">Editar</button>
-        </TemplateColumn>
-    </QuickGrid>
-    <div>
-        <button @onclick='() => navigationManager.NavigateTo("/admin/adicionar-grupo")'>
-            Adicionar Grupo
-        </button>
-    </div>
-} 
-else 
-{
-    <div>
-        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-        <p><em>Cadastrando...</em></p>
-    </div>
-}
+<PageSection>
+    @if (gruposPerfis.Any()) 
+    {
+        <section class="header-section">
+            <h4>Grupos</h4>
+            <button class="btn-icon" @onclick="AdicionarGrupo"><img class="icon" src="img/add-icon.svg" alt="" /></button>
+        </section>
+        <QuickGrid TGridItem="GrupoPerfil" Items="@gruposPerfis" Context="item">
+            <PropertyColumn Property="@(item => item.Nome)" Title="Nome do Grupo" />
+            <PropertyColumn Property="@(item => PerfilExtension.ToBeautifulString(item.Permissoes ?? Perfil.NenhumaPermissao))" Title="Permissões" />
+            <TemplateColumn Class="col-actions" Title="Ações" Context="item">
+                <button class="btn-icon" @onclick="() => EditarGrupo(item.Id)"><img class="icon" src="img/edit-icon.svg" alt="" /></button>
+            </TemplateColumn>
+        </QuickGrid>
+    } 
+    else 
+    {
+        <div>
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            <p><em>Cadastrando...</em></p>
+        </div>
+    }
+</PageSection>
+
+<ModalEditarGrupo @bind-IsActive="@IsEditModalActive" @bind-GrupoId="@GrupoId" OnGrupoEditado="OnGrupoEditadoHandler" />
+<ModalAdicionarGrupo @bind-IsActive="@IsAddModalActive" OnGrupoAdicionado="OnGrupoAdicionadoHandler" />
 
 @code {
+    private bool IsAddModalActive { get; set; } = false;
+    private bool IsEditModalActive { get; set; } = false;
+    private int GrupoId { get; set; } = 0;
+
     IQueryable<GrupoPerfil> gruposPerfis = new List<GrupoPerfil>().AsQueryable();
 
-    protected override async Task OnInitializedAsync()
+    private async Task CarregarGruposPerfis()
     {
+        Console.WriteLine("Carregando grupos de perfis...");
         ApiResponse<List<GrupoPerfil>> response = await grupoPerfilService.GetGruposPerfisAsync();
         gruposPerfis = response.Data?.AsQueryable() ?? new List<GrupoPerfil>().AsQueryable();
     }
 
-    public void EditarGrupo(String? name)
+    protected override async Task OnInitializedAsync()
     {
-        if (name != null)
-        {
-            navigationManager.NavigateTo($"/admin/editar-grupo/{name}");
-        }
+        await CarregarGruposPerfis();
     }
 
-    private string GetPermissionDisplayName(Perfil? flag)
+    public void EditarGrupo(int id)
     {
-        string name = flag.ToString() ?? "Nenhuma Permissão";
-        // Adiciona espaços antes de letras maiúsculas (exceto a primeira letra)
-        return System.Text.RegularExpressions.Regex.Replace(name, "(\\B[A-Z])", " $1");
+        Console.WriteLine($"EditarGrupo chamado com ID: {id} e IsAddModalActive: {IsAddModalActive}");
+        if (id <= 0 || IsAddModalActive)
+            return;
+
+        GrupoId = id;
+        IsEditModalActive = true;
+    }
+
+    public void AdicionarGrupo()
+    {
+        Console.WriteLine($"AdicionarGrupo chamado com IsEditModalActive: {IsEditModalActive}");
+        if (IsEditModalActive)
+            return;
+
+        @* GrupoId = 0; *@
+        IsAddModalActive = true;
+    }
+
+    private async Task OnGrupoEditadoHandler()
+    {
+        Console.WriteLine("Grupo editado com sucesso.");
+        IsEditModalActive = false;
+        await CarregarGruposPerfis();
+    }
+
+    private async Task OnGrupoAdicionadoHandler()
+    {
+        Console.WriteLine("Grupo adicionado com sucesso.");
+        IsAddModalActive = false;
+        await CarregarGruposPerfis();
     }
 }

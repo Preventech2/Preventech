@@ -25,10 +25,10 @@ namespace Preventech.Core.Controllers
             };
         }
 
-        [HttpGet("{nome}")]
-        public ApiResponse<GrupoPerfil> GetByName(string nome)
+        [HttpGet("{id}")]
+        public async Task<ApiResponse<GrupoPerfil>> GetById(int id)
         {
-            var grupoPerfil = _context.GruposPerfis.FirstOrDefault(g => g.Nome == nome);
+            var grupoPerfil = await _context.GruposPerfis.FindAsync(id);
             if (grupoPerfil == null)
             {
                 return new ApiResponse<GrupoPerfil>

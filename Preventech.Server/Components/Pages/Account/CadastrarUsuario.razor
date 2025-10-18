@@ -12,37 +12,39 @@
 
 <MostrarMensagem @bind-Mensagem="mensagem" />
 
-<EditForm Model="usuario" OnValidSubmit="OnSubmit">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+<PageSection>
+    <EditForm Model="usuario" OnValidSubmit="OnSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
 
-    <div class="mb-3">
-        <label for="cpf" class="form-label">Cpf</label>
-        <CpfInput id="cpf" @bind-Cpf="usuario.Cpf" />
-    </div>
-    <div class="mb-3">
-        <label for="nome" class="form-label">Nome</label>
-        <InputText id="nome" type="text" class="form-control" @bind-Value="usuario.Nome" />
-    </div>
-    <div class="mb-3">
-        <label for="email" class="form-label">Email</label>
-        <InputText id="email" type="email" class="form-control" @bind-Value="usuario.Email" />
-    </div>
-    <div class="mb-3">
-        <label for="senha" class="form-label">Senha</label>
-        <InputText id="senha" type="password" class="form-control" @bind-Value="usuario.Senha" />
-    </div>
-    <button type="submit" class="btn btn-primary" disabled="@isProcessing">
-        @if (isProcessing)
-        {
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-        }
-        else
-        {
-            <text>Cadastrar</text>
-        }
-    </button>
-</EditForm>
+        <div class="mb-3">
+            <label for="cpf" class="form-label">Cpf</label>
+            <CpfInput id="cpf" @bind-Cpf="usuario.Cpf" />
+        </div>
+        <div class="mb-3">
+            <label for="nome" class="form-label">Nome</label>
+            <InputText id="nome" type="text" class="form-control" @bind-Value="usuario.Nome" />
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <InputText id="email" type="email" class="form-control" @bind-Value="usuario.Email" />
+        </div>
+        <div class="mb-3">
+            <label for="senha" class="form-label">Senha</label>
+            <InputText id="senha" type="password" class="form-control" @bind-Value="usuario.Senha" />
+        </div>
+        <button type="submit" class="btn btn-primary" disabled="@isProcessing">
+            @if (isProcessing)
+            {
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            }
+            else
+            {
+                <text>Cadastrar</text>
+            }
+        </button>
+    </EditForm>
+</PageSection>
 
 @code {
     [SupplyParameterFromForm]

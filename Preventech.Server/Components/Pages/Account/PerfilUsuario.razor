@@ -12,16 +12,16 @@
 
 <PageSection>
     <section class="header-section">
-        <h2>Habilidades</h2>
-        <button class="btn btn-primary" @onclick="AdicionarHabilidade">Adicionar</button>
+        <h4>Habilidades</h4>
+        <button class="btn-icon" @onclick="AdicionarHabilidade"><img class="icon" src="img/add-icon.svg" alt="" /></button>
     </section>
     <section class="body-section">
         <GridHabilidades EditarHabilidade="@EditarHabilidade" @bind-NeedUpdate="GridHabilidadesNeedUpdate" />
     </section>
 </PageSection>
 
-<ModalAdicionarHabilidade IsActive="@IsAddModalActive" OnHabilidadeAdicionada="OnHabilidadeAdicionada" />
-<ModalEditarHabilidade IsActive="@IsEditModalActive" @bind-HabilidadeId="@habilidadeEdicaoId" OnHabilidadeEditada="OnHabilidadeEditada" />
+<ModalAdicionarHabilidade @bind-IsActive="@IsAddModalActive" OnHabilidadeAdicionada="OnHabilidadeAdicionada" />
+<ModalEditarHabilidade @bind-IsActive="@IsEditModalActive" @bind-HabilidadeId="@habilidadeEdicaoId" OnHabilidadeEditada="OnHabilidadeEditada" />
 
 @code {
     private bool IsAddModalActive { get; set; } = false;

@@ -8,16 +8,16 @@
 
 <PageSection>
     <section class="header-section">
-        <h2>Habilidades do Sistema</h2>
-        <button class="btn btn-primary" @onclick="AdicionarHabilidadeSistema">Adicionar</button>
+        <h4>Habilidades</h4>
+        <button class="btn-icon" @onclick="AdicionarHabilidadeSistema"><img class="icon" src="img/add-icon.svg" alt="" /></button>
     </section>
     <section class="body-section">
         @if (habilidades?.Any() == true) 
         {
             <QuickGrid TGridItem="HabilidadeSistema" Items="@habilidades" Context="item">
                 <PropertyColumn Property="@(item => item.Nome)" Title="Nome da Habilidade" />
-                <TemplateColumn Title="Ações" Context="item">
-                    <button class="btn btn-secondary" @onclick="() => EditarHabilidadeSistema(item.Id)">Editar</button>
+                <TemplateColumn Class="col-actions" Title="Ações" Context="item">
+                    <button class="btn-icon" @onclick="() => EditarHabilidadeSistema(item.Id)"><img class="icon" src="img/edit-icon.svg" alt="" /></button>
                 </TemplateColumn>
             </QuickGrid>
         } 
@@ -35,8 +35,8 @@
     </section>
 </PageSection>
 
-<ModalAdicionarHabilidadeSistema IsActive="@IsAddModalActive" OnHabilidadeAdicionada="OnHabilidadeAdicionada" />
-<ModalEditarHabilidadeSistema IsActive="@IsEditModalActive" @bind-HabilidadeId="@habilidadeEdicaoId" OnHabilidadeEditada="OnHabilidadeEditada" />
+<ModalAdicionarHabilidadeSistema @bind-IsActive="@IsAddModalActive" OnHabilidadeAdicionada="OnHabilidadeAdicionada" />
+<ModalEditarHabilidadeSistema @bind-IsActive="@IsEditModalActive" @bind-HabilidadeId="@habilidadeEdicaoId" OnHabilidadeEditada="OnHabilidadeEditada" />
 
 @code {
     IQueryable<HabilidadeSistema>? habilidades = new List<HabilidadeSistema>().AsQueryable();
