@@ -1,0 +1,109 @@
+@namespace Preventech.Server.Components.Modals
+@rendermode InteractiveServer
+
+@inject LocalizacaoService localizacaoService
+@inject EquipamentoService equipamentoService
+
+<Modal @bind-IsActive="IsActive">
+    <MostrarMensagem @bind-Mensagem="mensagem" />
+
+    <EditForm Model="equipamento" FormName="cadastrar-Equipamento">
+        <label>Nome:</label>
+        <InputText @bind-Value="equipamento!.Nome" class="form-control" />
+        <label>Patrimônio:</label>
+        <InputText @bind-Value="equipamento!.Patrimonio" class="form-control" />
+        @if (localizacoes != null && localizacoes.Any())
+        {
+            <div class="mb-3">
+                <label>Localização:</label>
+                <select class="form-control" required>
+                    <option value="" disabled></option>
+                    @foreach (var local in localizacoes)
+                    {
+                        <option @onclick="@(() => equipamento.Local.Id = local.Id)" value="@local!.Id">@local.ToString()
+                        </option>
+                    }
+                </select>
+            </div>
+        }
+        else
+        {
+            <p><em>Carregando locais</em></p>
+        }
+        <button type="submit" @onclick="EditarEquip" class="btn btn-primary" disabled="@isProcessing" autofocus>
+            @if (isProcessing)
+            {
+                <p>Editando...</p>
+            }
+            else
+            {
+                <p>Editar</p>
+            }
+        </button>
+    </EditForm>
+</Modal>
+
+@code {
+    [Parameter]
+    public bool IsActive { get; set; } = false;
+
+    [Parameter]
+    public Equipamento equipamento { get; set; }
+
+    [Parameter]
+    public EventCallback<Equipamento> equipamentoChanged { get; set; }
+
+    /// Lista de equipamentos
+    IQueryable<Equipamento> equipamentos;
+
+    /// lista de localizações
+    IQueryable<Localizacao> localizacoes;
+    bool isProcessing = false;
+    public string mensagem = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var res = await equipamentoService.GetEquipamentos(Equipamento.Vazio);
+        mensagem = res.Message ?? "";
+
+        if (res.Data != null)
+            equipamentos = res.Data!.AsQueryable();
+        else
+            equipamentos = (new List<Equipamento>()).AsQueryable();
+
+        var resloc = await localizacaoService.GetLocalizacoes(Localizacao.Vazia);
+        mensagem = resloc.Message ?? "";
+
+        if (resloc.Data != null)
+            localizacoes = resloc.Data!.AsQueryable();
+        else
+            localizacoes = (new List<Localizacao>()).AsQueryable();
+    }
+
+    private async Task EditarEquip()
+    {
+        isProcessing = true;
+        mensagem = string.Empty;
+        StateHasChanged();
+        try
+        {
+            var res = await equipamentoService.UpdateEquipamentoAsync(equipamento);
+            if (res is null)
+                mensagem = "sem resposta";
+            else if (!res.Success)
+                mensagem = res.Message;
+            else
+                equipamento = Equipamento.Vazio;
+        }
+        catch (Exception ex)
+        {
+            mensagem = $"Erro: {ex.Message}";
+        }
+        finally
+        {
+            isProcessing = false;
+            StateHasChanged();
+            IsActive = false;
+        }
+    }
+}

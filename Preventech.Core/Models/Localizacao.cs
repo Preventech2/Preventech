@@ -1,12 +1,14 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Preventech.Core.Models;
 
 /// <summary>
 /// Localização de uma equipamento no campus
 /// </summary>
+[BindProperties]
 public class Localizacao
 {
     /// <summary>
@@ -14,38 +16,39 @@ public class Localizacao
     /// </summary>
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; set; } = int.MinValue;
+    public int Id { get; set; }
 
     /// <summary>
     /// Nome do qual essa localização em específico 
     /// </summary>
-    public string? Apelido { get; set; } = string.Empty;
+    [StringLength(80)]
+    public string? Apelido { get; set; }
 
     /// <summary>
     /// Número do campus
     /// </summary>
     /// 
-    public int Campus { get; set; } = 0;
+    public int Campus { get; set; }
 
     /// <summary>
     /// Número do prédio
     /// </summary>
-    public int Predio { get; set; } = 0;
+    public int Predio { get; set; }
 
     /// <summary>
     /// Número do andar
     /// </summary>
-    public int Andar { get; set; } = 0;
+    public int Andar { get; set; }
 
     /// <summary>
     /// Número da sala
     /// </summary>
-    public int Numero { get; set; } = 0;
+    public int Numero { get; set; }
 
     /// <summary>
     /// Técnico responsável pela sala
     /// </summary>
-    public Usuario? Responsavel { get; set; } = default;
+    public Usuario Responsavel { get; set; } = new();
 
     public Localizacao() { }
 
@@ -58,5 +61,10 @@ public class Localizacao
         this.Responsavel = Responsavel;
     } 
     
-    public override string ToString() => $"{(Apelido != null ? $"\"{Apelido}\" em " : "")}c{Campus}p{Predio}s{(Numero < 10 ? "0" : "")}{Numero}";
+    public override string ToString() => $"{Apelido ?? "s/n"} gerido por {Responsavel} em c{Campus}p{Predio}s{Numero}";
+
+    /// <summary>
+    /// Localização vazia utilizada para passar sobre filtros
+    /// </summary>
+    public static readonly Localizacao Vazia = new();
 }

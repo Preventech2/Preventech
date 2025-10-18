@@ -1,0 +1,115 @@
+@namespace Preventech.Server.Components.Modals
+@rendermode InteractiveServer
+
+@inject LocalizacaoService localizacaoService
+@inject UsuarioService usuarioService
+
+@inject IJSRuntime jsr
+
+<Modal @bind-IsActive="IsActive">
+    <MostrarMensagem @bind-Mensagem="mensagem" />
+
+    <EditForm Model="local" FormName="cadastrar-Localizacoes">
+        <h2>Cadastrar localização</h2>
+        <p><em>*</em> indica item obrigatório</p>
+        <div>
+            <label @*data-tooltip="Nome dado à um local, caso aplicável. Exemplos: 'LABFUND' ou 'DGO'" *@>Nome:</label>
+            <InputText @bind-Value="local!.Apelido" class="form-control" />
+        </div>
+        <div>
+            <label data-tooltip="Número do campus que esta localização se refere"><em>*</em>Campus:</label>
+            <InputNumber @bind-Value="local!.Campus" class="form-control" required />
+        </div>
+        <div>
+            <label data-tooltip="Número do prédio desta localização"><em>*</em>Prédio:</label>
+            <InputNumber @bind-Value="local!.Predio" class="form-control" required />
+        </div>
+        <div>
+            <label data-tooltip="Número do andar desta localização"><em>*</em>Andar:</label>
+            <InputNumber @bind-Value="local!.Andar" class="form-control" required />
+        </div>
+        <div>
+            <label data-tooltip="Número da sala"><em>*</em>Sala:</label>
+            <InputNumber @bind-Value="local!.Numero" class="form-control" required />
+        </div>
+        <div>
+            <label>Técnicos</label>
+            <select class="form-control" required>
+                @if (tecnicos != null && tecnicos.Any())
+                {
+                    <option value="" disabled></option>
+                    @foreach (var tecnico in tecnicos)
+                    {
+                        <option @onclick="@(() => local.Responsavel.Id = tecnico.Id)" value=@tecnico.Id>@tecnico.Nome</option>
+                    }
+                }
+                else
+                {
+                    <p><em>Técnicos não encontrados!</em></p>
+                }
+            </select>
+        </div>
+        <button @onclick="SubmitLoc" class="btn btn-primary" disabled="@isProcessing" autofocus>
+            @if (isProcessing)
+            {
+                <text>Cadastrando...</text>
+            }
+            else
+            {
+                <text>Cadastrar</text>
+            }
+        </button>
+    </EditForm>
+</Modal>
+
+@code {
+    [Parameter]
+    public bool IsActive { get; set; }
+
+    [SupplyParameterFromForm]
+    private Localizacao local { get; set; } = Localizacao.Vazia;
+    private IEnumerable<Usuario> tecnicos = new List<Usuario>();
+    private bool isProcessing = false;
+    public string mensagem = string.Empty;
+    protected override async Task OnInitializedAsync()
+    {
+        var restec = await usuarioService.GetUsuariosAsync();
+        var sucesso = restec != null && restec.Success;
+        if (!sucesso)
+        {
+            mensagem = $"Erro inesperado ao resgatar técnicos: {(restec is null ? "" : restec.Message)} : .";
+            return;
+        }
+        tecnicos = from tecnico in restec!.Data
+                   where tecnico.Grupo != null && tecnico.Grupo.Permissoes! != 0
+                   select tecnico;
+
+        return;
+    }
+
+    protected override bool ShouldRender() => IsActive;
+
+    private async Task SubmitLoc()
+    {
+        isProcessing = true;
+        mensagem = string.Empty;
+        StateHasChanged();
+        try
+        {
+            var resultado = await localizacaoService.AddLocalizacaoAsync(local);
+
+            mensagem = resultado.Message ?? "Erro inesperado ao cadastrar a localização";
+        }
+        catch (Exception ex)
+        {
+            mensagem = mensagem + $"Erro: {ex.Message}";
+        }
+        finally
+        {
+            isProcessing = false;
+            StateHasChanged();
+        }
+
+        return;
+    }
+}

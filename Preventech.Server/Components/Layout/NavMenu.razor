@@ -64,38 +64,8 @@
         </Authorized>
     </AuthorizeView>
 
-    <AuthorizeView Roles="@PerfilExtension.VisualizarOrdemDeServico">
-        <Authorized>
-            <nav class="nav flex-column">
-                <div class="nav-item pad-x">
-                    <button class="nav-link" @onclick="@(_ => AtivarModal(1))">Cadastrar Localização</button>
-                </div>
-            </nav>
-            <nav class="nav flex-column">
-                <div class="nav-item pad-x">
-                    <button class="nav-link" @onclick="@(_ => AtivarModal(2))">Editar Localização</button>
-                </div>
-            </nav>
-        </Authorized>
-    </AuthorizeView>
-
-    <AuthorizeView Roles="@PerfilExtension.VisualizarOrdemDeServico">
-        <Authorized>
-            <nav class="nav flex-column">
-                <div class="nav-item pad-x">
-                    <button class="nav-link" @onclick="@(_ => AtivarModal(3))">Cadastrar Equipamento</button>
-                </div>
-            </nav>
-        </Authorized>
-    </AuthorizeView>
 </div>
 <footer>Powered by Preventech</footer>
-
-<div id="nav-modais">
-    <Preventech.Server.Components.Modals.Localizacoes.Cadastrar Aberto="@(modal == 1)" Resetar=@resetar/>
-    <Preventech.Server.Components.Modals.Localizacoes.Editar    Aberto="@(modal == 2)" Resetar=@resetar/>
-    <Preventech.Server.Components.Modals.Equipamento.Cadastrar  Aberto="@(modal == 3)" Resetar=@resetar/>
-</div>
 
 @code {
 
@@ -105,7 +75,7 @@
     [CascadingParameter]
     private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
 
-    protected async Task AtivarModal(int num) {
+    protected void AtivarModal(int num) {
         modal = num;
         StateHasChanged();
     }

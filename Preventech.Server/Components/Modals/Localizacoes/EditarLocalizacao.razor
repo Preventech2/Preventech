@@ -1,0 +1,99 @@
+@namespace Preventech.Server.Components.Modals
+@rendermode InteractiveServer
+
+@inject LocalizacaoService localizacaoService
+@inject UsuarioService usuarioService
+
+<Modal @bind-IsActive="IsActive">
+    <MostrarMensagem @bind-Mensagem="mensagem" />
+    <h2>Editar localização</h2>
+
+    <form>
+        <label>Nome:</label> <InputText @bind-Value="Local!.Apelido" class="form-control" />
+        <label>Campus:</label> <InputNumber @bind-Value="Local!.Campus" class="form-control" />
+        <label>Prédio:</label> <InputNumber @bind-Value="Local!.Predio" class="form-control" />
+        <label>Andar:</label> <InputNumber @bind-Value="Local!.Andar" class="form-control" />
+        <label>Sala:</label> <InputNumber @bind-Value="Local!.Numero" class="form-control" />
+        <label>Técnicos</label>
+            <select class="form-control" required>
+                @if (tecnicos != null && tecnicos.Any())
+                {
+                    <option value=""></option>
+                    @foreach (var tecnico in tecnicos)
+                    {
+                        <option @onclick="@(() =>  Local.Responsavel.Id = tecnico.Id)" value=@tecnico.Id>@tecnico.Nome</option>
+                    }
+                }
+                else
+                {
+                    <p><em>Técnicos não encontrados!</em></p>
+                }
+            </select>
+        <button @onclick="EditarLoc" type="submit" class="btn btn-primary" disabled="@isProcessing" autofocus>
+        @if (isProcessing)
+            {
+            <p>Editando...</p>
+            }
+            else
+            {
+                <p>Editar</p>
+            }
+        </button>
+    </form>
+</Modal>
+
+@code {
+    [Parameter]
+    public bool IsActive { get; set; } = false;
+    [Parameter]
+    public Localizacao Local { get; set; } = Localizacao.Vazia;
+    [Parameter]
+    public EventCallback<Localizacao> LocalChanged { get; set; }
+    private IEnumerable<Usuario> tecnicos = new List<Usuario>();
+    private bool isProcessing = false;
+    public string mensagem = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var restec = await usuarioService.GetUsuariosAsync();
+        mensagem = restec.Message ?? "";
+        if (restec is null || !restec.Success)
+        {
+            return;
+        }
+        tecnicos = from tecnico in restec!.Data
+                   where tecnico.Grupo != null && tecnico.Grupo.Permissoes! != 0
+                   select tecnico;
+
+        return;
+    }
+
+    protected override bool ShouldRender() => IsActive;
+
+    private async Task EditarLoc()
+    {
+        isProcessing = true;
+        mensagem = string.Empty;
+        StateHasChanged();
+
+        try
+        {
+            var res = await localizacaoService.EditarLocalizacaoAsync(Local);
+            if (res == null)
+                mensagem = "sem resposta";
+            else if (!res.Success)
+                mensagem = res.Message;
+            else
+                Local = Localizacao.Vazia;   
+        }
+        catch (Exception ex)
+        {
+            mensagem = $"Erro: {ex.Message}";
+        }
+        finally
+        {
+            isProcessing = false;
+            StateHasChanged();
+        }
+    }
+}

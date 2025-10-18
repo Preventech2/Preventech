@@ -1,0 +1,87 @@
+﻿@namespace Preventech.Server.Components.Modals
+@rendermode InteractiveServer
+
+@inject LocalizacaoService localizacaoService
+@inject UsuarioService usuarioService
+@inject EquipamentoService equipamentoService;
+
+
+<Modal @bind-IsActive="IsActive">
+    <MostrarMensagem @bind-Mensagem="mensagem" />
+
+    <EditForm Model="equipamento" FormName="cadastrar-Equipamento">
+        <label>Nome:</label>
+        <InputText @bind-Value="equipamento!.Nome" class="form-control" />
+        <label>Patrimônio:</label>
+        <InputText @bind-Value="equipamento!.Patrimonio" class="form-control" />
+        @if (locais != null && locais.Any())
+        {
+            <div class="mb-3">
+                <label>Localização:</label>
+                <select class="form-control" required>
+                    <option value="" disabled></option>
+                    @foreach (var local in locais)
+                    {
+                        <option @onclick="@(() => equipamento.Local.Id = local.Id)" value="@local!.Id">@local.ToString()</option>
+                    }
+                </select>
+            </div>
+        }
+        else
+        {
+            <p><em>Carregando locais</em></p>
+        }
+        <button type="submit" @onclick="FormData" class="btn btn-primary" disabled="@isProcessing" autofocus>
+            @if (isProcessing)
+            {
+                <p>Cadastrando...</p>
+            }
+            else
+            {
+                <p>Cadastrar</p>
+            }
+        </button>
+    </EditForm>
+</Modal>
+
+@code {
+    [Parameter]
+    public bool IsActive { get; set; } = false;
+
+    [SupplyParameterFromForm]
+    private Equipamento equipamento { get; set; } = Equipamento.Vazio;
+    private IQueryable<Localizacao> locais = null!;
+    private string mensagem = string.Empty;
+    private bool isProcessing = false;
+    
+
+    protected override async Task OnInitializedAsync()
+    {
+        equipamento ??= new Equipamento();
+        var res = await localizacaoService.GetLocalizacoes(Localizacao.Vazia);
+        mensagem = res.Message;
+        if (res.Data != null)
+            locais = res.Data.AsQueryable();
+    }
+
+    private async Task FormData()
+    {
+        isProcessing = true;
+        mensagem = string.Empty;
+        StateHasChanged();
+        try
+        {
+            var resultado = await equipamentoService.AddEquipamentoAsync(equipamento!);
+            mensagem = resultado.Message ?? "Erro inesperado ao cadastrar o equipamento.";
+        }
+        catch (Exception ex)
+        {
+            mensagem = $"Erro: {ex.Message}";
+        }
+        finally
+        {
+            isProcessing = false;
+            StateHasChanged();
+        }
+    }
+}

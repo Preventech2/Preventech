@@ -1,0 +1,63 @@
+@page "/localizacoes"
+@rendermode InteractiveServer
+
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using Preventech.Core.DTOs
+
+@if (localizacoes == null)
+{
+    <p><em>Carregando...</em></p>
+}
+else if (!localizacoes.Any())
+{
+    <p><em>Nenhuma localização cadastrada.</em></p>
+}
+else
+{
+    <h3>Lista de Localizações</h3>
+}
+<MostrarMensagem @bind-Mensagem="mensagem" />
+
+<QuickGrid TGridItem="Localizacao" Items="@localizacoes">
+    <PropertyColumn Sortable="true" Property="@(item => item.Id)" Title="ID" />
+    <PropertyColumn Sortable="true" Property="@(item => item.Apelido)" Title="Nome" />
+    <PropertyColumn Sortable="true" Property="@(item => "C" + item.Campus)" Title="Campus" />
+    <PropertyColumn Property="@(item => "P" + item.Predio)" Title="Prédio" />
+    <PropertyColumn Property="@(item => item.Andar)" Title="Andar" />
+    <PropertyColumn Property="@(item => item.Numero)" Title="Sala" />
+    <PropertyColumn Property="@(item => item.Responsavel)" Title="Responsável" />
+    <TemplateColumn Title="Editar">
+        <button @onclick="@(() => AcionarEditar(context))">
+            Editar?
+        </button>
+    </TemplateColumn>
+</QuickGrid>
+
+<button @onclick="@(() => IsCadastrarActive = true)">Cadastrar novo laboratório</button>
+
+<CadastrarLocalizacao IsActive="@IsCadastrarActive" />
+<EditarLocalizacao IsActive="@IsEditarActive" @bind-Local="Local" />
+
+@code {
+    private bool IsCadastrarActive = false;
+    private bool IsEditarActive = false;
+    private IQueryable<Localizacao>? localizacoes = null;
+    private string mensagem = string.Empty;
+    private Localizacao? Local { get; set; } = Localizacao.Vazia;
+    [Inject]
+    LocalizacaoService localizacoesService { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        ApiResponse<List<Localizacao>> response = await localizacoesService.GetLocalizacoes();
+        mensagem = response.Message;
+        localizacoes = response.Data?.AsQueryable() ?? new List<Localizacao>().AsQueryable();
+    }
+
+    private async Task AcionarEditar(Localizacao item)
+    {
+        // 'item' contains the entire row data, including the ID
+        Local = item;
+        IsEditarActive = true;
+    }
+}

@@ -74,7 +74,7 @@
     protected override async Task OnInitializedAsync()
     {
         equipamento ??= new Equipamento();
-        var res = await localizacaoService.GetLocalizacoes(new Localizacao());
+        var res = await localizacaoService.GetLocalizacoes(Localizacao.Vazia);
         sucesso = res.Success;
         mensagemResultado = res.Message;
         if (res.Data != null)

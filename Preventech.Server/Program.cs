@@ -190,8 +190,7 @@ app.Use(async (context, next) =>
 
     if (path.EndsWith(".css") || path.EndsWith(".js") || path.EndsWith(".png"))
     {
-        Console.WriteLine($"Fazendo cache do arquivo \"{path}\"");
-        var tempo = 7 * 24 * 60 * 60;
+        var tempo = (int)TimeSpan.FromDays(7).TotalSeconds;
         context.Response.Headers.Append("Cache-Control", $"max-age={tempo}");
     }
     else
