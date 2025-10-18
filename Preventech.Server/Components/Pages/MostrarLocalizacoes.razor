@@ -28,7 +28,7 @@ else
     <PropertyColumn Property="@(item => item.Responsavel.Nome)" Title="Responsável" />
     <TemplateColumn Title="Editar">
         <button @onclick="@(() => AcionarEditar(context))">
-            Editar?
+            Editar
         </button>
     </TemplateColumn>
 </QuickGrid>
@@ -57,6 +57,7 @@ else
     private async Task AcionarEditar(Localizacao item)
     {
         // 'item' contains the entire row data, including the ID
+        Console.WriteLine($"Editar localização com ID: {item.Id}, Nome: {item.Apelido}");
         Local = item;
         IsEditarActive = true;
     }

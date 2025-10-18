@@ -107,16 +107,49 @@ namespace Preventech.Core.Controllers
         {
             try
             {
-                await context.Localizacoes
-                    .Where(x => x.Id == localizacao.Id)
-                    .ExecuteUpdateAsync(setter => setter
-                        .SetProperty(loc => loc.Apelido, localizacao.Apelido)
-                        .SetProperty(loc => loc.Campus, localizacao.Campus)
-                        .SetProperty(loc => loc.Predio, localizacao.Predio)
-                        .SetProperty(loc => loc.Andar, localizacao.Andar)
-                        .SetProperty(loc => loc.Numero, localizacao.Numero)
-                        .SetProperty(loc => loc.Responsavel, localizacao.Responsavel)
-                    );
+                // await context.Localizacoes
+                //     .Where(x => x.Id == localizacao.Id)
+                //     .ExecuteUpdateAsync(setter => setter
+                //         .SetProperty(loc => loc.Apelido, localizacao.Apelido)
+                //         .SetProperty(loc => loc.Campus, localizacao.Campus)
+                //         .SetProperty(loc => loc.Predio, localizacao.Predio)
+                //         .SetProperty(loc => loc.Andar, localizacao.Andar)
+                //         .SetProperty(loc => loc.Numero, localizacao.Numero)
+                //         .SetProperty(loc => loc.Responsavel, localizacao.Responsavel)
+                //     );
+
+                var locExistente = await context.Localizacoes
+                    .Include(loc => loc.Responsavel)
+                    .FirstOrDefaultAsync(loc => loc.Id == localizacao.Id);
+
+                if (locExistente == null)
+                {
+                    return new ApiResponse<Localizacao>
+                    {
+                        Success = false,
+                        Message = "Localização não encontrada",
+                        Data = null
+                    };
+                }
+
+                var locResponsavel = await context.Usuarios.FindAsync(localizacao.Responsavel.Id);
+
+                if (locResponsavel == null)
+                {
+                    return new ApiResponse<Localizacao>
+                    {
+                        Success = false,
+                        Message = "Responsável não encontrado",
+                        Data = null
+                    };
+                }
+
+                locExistente.Apelido = localizacao.Apelido;
+                locExistente.Campus = localizacao.Campus;
+                locExistente.Predio = localizacao.Predio;
+                locExistente.Andar = localizacao.Andar;
+                locExistente.Numero = localizacao.Numero;
+                locExistente.Responsavel = locResponsavel;
 
                 await context.SaveChangesAsync();
 

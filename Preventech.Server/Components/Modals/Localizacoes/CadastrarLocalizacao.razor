@@ -17,19 +17,19 @@
             <InputText @bind-Value="local!.Apelido" class="form-control" />
         </div>
         <div>
-            <label data-tooltip="Número do campus que esta localização se refere"><em>*</em>Campus:</label>
+            <label @*data-tooltip="Número do campus que esta localização se refere"*@><em>*</em>Campus:</label>
             <InputNumber @bind-Value="local!.Campus" class="form-control" required />
         </div>
         <div>
-            <label data-tooltip="Número do prédio desta localização"><em>*</em>Prédio:</label>
+            <label @*data-tooltip="Número do prédio desta localização"*@><em>*</em>Prédio:</label>
             <InputNumber @bind-Value="local!.Predio" class="form-control" required />
         </div>
         <div>
-            <label data-tooltip="Número do andar desta localização"><em>*</em>Andar:</label>
+            <label @*data-tooltip="Número do andar desta localização"*@><em>*</em>Andar:</label>
             <InputNumber @bind-Value="local!.Andar" class="form-control" required />
         </div>
         <div>
-            <label data-tooltip="Número da sala"><em>*</em>Sala:</label>
+            <label @*data-tooltip="Número da sala"*@><em>*</em>Sala:</label>
             <InputNumber @bind-Value="local!.Numero" class="form-control" required />
         </div>
         <div>
@@ -82,6 +82,7 @@
 
     private async Task ResetForm()
     {
+        local = new Localizacao();
         var restec = await usuarioService.GetUsuariosAsync();
         var sucesso = restec != null && restec.Success;
         if (sucesso)
@@ -95,8 +96,6 @@
     
     }
 
-    protected override bool ShouldRender() => IsActive;
-
     private async Task SubmitLoc()
     {
         isProcessing = true;
@@ -104,10 +103,19 @@
         StateHasChanged();
         try
         {
-            Console.WriteLine($"Responsavel ID: {local.Responsavel.Id}");
             var resultado = await localizacaoService.AddLocalizacaoAsync(local);
 
-            mensagem = resultado.Message ?? "Erro inesperado ao cadastrar a localização";
+            if (resultado != null && resultado.Success)
+            {
+                mensagem = "";
+                local = Localizacao.Vazia;
+                await ResetForm();
+                IsActive = false;
+            }
+            else
+            {
+                mensagem = resultado?.Message ?? "Erro inesperado ao cadastrar a localização";
+            }
         }
         catch (Exception ex)
         {
@@ -125,7 +133,6 @@
     // Informa ao componente pai a mudança do estado do Modal
     private async Task OnIsActiveChanged(bool isActive)
     {
-        Console.WriteLine("CadastrarLocalizacao - OnIsActiveChanged chamado");
         await ResetForm();
         IsActive = isActive;
         await IsActiveChanged.InvokeAsync(IsActive);

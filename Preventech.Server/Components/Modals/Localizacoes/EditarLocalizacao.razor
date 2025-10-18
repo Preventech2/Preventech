@@ -74,13 +74,11 @@
         }
     }
 
-    protected override bool ShouldRender() => IsActive;
-
     private async Task EditarLoc()
     {
         isProcessing = true;
         mensagem = string.Empty;
-        StateHasChanged();
+        @* StateHasChanged(); *@
 
         try
         {
@@ -90,7 +88,10 @@
             else if (!res.Success)
                 mensagem = res.Message;
             else
-                Local = Localizacao.Vazia;   
+            {
+                Console.WriteLine($"Localização editada com sucesso: {res.Data?.Apelido}"); 
+                Local = Localizacao.Vazia;
+            }
         }
         catch (Exception ex)
         {
@@ -99,7 +100,7 @@
         finally
         {
             isProcessing = false;
-            StateHasChanged();
+            @* StateHasChanged(); *@
         }
     }
 
