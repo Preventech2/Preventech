@@ -6,7 +6,7 @@
 
 @inject IJSRuntime jsr
 
-<Modal @bind-IsActive="IsActive">
+<Modal IsActive="@IsActive" IsActiveChanged="@OnIsActiveChanged">
     <MostrarMensagem @bind-Mensagem="mensagem" />
 
     <EditForm Model="local" FormName="cadastrar-Localizacoes">
@@ -33,21 +33,22 @@
             <InputNumber @bind-Value="local!.Numero" class="form-control" required />
         </div>
         <div>
-            <label>Técnicos</label>
-            <select class="form-control" required>
-                @if (tecnicos != null && tecnicos.Any())
-                {
-                    <option value="" disabled></option>
-                    @foreach (var tecnico in tecnicos)
+            <label>Gestores</label>
+            
+            @if (gestores != null && gestores.Any())
+            {
+                <InputSelect @bind-Value="@local!.Responsavel!.Id" class="form-control">
+                    <option value="0">Selecionar Gestor</option>
+                    @foreach (var gestor in gestores)
                     {
-                        <option @onclick="@(() => local.Responsavel.Id = tecnico.Id)" value=@tecnico.Id>@tecnico.Nome</option>
+                        <option value="@gestor.Id">@gestor.Nome</option>
                     }
-                }
-                else
-                {
-                    <p><em>Técnicos não encontrados!</em></p>
-                }
-            </select>
+                </InputSelect>
+            }
+            else
+            {
+                <p><em>Técnicos não encontrados!</em></p>
+            }
         </div>
         <button @onclick="SubmitLoc" class="btn btn-primary" disabled="@isProcessing" autofocus>
             @if (isProcessing)
@@ -66,25 +67,32 @@
     [Parameter]
     public bool IsActive { get; set; }
 
+    [Parameter]
+    public EventCallback<bool> IsActiveChanged { get; set; }
+
     [SupplyParameterFromForm]
     private Localizacao local { get; set; } = Localizacao.Vazia;
-    private IEnumerable<Usuario> tecnicos = new List<Usuario>();
+    private IEnumerable<Usuario> gestores = new List<Usuario>();
     private bool isProcessing = false;
     public string mensagem = string.Empty;
     protected override async Task OnInitializedAsync()
     {
+        await ResetForm();
+    }
+
+    private async Task ResetForm()
+    {
         var restec = await usuarioService.GetUsuariosAsync();
         var sucesso = restec != null && restec.Success;
-        if (!sucesso)
+        if (sucesso)
         {
-            mensagem = $"Erro inesperado ao resgatar técnicos: {(restec is null ? "" : restec.Message)} : .";
-            return;
+            gestores = from gestor in restec!.Data
+                    where gestor.Grupo != null && (gestor.Grupo.Permissoes & Perfil.EditarLaboratorio) != 0
+                    select gestor;
         }
-        tecnicos = from tecnico in restec!.Data
-                   where tecnico.Grupo != null && tecnico.Grupo.Permissoes! != 0
-                   select tecnico;
-
-        return;
+        else
+            mensagem = $"Erro inesperado ao resgatar gestores: {(restec is null ? "" : restec.Message)} : .";
+    
     }
 
     protected override bool ShouldRender() => IsActive;
@@ -96,6 +104,7 @@
         StateHasChanged();
         try
         {
+            Console.WriteLine($"Responsavel ID: {local.Responsavel.Id}");
             var resultado = await localizacaoService.AddLocalizacaoAsync(local);
 
             mensagem = resultado.Message ?? "Erro inesperado ao cadastrar a localização";
@@ -111,5 +120,14 @@
         }
 
         return;
+    }
+
+    // Informa ao componente pai a mudança do estado do Modal
+    private async Task OnIsActiveChanged(bool isActive)
+    {
+        Console.WriteLine("CadastrarLocalizacao - OnIsActiveChanged chamado");
+        await ResetForm();
+        IsActive = isActive;
+        await IsActiveChanged.InvokeAsync(IsActive);
     }
 }

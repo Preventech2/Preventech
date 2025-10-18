@@ -4,7 +4,7 @@
 @inject LocalizacaoService localizacaoService
 @inject EquipamentoService equipamentoService
 
-<Modal @bind-IsActive="IsActive">
+<Modal IsActive="IsActive" IsActiveChanged="@OnIsActiveChanged">
     <MostrarMensagem @bind-Mensagem="mensagem" />
 
     <EditForm Model="equipamento" FormName="cadastrar-Equipamento">
@@ -48,6 +48,9 @@
     public bool IsActive { get; set; } = false;
 
     [Parameter]
+    public EventCallback<bool> IsActiveChanged { get; set; }
+
+    [Parameter]
     public Equipamento equipamento { get; set; }
 
     [Parameter]
@@ -63,16 +66,30 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var res = await equipamentoService.GetEquipamentos(Equipamento.Vazio);
-        mensagem = res.Message ?? "";
+        await InitializeEquipamento();
+    }
+
+    private async Task InitializeEquipamento()
+    {
+        ApiResponse<List<Equipamento>>? res = await equipamentoService.GetEquipamentos(Equipamento.Vazio);
+        
+        if (res.Success == false)
+            mensagem = res.Message;
+        else
+            mensagem = string.Empty;
+        
 
         if (res.Data != null)
             equipamentos = res.Data!.AsQueryable();
         else
             equipamentos = (new List<Equipamento>()).AsQueryable();
 
-        var resloc = await localizacaoService.GetLocalizacoes(Localizacao.Vazia);
-        mensagem = resloc.Message ?? "";
+        ApiResponse<List<Localizacao>>? resloc = await localizacaoService.GetLocalizacoes(Localizacao.Vazia);
+
+        if (resloc.Success == false)
+            mensagem = resloc.Message;
+        else
+            mensagem = string.Empty;
 
         if (resloc.Data != null)
             localizacoes = resloc.Data!.AsQueryable();
@@ -105,5 +122,13 @@
             StateHasChanged();
             IsActive = false;
         }
+    }
+
+    // Informa ao componente pai a mudança do estado do Modal
+    private async Task OnIsActiveChanged(bool isActive)
+    {
+        await InitializeEquipamento();
+        IsActive = isActive;
+        await IsActiveChanged.InvokeAsync(IsActive);
     }
 }

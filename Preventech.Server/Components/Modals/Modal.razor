@@ -22,6 +22,7 @@
 
     private async Task CloseModal()
     {
+        Console.WriteLine("Modal - CloseModal chamado");
         IsActive = false;
         await IsActiveChanged.InvokeAsync(IsActive);
     }

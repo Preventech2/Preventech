@@ -6,7 +6,7 @@
 @inject EquipamentoService equipamentoService;
 
 
-<Modal @bind-IsActive="IsActive">
+<Modal IsActive="IsActive" IsActiveChanged="@OnIsActiveChanged">
     <MostrarMensagem @bind-Mensagem="mensagem" />
 
     <EditForm Model="equipamento" FormName="cadastrar-Equipamento">
@@ -48,6 +48,9 @@
     [Parameter]
     public bool IsActive { get; set; } = false;
 
+    [Parameter]
+    public EventCallback<bool> IsActiveChanged { get; set; }
+
     [SupplyParameterFromForm]
     private Equipamento equipamento { get; set; } = Equipamento.Vazio;
     private IQueryable<Localizacao> locais = null!;
@@ -57,9 +60,20 @@
 
     protected override async Task OnInitializedAsync()
     {
-        equipamento ??= new Equipamento();
-        var res = await localizacaoService.GetLocalizacoes(Localizacao.Vazia);
-        mensagem = res.Message;
+        await ResetForm();
+    }
+
+    private async Task ResetForm()
+    {
+        equipamento = new Equipamento();
+
+        ApiResponse<List<Localizacao>>? res = await localizacaoService.GetLocalizacoes(Localizacao.Vazia);
+        
+        if (res.Success == false)
+            mensagem = res.Message;
+        else
+            mensagem = string.Empty;
+
         if (res.Data != null)
             locais = res.Data.AsQueryable();
     }
@@ -83,5 +97,13 @@
             isProcessing = false;
             StateHasChanged();
         }
+    }
+
+    // Informa ao componente pai a mudança do estado do Modal
+    private async Task OnIsActiveChanged(bool isActive)
+    {
+        await ResetForm();
+        IsActive = isActive;
+        await IsActiveChanged.InvokeAsync(IsActive);
     }
 }

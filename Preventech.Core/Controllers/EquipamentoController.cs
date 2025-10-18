@@ -58,6 +58,8 @@ namespace Preventech.Core.Controllers
                 // qualquer coisa que não seja inline faz com que o LINQ
                 // chore 
                 var equipamentos = await context.Equipamentos
+                    .Include(eqp => eqp.Local)
+                    .Include(eqp => eqp.Local.Responsavel)
                     .Where(query => 
                         (string.IsNullOrWhiteSpace(filtro.Patrimonio) || filtro.Patrimonio == query.Patrimonio)
                      && (string.IsNullOrWhiteSpace(filtro.Nome) || filtro.Nome == query.Nome)

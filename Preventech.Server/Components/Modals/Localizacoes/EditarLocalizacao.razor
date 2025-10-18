@@ -4,7 +4,7 @@
 @inject LocalizacaoService localizacaoService
 @inject UsuarioService usuarioService
 
-<Modal @bind-IsActive="IsActive">
+<Modal IsActive="@IsActive" IsActiveChanged="@OnIsActiveChanged">
     <MostrarMensagem @bind-Mensagem="mensagem" />
     <h2>Editar localização</h2>
 
@@ -15,20 +15,20 @@
         <label>Andar:</label> <InputNumber @bind-Value="Local!.Andar" class="form-control" />
         <label>Sala:</label> <InputNumber @bind-Value="Local!.Numero" class="form-control" />
         <label>Técnicos</label>
-            <select class="form-control" required>
-                @if (tecnicos != null && tecnicos.Any())
-                {
-                    <option value=""></option>
-                    @foreach (var tecnico in tecnicos)
+            @if (gestores != null && gestores.Any())
+            {
+                <InputSelect @bind-Value="@Local!.Responsavel!.Id" class="form-control">
+                    <option value="0">Selecionar Gestor</option>
+                    @foreach (var gestor in gestores)
                     {
-                        <option @onclick="@(() =>  Local.Responsavel.Id = tecnico.Id)" value=@tecnico.Id>@tecnico.Nome</option>
+                        <option value="@gestor.Id">@gestor.Nome</option>
                     }
-                }
-                else
-                {
-                    <p><em>Técnicos não encontrados!</em></p>
-                }
-            </select>
+                </InputSelect>
+            }
+            else
+            {
+                <p><em>Técnicos não encontrados!</em></p>
+            }
         <button @onclick="EditarLoc" type="submit" class="btn btn-primary" disabled="@isProcessing" autofocus>
         @if (isProcessing)
             {
@@ -45,27 +45,33 @@
 @code {
     [Parameter]
     public bool IsActive { get; set; } = false;
+
+    [Parameter]
+    public EventCallback<bool> IsActiveChanged { get; set; }
+
     [Parameter]
     public Localizacao Local { get; set; } = Localizacao.Vazia;
     [Parameter]
     public EventCallback<Localizacao> LocalChanged { get; set; }
-    private IEnumerable<Usuario> tecnicos = new List<Usuario>();
+    private IEnumerable<Usuario> gestores = new List<Usuario>();
     private bool isProcessing = false;
     public string mensagem = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
+        await InitializeLocalizacao();
+    }
+
+    private async Task InitializeLocalizacao()
+    {
         var restec = await usuarioService.GetUsuariosAsync();
         mensagem = restec.Message ?? "";
-        if (restec is null || !restec.Success)
+        if (restec != null && restec.Success)
         {
-            return;
+            gestores = from gestor in restec!.Data
+                    where gestor.Grupo != null && (gestor.Grupo.Permissoes & Perfil.EditarLaboratorio) != 0
+                    select gestor;
         }
-        tecnicos = from tecnico in restec!.Data
-                   where tecnico.Grupo != null && tecnico.Grupo.Permissoes! != 0
-                   select tecnico;
-
-        return;
     }
 
     protected override bool ShouldRender() => IsActive;
@@ -95,5 +101,13 @@
             isProcessing = false;
             StateHasChanged();
         }
+    }
+
+    // Informa ao componente pai a mudança do estado do Modal
+    private async Task OnIsActiveChanged(bool isActive)
+    {
+        await InitializeLocalizacao();
+        IsActive = isActive;
+        await IsActiveChanged.InvokeAsync(IsActive);
     }
 }

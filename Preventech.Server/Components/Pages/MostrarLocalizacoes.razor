@@ -25,7 +25,7 @@ else
     <PropertyColumn Property="@(item => "P" + item.Predio)" Title="Prédio" />
     <PropertyColumn Property="@(item => item.Andar)" Title="Andar" />
     <PropertyColumn Property="@(item => item.Numero)" Title="Sala" />
-    <PropertyColumn Property="@(item => item.Responsavel)" Title="Responsável" />
+    <PropertyColumn Property="@(item => item.Responsavel.Nome)" Title="Responsável" />
     <TemplateColumn Title="Editar">
         <button @onclick="@(() => AcionarEditar(context))">
             Editar?
@@ -35,8 +35,8 @@ else
 
 <button @onclick="@(() => IsCadastrarActive = true)">Cadastrar novo laboratório</button>
 
-<CadastrarLocalizacao IsActive="@IsCadastrarActive" />
-<EditarLocalizacao IsActive="@IsEditarActive" @bind-Local="Local" />
+<CadastrarLocalizacao @bind-IsActive="@IsCadastrarActive" />
+<EditarLocalizacao @bind-IsActive="@IsEditarActive" @bind-Local="Local" />
 
 @code {
     private bool IsCadastrarActive = false;

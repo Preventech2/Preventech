@@ -25,6 +25,7 @@ namespace Preventech.Core.Controllers
             try
             {
                 var query = context.Localizacoes
+                    .Include(loc => loc.Responsavel)
                     .AsQueryable()
                     .Where(query =>
                         (filtro.Campus <= 0 || query.Campus == filtro.Campus)
