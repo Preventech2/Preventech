@@ -29,8 +29,9 @@ main {
 
 .sidebar {
     background: var(--preto);
+    max-height: 100vh;
+    overflow: hidden;
 }
-
 
 .top-row {
     background-color: var(--branco);

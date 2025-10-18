@@ -25,6 +25,14 @@ public class GrupoPerfilService(HttpClient httpClient)
         return result;
     }
 
+    public async Task<ApiResponse<GrupoPerfil>> GetGrupoPerfilByIdAsync(int id)
+    {
+        var response = await _httpClient.GetAsync($"api/grupos-perfis/{id}");
+        var result = await response.Content.ReadFromJsonAsync<ApiResponse<GrupoPerfil>>()
+        ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<GrupoPerfil>.");
+        return result;
+    }
+
     public async Task<ApiResponse<GrupoPerfil>?> EditGrupoPerfilAsync(GrupoPerfil grupoPerfil)
     {
         var response = await _httpClient.PostAsJsonAsync("api/grupos-perfis/editar", grupoPerfil);

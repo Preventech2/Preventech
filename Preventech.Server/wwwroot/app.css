@@ -152,3 +152,139 @@ em {
     margin-top: -50px;
     margin-left: 20px;
 }
+
+/* Configurando atributo option do InputSelect */
+select option {
+    color: var(--azul);
+    border-radius: 8px;
+}
+
+select option:checked {
+    color: var(--branco);
+    background-color: var(--azul);
+}
+
+select:focus {
+    outline: none;
+}
+
+.no-select {
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none;    /* Firefox */
+    -ms-user-select: none;     /* IE10+/Edge */
+    user-select: none;         /* Standard */
+}
+
+.edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* Minimalist quick-grid table */
+.quickgrid[theme=default] {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.quickgrid[theme=default] table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    font-size: .95rem;
+    color: var(--preto);
+    background: var(--branco);
+    box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+}
+
+.quickgrid[theme=default] th,
+.quickgrid[theme=default] td {
+    padding: .45rem .6rem;
+    text-align: left;
+    border-bottom: 1px solid var(--azul-claro);
+    vertical-align: middle;
+}
+
+.quickgrid[theme=default] th {
+    font-weight: 600;
+    font-size: .85rem;
+    color: var(--azul-escuro);
+    background: rgba(255,255,255,0.6);
+    /* position: sticky;
+    top: auto;
+    z-index: 1; */
+    text-transform: none;
+}
+
+.quickgrid[theme=default] tr:nth-child(even) td {
+    background: rgba(10,98,174,0.02); /* subtle striping */
+}
+
+.quickgrid[theme=default] tr:hover td {
+    background: rgba(10,98,174,0.04);
+}
+
+/* alignment helpers */
+.quickgrid[theme=default] .numeric { text-align: right; font-variant-numeric: tabular-nums; }
+.quickgrid[theme=default] .center  { text-align: center; }
+.quickgrid[theme=default] .nowrap  { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* compact mode */
+.quickgrid[theme=default].compact th,
+.quickgrid[theme=default].compact td {
+    padding: .25rem .4rem;
+    font-size: .9rem;
+}
+
+/* no borders (for card-like lists) */
+.quickgrid[theme=default].no-borders th,
+.quickgrid[theme=default].no-borders td {
+    border-bottom: none;
+}
+
+/* sortable header affordance */
+.quickgrid[theme=default] .sortable {
+    cursor: pointer;
+    user-select: none;
+}
+.quickgrid[theme=default] .sort-indicator {
+    opacity: .6;
+    margin-left: .35rem;
+    font-size: .8em;
+}
+
+/* responsive tweaks */
+@media (max-width: 640px) {
+    .quickgrid[theme=default] th,
+    .quickgrid[theme=default] td {
+        padding: .45rem .45rem;
+        font-size: .92rem;
+    }
+}
+
+.icon {
+    width: 2rem;
+    height: 2rem;
+}
+
+.btn-icon {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.col-actions {
+    width: 2rem;
+}
+
+.col-actions-2 {
+    width: 4rem;
+}
+
+.col-actions .btn-icon, .col-actions-2 section {
+    width: 100%;
+}

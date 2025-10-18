@@ -4,10 +4,10 @@
 
 @inject HabilidadeSistemaService HabilidadeSistemaService
 
-<Modal @bind-IsActive="IsActive">
+<Modal IsActive="IsActive" IsActiveChanged="@OnIsActiveChanged">
     <MostrarMensagem @bind-Mensagem="mensagem" />
     <h3>Editar Habilidade do Sistema</h3>
-    <EditForm Model="@novaHabilidade" OnValidSubmit="@EditarHabilidadeSistema">
+    <EditForm class="edit-form" Model="@novaHabilidade" OnValidSubmit="@EditarHabilidadeSistema">
         <DataAnnotationsValidator />
         <ValidationSummary />
 
@@ -24,11 +24,6 @@
 
         <button type="submit" class="btn btn-primary" disabled="@IsProcessing">Editar</button>
     </EditForm>
-
-    <section class="info-section">
-        <p>Essas habilidades do sistema definem quais possíveis habilidades os usuários podem ter.</p>
-        <p>Adicione com base nas necessidades das manutenções.</p>
-    </section>
 </Modal>
 
 @code {
@@ -37,6 +32,9 @@
 
     [Parameter]
     public EventCallback OnHabilidadeEditada { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsActiveChanged { get; set; }
 
     [Parameter]
     public int HabilidadeId { get; set; }
@@ -50,10 +48,6 @@
 
     public string mensagem = string.Empty;
     private bool IsProcessing { get; set; } = false;
-
-    // Variáveis para controlar mudanças
-    private bool _previousIsActive = false;
-    private int _previousHabilidadeId = 0;
 
     private async Task EditarHabilidadeSistema()
     {
@@ -75,9 +69,9 @@
 
     private async Task CarregarHabilidade()
     {
+        mensagem = string.Empty; // Limpa mensagens anteriores
         if (HabilidadeId > 0)
         {
-            mensagem = string.Empty; // Limpa mensagens anteriores
             ApiResponse<HabilidadeSistema> response = await HabilidadeSistemaService.GetHabilidadeByIdAsync(HabilidadeId);
             if (response.Success && response.Data != null)
             {
@@ -103,26 +97,21 @@
     protected override async Task OnInitializedAsync()
     {
         await CarregarHabilidade();
-        _previousIsActive = IsActive;
-        _previousHabilidadeId = HabilidadeId;
     }
 
     protected override async Task OnParametersSetAsync()
     {
-        // Verifica se o modal foi ativado (false -> true)
-        bool modalFoiAtivado = !_previousIsActive && IsActive;
-        
-        // Verifica se o HabilidadeId mudou
-        bool idMudou = _previousHabilidadeId != HabilidadeId;
-
-        // Recarrega se o modal foi ativado OU se o ID mudou
-        if (modalFoiAtivado || idMudou)
+        // Recarrega se o modal foi ativado
+        if (IsActive)
         {
             await CarregarHabilidade();
         }
+    }
 
-        // Atualiza os valores anteriores
-        _previousIsActive = IsActive;
-        _previousHabilidadeId = HabilidadeId;
+    // Informa ao componente pai a mudança do estado do Modal
+    private async Task OnIsActiveChanged(bool isActive)
+    {
+        IsActive = isActive;
+        await IsActiveChanged.InvokeAsync(IsActive);
     }
 }

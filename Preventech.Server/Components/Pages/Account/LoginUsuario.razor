@@ -13,30 +13,32 @@
 
 <MostrarMensagem @bind-Mensagem="@mensagem" />
 
-<EditForm Model="@usuario" OnValidSubmit="HandleValidSubmit">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+<PageSection>
+    <EditForm Model="@usuario" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
 
-    <div class="mb-3">
-        <label for="cpf" class="form-label">CPF</label>
-        <CpfInput id="cpf" @bind-Cpf="usuario.Cpf" />
-    </div>
-    <div class="mb-3">
-        <label for="senha" class="form-label">Senha</label>
-        <InputText id="senha" type="password" class="form-control" @bind-Value="usuario.Senha" />
-    </div>
-    <button type="submit" class="btn btn-primary" disabled="@isProcessing">
-        @if (isProcessing)
-        {
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-        }
-        else
-        {
-            <text>Entrar</text>
-        }
-    </button>
-    <p><a href="/signup">Não tem uma conta? Cadastre-se</a></p>
-</EditForm>
+        <div class="mb-3">
+            <label for="cpf" class="form-label">CPF</label>
+            <CpfInput id="cpf" @bind-Cpf="usuario.Cpf" />
+        </div>
+        <div class="mb-3">
+            <label for="senha" class="form-label">Senha</label>
+            <InputText id="senha" type="password" class="form-control" @bind-Value="usuario.Senha" />
+        </div>
+        <button type="submit" class="btn btn-primary" disabled="@isProcessing">
+            @if (isProcessing)
+            {
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            }
+            else
+            {
+                <text>Entrar</text>
+            }
+        </button>
+        <p><a href="/signup">Não tem uma conta? Cadastre-se</a></p>
+    </EditForm>
+</PageSection>
 
 @code {
     private Usuario usuario = new Usuario();

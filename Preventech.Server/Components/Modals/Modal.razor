@@ -1,9 +1,9 @@
 ﻿@rendermode InteractiveServer
 
-<main class="@(IsActive ? "modal-opened" : "modal-closed")">
-    <section class="modal-section">
-        <span class="modal-close" @onclick="CloseModal">&times;</span>
-        <div class="modal-content">
+<main class="@(IsActive ? "modal-opened" : "modal-closed") no-select">
+    <section class="modal-section no-select">
+        <span class="modal-close no-select" @onclick="CloseModal"><div class="close-btn-icon" /></span>
+        <div class="modal-content no-select">
             @ChildContent
         </div>
     </section>

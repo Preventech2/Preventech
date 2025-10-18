@@ -4,59 +4,60 @@
 
 <h3>Editar Grupo do Usuário</h3>
 
-<MostrarMensagem @bind-Mensagem="@mensagem" />
+<PageSection>
+    <MostrarMensagem @bind-Mensagem="@mensagem" />
+    @if (!userSelected)
+    {
+        <EditForm Model="@usuario" OnValidSubmit="BuscarUsuario">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
 
-@if (!userSelected)
-{
-    <EditForm Model="@usuario" OnValidSubmit="BuscarUsuario">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
+            <div class="mb-3">
+                <label for="cpf" class="form-label">Cpf</label>
+                <CpfInput id="cpf" @bind-Cpf="usuario.Cpf" />
+            </div>
+            <button type="submit" class="btn btn-primary" disabled="@isProcessing">
+                @if (isProcessing)
+                {
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                }
+                else
+                {
+                    <text>Selecionar usuário</text>
+                }
+            </button>
+        </EditForm>
+    }
+    else
+    {
+        <EditForm Model="@usuario" OnValidSubmit="EditarGrupo">
+            <AntiforgeryToken />
+            <DataAnnotationsValidator />
+            <ValidationSummary />
 
-        <div class="mb-3">
-            <label for="cpf" class="form-label">Cpf</label>
-            <CpfInput id="cpf" @bind-Cpf="usuario.Cpf" />
-        </div>
-        <button type="submit" class="btn btn-primary" disabled="@isProcessing">
-            @if (isProcessing)
-            {
-                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            }
-            else
-            {
-                <text>Selecionar usuário</text>
-            }
-        </button>
-    </EditForm>
-}
-else
-{
-    <EditForm Model="@usuario" OnValidSubmit="EditarGrupo">
-        <AntiforgeryToken />
-        <DataAnnotationsValidator />
-        <ValidationSummary />
+            <div class="mb-3">
+                <label for="cpf" class="form-label">Cpf</label>
+                <h6 id="cpf">@FormatCpf(usuario.Cpf)</h6>
+            </div>
+            
+            <SelecionarGrupo @bind-Grupo="usuario.Grupo" />
 
-        <div class="mb-3">
-            <label for="cpf" class="form-label">Cpf</label>
-            <h6 id="cpf">@FormatCpf(usuario.Cpf)</h6>
-        </div>
-        
-        <SelecionarGrupo @bind-Grupo="usuario.Grupo" />
-
-        <button type="submit" class="btn btn-primary" disabled="@isProcessing">
-            @if (isProcessing)
-            {
-                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            }
-            else
-            {
-                <text>Mudar grupo</text>
-            }
-        </button>
-        <button type="button" class="btn btn-secondary" disabled="@isProcessing" @onclick="Cancelar">
-            <text>Cancelar</text>
-        </button>
-    </EditForm>
-}
+            <button type="submit" class="btn btn-primary" disabled="@isProcessing">
+                @if (isProcessing)
+                {
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                }
+                else
+                {
+                    <text>Mudar grupo</text>
+                }
+            </button>
+            <button type="button" class="btn btn-secondary" disabled="@isProcessing" @onclick="Cancelar">
+                <text>Cancelar</text>
+            </button>
+        </EditForm>
+    }
+</PageSection>
 
 @code {
     [Inject]

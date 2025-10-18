@@ -7,9 +7,8 @@ using System.Security.Cryptography;
 
 namespace Preventech.Core.Services;
 
-public class UsuarioService(HttpClient httpClient, ILogger<UsuarioService> logger)
+public class UsuarioService(HttpClient httpClient)
 {
-    private readonly ILogger<UsuarioService> _logger = logger;
     private readonly HttpClient _httpClient = httpClient;
 
     public async Task<ApiResponse<Usuario>> AddUsuarioAsync(Usuario usuario)
