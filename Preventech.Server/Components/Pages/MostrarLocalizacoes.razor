@@ -1,6 +1,8 @@
 @page "/laboratorios"
 @rendermode InteractiveServer
 
+@attribute [Authorize(Roles = PerfilExtension.VisualizarLaboratorio)]
+
 @using Microsoft.AspNetCore.Components.QuickGrid
 @using Preventech.Core.DTOs
 
@@ -16,8 +18,8 @@
         @* <PropertyColumn Sortable="true" Property="@(item => item.Id)" Title="ID" /> *@
         <PropertyColumn Sortable="true" Property="@(item => item.Apelido)" Title="Nome" />
         <PropertyColumn Sortable="true" Property="@(item => "C" + item.Campus)" Title="Campus" />
-        <PropertyColumn Property="@(item => "P" + item.Predio)" Title="Prédio" />
-        <PropertyColumn Property="@(item => item.Andar)" Title="Andar" />
+        <PropertyColumn Class="d-none d-md-table-cell" Property="@(item => "P" + item.Predio)" Title="Prédio" />
+        <PropertyColumn Class="d-none d-md-table-cell" Property="@(item => item.Andar)" Title="Andar" />
         <PropertyColumn Property="@(item => item.Numero)" Title="Sala" />
         <PropertyColumn Property="@(item => item.Responsavel.Nome)" Title="Responsável" />
         <TemplateColumn Class="col-actions" Title="Ações">

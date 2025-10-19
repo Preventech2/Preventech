@@ -1,5 +1,7 @@
 ﻿@page "/admin/grupos"
 
+@attribute [Authorize(Roles = PerfilExtension.Admin)]
+
 @rendermode InteractiveServer
 
 @inject GrupoPerfilService grupoPerfilService

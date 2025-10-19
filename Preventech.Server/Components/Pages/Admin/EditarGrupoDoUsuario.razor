@@ -1,5 +1,7 @@
 ﻿@page "/admin/editar-grupo-usuario"
 
+@attribute [Authorize(Roles = PerfilExtension.Admin)]
+
 @rendermode InteractiveServer
 
 <h3>Editar Grupo do Usuário</h3>

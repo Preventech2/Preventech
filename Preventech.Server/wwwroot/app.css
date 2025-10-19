@@ -19,11 +19,12 @@ body {
     font-family: Inter, monospace;
     margin: 0;
     padding: 0;
-    background-color: var(--azul-claro);
+    background-color: var(--azul-claro) !important;
+    height: 100%; min-height: 100%;
 }
 
 body {
-    min-height: 100vh;
+    /* min-height: 100vh; */
     min-width: 100%;
 }
 
@@ -259,8 +260,49 @@ select:focus {
 @media (max-width: 640px) {
     .quickgrid[theme=default] th,
     .quickgrid[theme=default] td {
-        padding: .45rem .45rem;
+        padding: .45rem 0.1rem;
         font-size: .92rem;
+    }
+
+    .quickgrid[theme=default] td.col-justify-start {
+        padding-right: 0.1rem;
+    }
+
+    .quickgrid[theme=default] th .col-header-content, .quickgrid[theme=default] th .col-title {
+        padding-right: 0;
+    }
+
+    .sort-indicator {
+        margin-left: 0rem !important;
+    }
+}
+
+@media (max-width: 380px) {
+    .quickgrid[theme=default] th,
+    .quickgrid[theme=default] td {
+        padding: .45rem 0rem;
+        font-size: .7rem;
+    }
+
+    .quickgrid[theme=default] td.col-justify-start {
+        padding-right: 0rem;
+    }
+
+    .quickgrid[theme=default] th .col-header-content, .quickgrid[theme=default] th .col-title {
+        padding-right: 0;
+    }
+
+    .icon {
+        width: 1.5rem !important;
+        height: 1.5rem !important;
+    }
+
+    .col-actions {
+        width: 1.5rem;
+    }
+
+    .col-actions-2 {
+        width: 2rem;
     }
 }
 
@@ -324,7 +366,7 @@ input[type=file] {
 input[type=file]::file-selector-button {
   margin-right: 20px;
   border: none;
-  background: #084cdf;
+  background: var(--azul-escuro);
   padding: 10px 20px;
   border-radius: 10px;
   color: #fff;
@@ -334,4 +376,30 @@ input[type=file]::file-selector-button {
 
 input[type=file]::file-selector-button:hover {
   background: #0d45a5;
+}
+
+/* Estilos do nome do usuário no navmenu */
+.navmenu-top {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.navbar-brand {
+    margin: 0 !important;
+}
+
+/* Estilos da foto de perfil no navmenu */
+.profile-picture-container {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: inline-block;
+}
+
+.profile-picture {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }

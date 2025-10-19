@@ -1,5 +1,7 @@
 ﻿@page "/admin/painel"
 
+@attribute [Authorize(Roles = PerfilExtension.Admin)]
+
 <HeaderTitle Title="Painel de Admin" />
 
 <article>

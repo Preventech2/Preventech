@@ -1,5 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Mvc.ModelBinding
 
+@attribute [Authorize(Roles = PerfilExtension.Admin)]
+
 @rendermode InteractiveServer
 
 @inject GrupoPerfilService grupoPerfilService

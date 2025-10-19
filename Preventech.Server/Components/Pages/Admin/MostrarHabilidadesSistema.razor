@@ -1,5 +1,7 @@
 @page "/admin/habilidades-sistema"
 
+@attribute [Authorize(Roles = PerfilExtension.Admin)]
+
 @rendermode InteractiveServer
 
 @inject HabilidadeSistemaService habilidadeSistemaService

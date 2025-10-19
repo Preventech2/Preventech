@@ -14,7 +14,7 @@
 <MostrarMensagem @bind-Mensagem="@mensagem" />
 
 <PageSection>
-    <EditForm Model="@usuario" OnValidSubmit="HandleValidSubmit">
+    <EditForm class="edit-form" Model="@usuario" OnValidSubmit="HandleValidSubmit">
         <DataAnnotationsValidator />
         <ValidationSummary />
 

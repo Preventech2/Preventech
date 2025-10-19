@@ -1,5 +1,7 @@
 ﻿@namespace Preventech.Server.Components.Pages
 
+@attribute [Authorize(Roles = PerfilExtension.Admin)]
+
 <div style="margin-bottom: 0;">
     @foreach (Perfil perfil in perfis)
     {

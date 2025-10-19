@@ -27,6 +27,10 @@
     text-decoration: none;
 }
 
+.navbar-toggler {
+    display: none;
+}
+
 .navbar-toggler:checked {
     background-color: rgba(255, 255, 255, 0.5);
 }
@@ -153,6 +157,10 @@
     display: flex;
 }
 
+:has(.navbar-toggler:not(:checked)) footer {
+    display: none;
+}
+
 footer {
     display: flex;
     flex-direction: column;
@@ -170,6 +178,10 @@ footer p {
 }
 
 @media (min-width: 641px) {
+    .btn-navbar-toggler {
+        display: none;
+    }
+
     .navbar-toggler {
         display: none;
     }

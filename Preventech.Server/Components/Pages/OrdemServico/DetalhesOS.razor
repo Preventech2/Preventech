@@ -1,4 +1,7 @@
 @page "/ordens-servico/{id:guid}"
+
+@attribute [Authorize(Roles = PerfilExtension.VisualizarOrdemDeServico)]
+
 @rendermode InteractiveServer
 
 @using Microsoft.AspNetCore.Components.QuickGrid
@@ -52,19 +55,23 @@ else
             }
 
             @if (ordem.TecnicoResponsavel == null) {
-                <EditForm Model="ordem" OnSubmit="FormData" FormName="pegar-Ordem-Servico">
-                    <button type="submit" class="btn btn-primary" disabled="@isProcessing">
-                        @if (isProcessing)
-                        {
-                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                            <span class="visually-hidden">Processando...</span>
-                        }
-                        else
-                        {
-                            <text>Pegar ordem</text>
-                        }
-                    </button>
-                </EditForm>      
+                <AuthorizeView Roles="@PerfilExtension.EditarOrdemDeServico">
+                    <Authorized Context="authContext">
+                    <EditForm Model="ordem" OnSubmit="FormData" FormName="pegar-Ordem-Servico">
+                        <button type="submit" class="btn btn-primary" disabled="@isProcessing">
+                            @if (isProcessing)
+                            {
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                <span class="visually-hidden">Processando...</span>
+                            }
+                            else
+                            {
+                                <text>Pegar ordem</text>
+                            }
+                        </button>
+                    </EditForm> 
+                    </Authorized>
+                </AuthorizeView>     
             }
 
             else if (ordem.TecnicoResponsavel.Id == userInfo?.Id && ordem.Status != StatusOS.Concluida) {
@@ -158,7 +165,6 @@ else
                 <p><strong>Técnico Responsável:</strong> @ordem.TecnicoResponsavel.Nome</p>
                 <p><strong>Descrição da solução:</strong> @ordem.DescricaoSolucao</p>
                 <p><strong>Data de Conclusão:</strong> @ordem.DataConclusão</p>
-
             }
 
             else {
@@ -167,6 +173,7 @@ else
         </section>
     </PageSection>
 }
+
 @code {
     private OrdemServico ordem = null!;
     private Equipamento equipamento = null!;

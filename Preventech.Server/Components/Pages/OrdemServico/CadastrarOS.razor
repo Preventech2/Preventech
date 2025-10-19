@@ -1,4 +1,7 @@
 ﻿@page "/cadastrar/ordem-servico"
+
+@attribute [Authorize(Roles = PerfilExtension.CriarOrdemDeServico)]
+
 @rendermode InteractiveServer
 @inject UserClaimsHelper UserClaimsHelper
 

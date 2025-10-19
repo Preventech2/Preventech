@@ -10,18 +10,21 @@
     <EditFormUser />
 </PageSection>
 
-<PageSection>
-    <section class="header-section">
-        <h4>Habilidades</h4>
-        <button class="btn-icon" @onclick="AdicionarHabilidade"><img class="icon" src="img/add-icon.svg" alt="" /></button>
-    </section>
-    <section class="body-section">
-        <GridHabilidades EditarHabilidade="@EditarHabilidade" @bind-NeedUpdate="GridHabilidadesNeedUpdate" />
-    </section>
-</PageSection>
+<AuthorizeView Roles="@PerfilExtension.PossuirHabilidades">
+    <PageSection>
+        <section class="header-section">
+            <h4>Habilidades</h4>
+            <button class="btn-icon" @onclick="AdicionarHabilidade"><img class="icon" src="img/add-icon.svg" alt="" /></button>
+        </section>
 
-<ModalAdicionarHabilidade @bind-IsActive="@IsAddModalActive" OnHabilidadeAdicionada="OnHabilidadeAdicionada" />
-<ModalEditarHabilidade @bind-IsActive="@IsEditModalActive" @bind-HabilidadeId="@habilidadeEdicaoId" OnHabilidadeEditada="OnHabilidadeEditada" />
+        <section class="body-section">
+            <GridHabilidades EditarHabilidade="@EditarHabilidade" @bind-NeedUpdate="GridHabilidadesNeedUpdate" />
+        </section>
+    </PageSection>
+
+    <ModalAdicionarHabilidade @bind-IsActive="@IsAddModalActive" OnHabilidadeAdicionada="OnHabilidadeAdicionada" />
+    <ModalEditarHabilidade @bind-IsActive="@IsEditModalActive" @bind-HabilidadeId="@habilidadeEdicaoId" OnHabilidadeEditada="OnHabilidadeEditada" />
+</AuthorizeView>
 
 @code {
     private bool IsAddModalActive { get; set; } = false;

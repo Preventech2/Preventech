@@ -6,21 +6,25 @@
 @rendermode InteractiveServer
 
 @inject UserClaimsHelper UserClaimsHelper
-@inject IJSRuntime jsr
+
 <div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
+    <div class="navmenu-top">
+        <button class="btn-icon btn-navbar-toggler" @onclick="@(() => IsMenuOpen = !IsMenuOpen)"><img class="icon" src="img/menu-btn.svg" alt="" /></button>
         <AuthorizeView>
             <Authorized>
+                @* trocar para pegar a foto de perfil do usuário *@
+                <div class="profile-picture-container"><img src="img/default-profile-picture.svg" alt="" class="profile-picture" /></div>
                 <a class="navbar-brand" href="meu-perfil">@userInfo.DisplayName()</a>
             </Authorized>
             <NotAuthorized>
+                <div class="profile-picture-container"><img src="img/default-profile-picture.svg" alt="" class="profile-picture" /></div>
                 <a class="navbar-brand" href="">Usuario</a>
             </NotAuthorized>
         </AuthorizeView>
     </div>
 </div>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+<input type="checkbox" checked="@IsMenuOpen" title="Navigation menu" class="navbar-toggler" />
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="nav flex-column">
@@ -94,6 +98,8 @@
     private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
 
     private UserInfo userInfo = new UserInfo();
+
+    private bool IsMenuOpen = false;
 
     protected override async Task OnInitializedAsync()
     {
