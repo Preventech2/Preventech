@@ -25,13 +25,11 @@ else
     <PropertyColumn Sortable="true" Property="@(item => item.Nome)" Title="Nome" />
     <PropertyColumn Property="@(item => item.Local)" Title="Local" />
     <TemplateColumn Title="Editar">
-        <button @onclick="@(() => AcionarEditar(context))">
-            Editar?
-        </button>
+        <button class="btn-icon" @onclick="() => AcionarEditar(context)"><img class="icon" src="img/edit-icon.svg" alt="" /></button>
     </TemplateColumn>
 </QuickGrid>
 
-<button @onclick="@(() => IsCadastrarActive = true)">Cadastrar novo Equipamento</button>
+<button @onclick="@(() => IsCadastrarActive = true)">Adicionar</button>
 
 <CadastrarEquipamento @bind-IsActive="@IsCadastrarActive" />
 <EditarEquipamento @bind-IsActive="@IsEditarActive" @bind-equipamento="equipamento" />

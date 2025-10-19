@@ -16,14 +16,13 @@
         {
             <div class="mb-3">
                 <label>Localização:</label>
-                <select class="form-control" required>
-                    <option value="" disabled></option>
+                <InputSelect @bind-Value="@equipamento.Local.Id" class="form-control">
+                    <option value="0">Selecionar local</option>
                     @foreach (var local in localizacoes)
                     {
-                        <option @onclick="@(() => equipamento.Local.Id = local.Id)" value="@local!.Id">@local.ToString()
-                        </option>
+                        <option value="@local.Id">@local.ToString()</option>
                     }
-                </select>
+                </InputSelect>
             </div>
         }
         else
@@ -71,6 +70,7 @@
 
     private async Task InitializeEquipamento()
     {
+        equipamento = new Equipamento { Local = new Localizacao() };
         ApiResponse<List<Equipamento>>? res = await equipamentoService.GetEquipamentos(Equipamento.Vazio);
         
         if (res.Success == false)
@@ -111,6 +111,7 @@
                 mensagem = res.Message;
             else
                 equipamento = Equipamento.Vazio;
+            Console.WriteLine($"Equipamento editado com sucesso: {res.Data?.Nome}");
         }
         catch (Exception ex)
         {

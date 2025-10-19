@@ -95,18 +95,40 @@ namespace Preventech.Core.Controllers
         [HttpPatch]
         public async Task<ApiResponse<Equipamento>> EditarEquipamento([FromBody] Equipamento equipamento)
         {
-            Console.WriteLine(equipamento);
-            using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
-                /// TODO: arrumar um jeito de fazer update do local
-                await context.Equipamentos
-                   .Where(x => x.Id == equipamento.Id)
-                   .ExecuteUpdateAsync(setter => setter
-                       .SetProperty(eqp => eqp.Nome, equipamento.Nome)
-                       .SetProperty(eqp => eqp.Patrimonio, equipamento.Patrimonio)
-                   );
-                await transaction.CommitAsync();
+
+                var updatedEquipamento = await context.Equipamentos
+                    .Include(eqp => eqp.Local)
+                    .Include(eqp => eqp.Local.Responsavel)
+                    .FirstOrDefaultAsync(eqp => eqp.Id == equipamento.Id);
+
+                if (updatedEquipamento == null)
+                {
+                    return new ApiResponse<Equipamento>
+                    {
+                        Success = false,
+                        Message = "Equipamento não encontrado",
+                        Data = null
+                    };
+                }
+
+                var novoLocal = await context.Localizacoes.FindAsync(equipamento.Local.Id);
+
+                if (novoLocal == null)
+                {
+                    return new ApiResponse<Equipamento>
+                    {
+                        Success = false,
+                        Message = "Localização não encontrada",
+                        Data = null
+                    };
+                }
+
+                updatedEquipamento.Nome = equipamento.Nome;
+                updatedEquipamento.Patrimonio = equipamento.Patrimonio;
+                updatedEquipamento.Local = novoLocal;
+
                 await context.SaveChangesAsync();
 
                 return new ApiResponse<Equipamento>
@@ -118,7 +140,6 @@ namespace Preventech.Core.Controllers
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync();
                 return new ApiResponse<Equipamento>
                 {
                     Success = false,

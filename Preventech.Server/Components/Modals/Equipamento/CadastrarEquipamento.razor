@@ -18,13 +18,13 @@
         {
             <div class="mb-3">
                 <label>Localização:</label>
-                <select class="form-control" required>
-                    <option value="" disabled></option>
+                <InputSelect @bind-Value="@equipamento.Local.Id" class="form-control">
+                    <option value="0">Selecionar local</option>
                     @foreach (var local in locais)
                     {
-                        <option @onclick="@(() => equipamento.Local.Id = local.Id)" value="@local!.Id">@local.ToString()</option>
+                        <option value="@local.Id">@local.ToString()</option>
                     }
-                </select>
+                </InputSelect>
             </div>
         }
         else
@@ -52,7 +52,7 @@
     public EventCallback<bool> IsActiveChanged { get; set; }
 
     [SupplyParameterFromForm]
-    private Equipamento equipamento { get; set; } = Equipamento.Vazio;
+    private Equipamento equipamento { get; set; } = new Equipamento();
     private IQueryable<Localizacao> locais = null!;
     private string mensagem = string.Empty;
     private bool isProcessing = false;
