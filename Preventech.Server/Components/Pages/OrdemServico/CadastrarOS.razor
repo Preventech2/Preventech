@@ -2,76 +2,82 @@
 @rendermode InteractiveServer
 @inject UserClaimsHelper UserClaimsHelper
 
-<PageTitle>Cadastrar uma Ordem de Serviço</PageTitle>
+<HeaderTitle Title="Ordem de Serviço" />
 
-<h1>Cadastrar OS</h1>
+<MostrarMensagem @bind-Mensagem="mensagemResultado" />
 
-
-@if (!string.IsNullOrEmpty(mensagemResultado))
-{
-    <div class="alert @(sucesso ? "alert-success" : "alert-danger")" role="alert">
-        @mensagemResultado
-    </div>
-}
-
-<EditForm Model="ordemServico" OnSubmit="FormData" FormName="cadastrar-Ordem-Servico">
-    <div class="mb-3">
-        <label>Título:
+<PageSection>
+    <section class="header-section">
+        <h4>Cadastrar OS</h4>
+    </section>
+    <EditForm class="edit-form" Model="ordemServico" OnSubmit="FormData" FormName="cadastrar-Ordem-Servico">
+        <div class="form-group">
+            <label for="titulo">Título</label>
             <InputText @bind-Value="ordemServico!.Titulo" class="form-control"/>
-        </label>
-    </div>
-
-    <div class="mb-3">
-        <label>Descrição:
-            <InputTextArea @bind-Value="ordemServico!.Descricao" class="form-control"/>
-        </label>
-    </div>
-
-    <div class="mb-3">
-        <label>Alguma observação?
-            <InputTextArea @bind-Value="ordemServico!.Observacoes" class="form-control"/>
-        </label>
-    </div>
-
-    <div class="mb-3">
-        <label>Deseja anexar um documento?
-            <InputFile OnChange="HandleFileSelection" multiple />
-        </label>
-    </div>
-
-    @if(equipamentos != null && equipamentos.Any()) 
-    {
-        <div class="mb-3">
-            <label>Equipamento:
-                <InputSelect @bind-Value="ordemServico!.EquipamentoId">
-                    @foreach (Equipamento equipamento in equipamentos)
-                    {
-                        <option value="@equipamento.Id">@equipamento.ToString()</option>
-                    }
-                </InputSelect>
-            </label>
-            <span>Não encontrou o equipamento? <a href="/cadastrar/equipamento" target="_blank">Cadastre-o!</a></span>
         </div>
-    }
-    else
-    {   
-        <p><em>Carregando equipamentos</em></p>
-        <span>Não encontrou o equipamento? <a href="/cadastrar/equipamento" target="_blank">Cadastre-o!</a></span>
-    }
 
-    <br />
-    <button type="submit" class="btn btn-primary" disabled="@isProcessing">
-        @if (isProcessing)
+        <div class="form-group">
+            <label for="descricao">Descrição</label>
+            <InputTextArea @bind-Value="ordemServico!.Descricao" class="form-control"/>
+        </div>
+
+        <div class="form-group">
+            <label for="observacoes">Alguma observação?</label>
+            <InputTextArea @bind-Value="ordemServico!.Observacoes" class="form-control"/>
+        </div>
+
+        <div class="form-group">
+            <label for="documento">Deseja anexar um documento?</label>
+            <InputFile OnChange="HandleFileSelection" multiple />
+        </div>
+
+        @if(equipamentos != null && equipamentos.Any()) 
         {
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            <text>Cadastrando...</text>
+            @* <div class="mb-3">
+                <label>Equipamento:
+                    <InputSelect @bind-Value="ordemServico!.EquipamentoId" class="form-control">
+                        @foreach (Equipamento equipamento in equipamentos)
+                        {
+                            <option value="@equipamento.Id">@equipamento.ToString()</option>
+                        }
+                    </InputSelect>
+                </label>
+                <br />
+                <span>Não encontrou o equipamento? <a href="/cadastrar/equipamento" target="_blank">Cadastre-o!</a></span>
+            </div> *@
+            <div class="mb-3">
+                <label for="grupo">
+                    Equipamento
+                </label>
+            <InputSelect @bind-Value="ordemServico!.EquipamentoId" class="form-control">
+                <option value="0">Selecionar equipamento</option>
+                @foreach (Equipamento equipamento in equipamentos)
+                {
+                    <option value="@equipamento.Id">@equipamento.ToString()</option>
+                }
+            </InputSelect>
+            </div>
         }
         else
-        {
-            <text>Cadastrar</text>
+        {   
+            <p><em>Carregando equipamentos</em></p>
+            <span>Não encontrou o equipamento? <a href="/cadastrar/equipamento" target="_blank">Cadastre-o!</a></span>
         }
-    </button>
-</EditForm>
+
+        <br />
+        <button type="submit" class="btn btn-primary" disabled="@isProcessing">
+            @if (isProcessing)
+            {
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <text>Cadastrando...</text>
+            }
+            else
+            {
+                <text>Cadastrar</text>
+            }
+        </button>
+    </EditForm>
+</PageSection>
 
 @code {
     [SupplyParameterFromForm]
@@ -99,7 +105,7 @@
     {
         userInfo = await UserClaimsHelper.GetCurrentUserInfoAsync();
 
-        ordemServico ??= new OrdemServico();
+        ordemServico = new OrdemServico();
 
         ApiResponse<List<Equipamento>> response = await EquipService.GetEquipamentosAsync();
         equipamentos = response.Data?.AsQueryable() ?? new List<Equipamento>().AsQueryable();
@@ -115,6 +121,19 @@
             sucesso = false;
             mensagemResultado = "Erro de autenticação: Não foi possível identificar o usuário requisitante. Por favor, tente recarregar a página ou fazer login novamente.";
             return; // STOP the submission
+        }
+
+        if (ordemServico == null)
+        {
+            isProcessing = false;
+            sucesso = false;
+            mensagemResultado = "Erro interno: Dados da ordem de serviço não foram inicializados corretamente.";
+            return; // STOP the submission
+        }
+
+        if (ordemServico.EquipamentoId.HasValue == false || ordemServico.EquipamentoId == 0)
+        {
+            ordemServico.EquipamentoId = null;
         }
 
         ordemServico!.Abertura = DateTime.UtcNow;

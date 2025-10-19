@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;   
+using Microsoft.AspNetCore.Http;
 
 using Preventech.Core.Models;
 using Preventech.Core.DatabaseContexts;
@@ -80,36 +80,38 @@ namespace Preventech.Core.Controllers
         [HttpGet("{id}/download")]
         public async Task<IActionResult> DownloadDocument(Guid id)
         {
-                try {
-                    var documento = await _context.DocumentosAnexados
-                        .FirstOrDefaultAsync(e => e.Id == id);
+            try
+            {
+                var documento = await _context.DocumentosAnexados
+                    .FirstOrDefaultAsync(e => e.Id == id);
 
-                    if (documento == null || string.IsNullOrEmpty(documento.Url))
-                    {
-                        return NotFound("Documento não encontrado.");
-                    }
-
-                    // 1. Obtenha o caminho completo no disco
-                    var fullPath = Path.Combine(_environment.WebRootPath, documento.Url);
-
-                    if (!System.IO.File.Exists(fullPath))
-                    {
-                        return NotFound("Arquivo no disco não encontrado.");
-                    }
-
-                    // 2. Use FileStreamResult para ler e servir o arquivo do disco eficientemente
-                    var stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read);
-
-                    string contentType = string.IsNullOrEmpty(documento.TipoConteudo) 
-                        ? "application/octet-stream" 
-                        : documento.TipoConteudo;
-
-                    return File(stream, contentType, documento.NomeArquivo);
+                if (documento == null || string.IsNullOrEmpty(documento.Url))
+                {
+                    return NotFound("Documento não encontrado.");
                 }
 
-                catch (Exception ex) {
-                    return StatusCode(500, $"Erro interno ao processar o download: {ex.Message}");
+                // 1. Obtenha o caminho completo no disco
+                var fullPath = Path.Combine(_environment.WebRootPath, documento.Url);
+
+                if (!System.IO.File.Exists(fullPath))
+                {
+                    return NotFound("Arquivo no disco não encontrado.");
                 }
+
+                // 2. Use FileStreamResult para ler e servir o arquivo do disco eficientemente
+                var stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read);
+
+                string contentType = string.IsNullOrEmpty(documento.TipoConteudo)
+                    ? "application/octet-stream"
+                    : documento.TipoConteudo;
+
+                return File(stream, contentType, documento.NomeArquivo);
+            }
+
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro interno ao processar o download: {ex.Message}");
+            }
         }
     }
 }

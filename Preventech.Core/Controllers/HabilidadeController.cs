@@ -170,7 +170,7 @@ namespace Preventech.Core.Controllers
         [HttpPost("editar")]
         public async Task<ApiResponse<Habilidade>> EditHabilidade([FromBody] Habilidade habilidade)
         {
-            if (habilidade.Categoria == null 
+            if (habilidade.Categoria == null
                 || string.IsNullOrWhiteSpace(habilidade.Categoria.Nome)
                 || string.IsNullOrWhiteSpace(habilidade.Descricao))
             {

@@ -54,21 +54,20 @@ namespace Preventech.Core.Controllers
         {
             try
             {
-                // não achei jeito melhor (ainda) de fazer esse filtro, 
-                // qualquer coisa que não seja inline faz com que o LINQ
-                // chore 
                 var equipamentos = await context.Equipamentos
                     .Include(eqp => eqp.Local)
                     .Include(eqp => eqp.Local.Responsavel)
-                    .Where(query => 
-                        (string.IsNullOrWhiteSpace(filtro.Patrimonio) || filtro.Patrimonio == query.Patrimonio)
-                     && (string.IsNullOrWhiteSpace(filtro.Nome) || filtro.Nome == query.Nome)
-                      && (filtro.Local.Campus <= 0 || query.Local.Campus == filtro.Local.Campus)
-                      && (filtro.Local.Predio <= 0 || query.Local.Predio == filtro.Local.Predio)
-                      && (filtro.Local.Andar <= 0 || query.Local.Andar == filtro.Local.Andar)
-                      && (filtro.Local.Numero <= 0 || query.Local.Numero == filtro.Local.Numero)
-                      && (string.IsNullOrWhiteSpace(filtro.Local.Apelido) || query.Local.Apelido == filtro.Local.Apelido))
+                    .Where(query =>
+                         (filtro.Id <= 0 || filtro.Id == query.Id)
+                      && (string.IsNullOrWhiteSpace(filtro.Patrimonio) || filtro.Patrimonio.Equals(query.Patrimonio))
+                      && (string.IsNullOrWhiteSpace(filtro.Nome) || filtro.Nome.Equals(query.Nome))
+                      && (filtro.Local == null || filtro.Local.Campus <= 0 || query.Local.Campus == filtro.Local.Campus)
+                      && (filtro.Local == null || filtro.Local.Predio <= 0 || query.Local.Predio == filtro.Local.Predio)
+                      && (filtro.Local == null || filtro.Local.Andar <= 0 || query.Local.Andar == filtro.Local.Andar)
+                      && (filtro.Local == null || filtro.Local.Numero <= 0 || query.Local.Numero == filtro.Local.Numero)
+                      && (filtro.Local == null || string.IsNullOrWhiteSpace(filtro.Local.Apelido) || filtro.Local.Apelido.Equals(query.Local.Apelido)))
                     .ToListAsync();
+
                 return new ApiResponse<List<Equipamento>>
                 {
                     Success = true,

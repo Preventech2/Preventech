@@ -5,9 +5,9 @@ namespace Preventech.Core.Services
     public class HeaderService
     {
         private string _title = "Preventech";
-        
-        public string Title 
-        { 
+
+        public string Title
+        {
             get => _title;
             private set
             {

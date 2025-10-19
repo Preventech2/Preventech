@@ -119,7 +119,7 @@ namespace Preventech.Core.Controllers
                     .Include(o => o.Requisitante)
                     .Include(o => o.TecnicoResponsavel)
                     .Where(e => e.TecnicoResponsavelId == id)
-                    .ToListAsync(); 
+                    .ToListAsync();
 
                 return new ApiResponse<List<OrdemServico>>
                 {
@@ -176,7 +176,7 @@ namespace Preventech.Core.Controllers
                 existingOrdem.TecnicoResponsavelId = updatedOrdem.TecnicoResponsavelId;
                 existingOrdem.RequisitanteId = updatedOrdem.RequisitanteId;
                 existingOrdem.EquipamentoId = updatedOrdem.EquipamentoId;
-                
+
                 await _context.SaveChangesAsync();
 
                 return new ApiResponse<OrdemServico>

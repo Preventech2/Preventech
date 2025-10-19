@@ -65,7 +65,10 @@
     private async Task InitializeLocalizacao()
     {
         var restec = await usuarioService.GetUsuariosAsync();
-        mensagem = restec.Message ?? "";
+        if (!restec.Success)
+            mensagem = restec.Message ?? "";
+        else
+            mensagem = string.Empty;
         if (restec != null && restec.Success)
         {
             gestores = from gestor in restec!.Data

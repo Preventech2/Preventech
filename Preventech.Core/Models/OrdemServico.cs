@@ -27,21 +27,21 @@ public class OrdemServico
     public string Descricao { get; set; } = "";
 
     public string? Observacoes { get; set; }
-    
+
     public int? TecnicoResponsavelId { get; set; }
     public Usuario? TecnicoResponsavel { get; set; }
 
     public int? EquipamentoId { get; set; }
     public Equipamento? Equipamento { get; set; }
-    
+
     public int? RequisitanteId { get; set; }
     public Usuario? Requisitante { get; set; }
-    
+
     public string? DescricaoSolucao { get; set; }
     public DateTime? DataConclusão { get; set; }
 
     public ICollection<DocumentoAnexado> Arquivos { get; set; } = new List<DocumentoAnexado>();
-    
+
     public static Guid GerarIdOrdem()
     {
         var agora = DateTimeOffset.Now;

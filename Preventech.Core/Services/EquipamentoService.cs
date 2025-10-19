@@ -59,22 +59,23 @@ public class EquipamentoService(HttpClient httpClient)
     public async Task<ApiResponse<List<Equipamento>>> GetEquipamentos(Equipamento filtro)
     {
         var query = Query(filtro);
-        var response = await httpClient.GetFromJsonAsync<ApiResponse<List<Equipamento>>>($"api/equipamentos{query}");
+        var response = await httpClient.GetFromJsonAsync<ApiResponse<List<Equipamento>>>($"api/equipamentos{query}", _options);
         return response ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<List<Equipamento>>.");
     }
 
     [Obsolete("A chamada `GetEquipamento(new Equipamento{ Patrimonio = id })` supre a necessidade desse método")]
     public async Task<ApiResponse<Equipamento>> GetEquipamentoByIdRealAsync(int id)
     {
-        var response = await GetEquipamentos(new Equipamento { Patrimonio = $"{id}" });
-        return new ApiResponse<Equipamento>{
+        var response = await GetEquipamentos(new Equipamento { Id = id });
+        return new ApiResponse<Equipamento>
+        {
             Success = response.Success,
             Message = response.Message,
             Data = response.Data!.ElementAt(0) ?? null
         };
     }
 
-    
+
     public async Task<ApiResponse<Equipamento>?> AddEquipamentoAsync(Equipamento Equipamento)
     {
         var response = await httpClient.PostAsJsonAsync("api/equipamentos", Equipamento);

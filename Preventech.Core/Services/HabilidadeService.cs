@@ -38,18 +38,12 @@ public class HabilidadeService(HttpClient httpClient)
         try
         {
             var response = await _httpClient.PostAsJsonAsync("api/habilidades/cadastro", habilidade);
-            Console.WriteLine($"Response: {response}");
-
-            var errorContent = await response.Content.ReadAsStringAsync();
-            Console.WriteLine($"Error Content: {errorContent}");
-
             var result = await response.Content.ReadFromJsonAsync<ApiResponse<Habilidade>>()
             ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<Habilidade>.");
             return result;
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Erro ao adicionar habilidade: " + ex.Message);
             return new ApiResponse<Habilidade>
             {
                 Success = false,

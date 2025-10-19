@@ -38,7 +38,7 @@ namespace Preventech.Core.Controllers
                     Data = null
                 };
             }
-            
+
             return new ApiResponse<GrupoPerfil>
             {
                 Success = true,
@@ -67,7 +67,7 @@ namespace Preventech.Core.Controllers
                 // Verifica se o novo nome já existe em outro grupo (diferente do atual)
                 var nomeExiste = await _context.GruposPerfis
                     .AnyAsync(g => g.Nome == grupoPerfil.Nome && g.Id != grupoPerfil.Id);
-                
+
                 if (nomeExiste)
                 {
                     return new ApiResponse<GrupoPerfil>
@@ -120,7 +120,7 @@ namespace Preventech.Core.Controllers
                 // Verifica se o novo nome já existe em outro grupo (diferente do atual)
                 var nomeExiste = await _context.GruposPerfis
                     .AnyAsync(g => g.Nome == grupoPerfil.Nome);
-                
+
                 if (nomeExiste)
                 {
                     return new ApiResponse<GrupoPerfil>

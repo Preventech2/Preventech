@@ -33,7 +33,7 @@ namespace Preventech.Core.Controllers
                     .Where(u => u.Cpf == usuario.Cpf)
                     .FirstOrDefaultAsync();
 
-                if(usuarioExistente != null)
+                if (usuarioExistente != null)
                 {
                     return new ApiResponse<Usuario>
                     {
@@ -95,7 +95,7 @@ namespace Preventech.Core.Controllers
                     return new ApiResponse<Usuario>
                     {
                         Success = false,
-                        Message = "Usuário não encontrado.",
+                        Message = "CPF ou senha inválidos.",
                         Data = null
                     };
                 }
@@ -252,7 +252,7 @@ namespace Preventech.Core.Controllers
 
                 // Salva as mudanças no banco de dados
                 await _context.SaveChangesAsync();
-                
+
                 return new ApiResponse<Usuario>
                 {
                     Success = true,
@@ -329,7 +329,7 @@ namespace Preventech.Core.Controllers
                 };
             }
         }
-    
+
         [HttpPost("editar")]
         public async Task<ApiResponse<Usuario>> UpdateUsuarioAsync([FromBody] Usuario usuario)
         {
@@ -346,7 +346,7 @@ namespace Preventech.Core.Controllers
                     Data = null
                 };
             }
-            
+
             try
             {
                 var usuarioExistente = await _context.Usuarios

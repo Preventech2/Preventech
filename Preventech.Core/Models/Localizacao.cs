@@ -52,15 +52,16 @@ public class Localizacao
 
     public Localizacao() { }
 
-    public Localizacao(string Apelido, int Campus, int Predio, int Andar, int Numero, Usuario Responsavel) {
+    public Localizacao(string Apelido, int Campus, int Predio, int Andar, int Numero, Usuario Responsavel)
+    {
         this.Apelido = Apelido;
         this.Campus = Campus;
         this.Predio = Predio;
         this.Andar = Andar;
         this.Numero = Numero;
         this.Responsavel = Responsavel;
-    } 
-    
+    }
+
     public override string ToString() => $"{Apelido ?? "s/n"} gerido por {Responsavel.Nome} em c{Campus}p{Predio}s{Numero}";
 
     /// <summary>

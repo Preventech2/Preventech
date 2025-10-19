@@ -21,20 +21,20 @@ public class RelatorioGeneratorService
         _httpClient = httpClient;
     }
 
-    public byte[] GerarRelatorioPDF (OrdemServico os)
+    public byte[] GerarRelatorioPDF(OrdemServico os)
     {
-       using (var stream = new MemoryStream())
+        using (var stream = new MemoryStream())
         {
             PdfWriter writer = new PdfWriter(stream);
             PdfDocument pdf = new PdfDocument(writer);
             Document document = new Document(pdf);
-            
+
             document.Add(new Paragraph("RELATÓRIO DE ORDEM DE SERVIÇO")
                 .SetTextAlignment(TextAlignment.CENTER)
                 .SetFontSize(16)
                 .SetBold()
                 .SetMarginBottom(15));
-                
+
             document.Add(new Paragraph($"Título: {os.Titulo}")
                 .SetFontSize(20));
             document.Add(new Paragraph($"ID da OS: {os.Id}")
@@ -42,13 +42,13 @@ public class RelatorioGeneratorService
             document.Add(new Paragraph($"Status: {os.Status}")
                 .SetFontSize(12)
                 .SetFontColor(os.Status == StatusOS.Concluida ? ColorConstants.GREEN : ColorConstants.ORANGE)
-                .SetMarginBottom(10));   
+                .SetMarginBottom(10));
 
             document.Add(new Paragraph($"Equipamento: " + (os.Equipamento != null ? os.Equipamento.Nome : "N/A"))
                 .SetFontSize(12)
                 .SetFontColor(os.Status == StatusOS.Concluida ? ColorConstants.GREEN : ColorConstants.ORANGE)
-                .SetMarginBottom(10));   
-                
+                .SetMarginBottom(10));
+
             document.Add(new Paragraph("Descrição:")
                 .SetBackgroundColor(ColorConstants.LIGHT_GRAY)
                 .SetPadding(5)
@@ -81,16 +81,16 @@ public class RelatorioGeneratorService
                 document.Add(new Paragraph("Nenhuma descrição de solução fornecida.")
                     .SetFontColor(ColorConstants.RED));
             }
-            
+
             document.Add(new Paragraph($"Técnico Responsável: {os.TecnicoResponsavel?.Nome ?? "Não Atribuído"}"));
             document.Add(new Paragraph($"Data de Conclusão: {os.DataConclusão?.ToShortDateString() ?? "N/A"}"));
-            
+
             document.Add(new Paragraph("Powered by Preventech"))
                 .SetFontSize(20)
-                .SetFontColor(ColorConstants.CYAN);   
+                .SetFontColor(ColorConstants.CYAN);
 
             document.Close();
-            
+
             return stream.ToArray();
         }
     }

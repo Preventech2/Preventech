@@ -19,7 +19,7 @@ public class DocumentoService
         {
             // Cria o objeto de conteúdo multipart
             using var content = new MultipartFormDataContent();
-            
+
             // Define o tamanho máximo de buffer (deve ser menor que o limite do servidor)
             const int MAX_STREAM_SIZE = 1024 * 1024 * 50; // 5MB
 

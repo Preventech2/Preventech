@@ -20,7 +20,7 @@ namespace Preventech.Core.Controllers
             {
                 return BadRequest("Dados do usuário inválidos");
             }
-            
+
             var perfil = usuario.Grupo?.Permissoes ?? Perfil.NenhumaPermissao;
             var identity = new ClaimsIdentity(AuthConstants.CookieName);
 

@@ -24,7 +24,7 @@ public class OrdemServicoService
     }
 
     // Example method to get a single OrdemServico by ID
-    
+
     public async Task<ApiResponse<OrdemServico>> GetOrdemServicoByIdAsync(Guid id)
     {
         var response = await _httpClient.GetAsync($"api/ordem-servico/{id}");

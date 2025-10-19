@@ -21,7 +21,7 @@ public class UserClaimsHelper(AuthenticationStateProvider authStateProvider)
         {
             return new UserInfo { IsAuthenticated = false };
         }
-       
+
         return ExtractUserInfoFromClaims(user);
     }
 
@@ -32,7 +32,7 @@ public class UserClaimsHelper(AuthenticationStateProvider authStateProvider)
     /// <returns>UserInfo object with Name, Cpf, and Id</returns>
     public static UserInfo ExtractUserInfoFromClaims(ClaimsPrincipal user)
     {
-        var name = user.Identity?.Name 
+        var name = user.Identity?.Name
             ?? user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value
             ?? string.Empty;
 
@@ -59,7 +59,7 @@ public class UserClaimsHelper(AuthenticationStateProvider authStateProvider)
             Permissoes = Perfil.NenhumaPermissao
         };
 
-        foreach(var role in roles)
+        foreach (var role in roles)
         {
             if (Enum.TryParse<Perfil>(role, out var perfil))
             {

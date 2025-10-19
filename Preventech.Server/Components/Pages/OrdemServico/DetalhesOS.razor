@@ -6,7 +6,7 @@
 @using Preventech.Core.Services
 @inject UserClaimsHelper UserClaimsHelper
 
-<PageTitle>Visualizar Ordem de Serviço</PageTitle>
+<HeaderTitle Title="Ordem de Serviço" />
  
 @if (ordem == null)
 {
@@ -14,158 +14,159 @@
 }
 else
 {
-    <h2>@ordem.Titulo</h2>
-    
-    <div>
-        <img src="@GetStatusIcon(@ordem.Status)" alt="Status Icon"
-             width="14" height="14" style="margin-right: 2px;" />
-        @ordem.Status
-        [Aberta em @ordem.Abertura]
-    </div>
-    <br>
-    <p><strong>Descrição:</strong> @ordem.Descricao</p>
-    <p><strong>Observações:</strong> @ordem.Observacoes</p>
-    <p><strong>Id:</strong> @ordem.Id</p>
-    <p><strong>Equipamento:</strong> @equipamento.ToString()</p>
-    <p>
-        <strong>Requisitado por: </strong> 
-            @if (ordem.Requisitante == null) {
-                <span> Carregando</span>
-            }
-
-            else {
-                @ordem.Requisitante.Nome
-            }
-    </p>
-
-    //@ordem.Arquivos.ToList().Count()
-
-    @foreach (var arquivo in @ordem.Arquivos)
-    {
-        <p>
-            <strong>Arquivo:</strong> 
-            <a href="api/documentos/@arquivo.Id/download" target="_blank" download="@arquivo.NomeArquivo">
-                @arquivo.NomeArquivo 
-                (@arquivo.DataEnvio.ToLocalTime()) </a>
-        </p>
-    }
-
-@if (ordem.TecnicoResponsavel == null) {
-    <EditForm Model="ordem" OnSubmit="FormData" FormName="pegar-Ordem-Servico">
-        <button type="submit" class="btn btn-primary" disabled="@isProcessing">
-            @if (isProcessing)
-            {
-                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                <span class="visually-hidden">Processando...</span>
-            }
-            else
-            {
-                <text>Pegar ordem</text>
-            }
-        </button>
-    </EditForm>      
-}
-
-else if (ordem.TecnicoResponsavel.Id == userInfo?.Id && ordem.Status != StatusOS.Concluida) {
-    <div>
-        <EditForm Model="ordem" OnSubmit="FormAddDoc" FormName="adicionar-documento">
-            <div class="mb-3">
-                <label>Deseja anexar documentos?
-                    <InputFile OnChange="HandleFileSelection" multiple />
-                </label>
-                @if (arquivosParaUpload.Any())
-                {
-                    <p class="mt-2">Arquivos selecionados para upload:</p>
-                    <ul>
-                        @foreach (var file in arquivosParaUpload)
-                        {
-                            <li>@file.Name (@((file.Size / 1024).ToString("N0")) KB)</li>
-                        }
-                    </ul>
-                }
-                
-                <button type="submit" class="btn btn-success" disabled="@isProcessing"> 
-                    @if (isProcessing)
-                    {
-                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                        <text>Anexando...</text>
-                    }
-                    else
-                    {
-                        <text>Anexar documento</text>
-                    }
-                </button>
+    <PageSection>
+        <section class="header-section">
+            <h4>@ordem.Titulo</h4>
+        </section>
+        <section>
+        
+            <div>
+                <img src="@GetStatusIcon(@ordem.Status)" alt="Status Icon"
+                    width="14" height="14" style="margin-right: 2px;" />
+                @ordem.Status
+                [Aberta em @ordem.Abertura]
             </div>
-        </EditForm>
-    </div>
-    <div>
-        <EditForm Model="ordem" OnSubmit="FormDataCancel" FormName="pegar-Ordem-Servico">
-            <button type="submit" class="btn btn-danger" disabled="@isProcessing">
-                @if (isProcessing)
-                {
-                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                    <span class="visually-hidden">Processando...</span>
-                }
-                else
-                {
-                    <text>Cancelar</text>
-                }
-            </button>
-        </EditForm>
-    </div>
-    @if (!isShowingCompletionForm)
-    {
-        <div>
-            <button type="button" class="btn btn-success" @onclick="() => isShowingCompletionForm = true" disabled="@isProcessing">
-                Concluir OS (Detalhar Ações)
-            </button>
-        </div>
-    }
-    else {
-        <EditForm Model="ordem" OnSubmit="FormDataFinish" FormName="form-conclusao">
-            <div class="card my-3 p-3 border-success">
-                <h4>Relatório de Conclusão</h4>
+            <br>
+            <p><strong>Descrição:</strong> @ordem.Descricao</p>
+            <p><strong>Observações:</strong> @ordem.Observacoes</p>
+            <p><strong>Id:</strong> @ordem.Id</p>
+            <p><strong>Equipamento:</strong> @equipamento.ToString()</p>
+            <p>
+                <strong>Requisitado por: </strong> 
+                    @if (ordem.Requisitante == null) {
+                        <span> Carregando</span>
+                    }
 
-                <div class="mb-3">
-                    <label for="DescricaoSolucao" class="form-label">Descrição das Ações Realizadas:</label>
-                    <InputTextArea id="DescricaoSolucao" @bind-Value="ordem.DescricaoSolucao" rows="5" class="form-control" required />
-                    <ValidationMessage For="@(() => ordem.DescricaoSolucao)" />
-                </div>
+                    else {
+                        @ordem.Requisitante.Nome
+                    }
+            </p>
+            @foreach (var arquivo in @ordem.Arquivos)
+            {
+                <p>
+                    <strong>Arquivo:</strong> 
+                    <a href="api/documentos/@arquivo.Id/download" target="_blank" download="@arquivo.NomeArquivo">
+                        @arquivo.NomeArquivo 
+                        (@arquivo.DataEnvio.ToLocalTime()) </a>
+                </p>
+            }
 
-                <div class="d-flex justify-content-between">
-                    <button type="button" class="btn btn-secondary" @onclick="() => isShowingCompletionForm = false">
-                        Cancelar
-                    </button>
-                    <button type="submit" class="btn btn-success" disabled="@isProcessing">
+            @if (ordem.TecnicoResponsavel == null) {
+                <EditForm Model="ordem" OnSubmit="FormData" FormName="pegar-Ordem-Servico">
+                    <button type="submit" class="btn btn-primary" disabled="@isProcessing">
                         @if (isProcessing)
                         {
                             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                            <text>Finalizando...</text>
+                            <span class="visually-hidden">Processando...</span>
                         }
                         else
                         {
-                            <text>Concluir e Salvar</text>
+                            <text>Pegar ordem</text>
                         }
                     </button>
+                </EditForm>      
+            }
+
+            else if (ordem.TecnicoResponsavel.Id == userInfo?.Id && ordem.Status != StatusOS.Concluida) {
+                <div>
+                    <EditForm Model="ordem" OnSubmit="FormAddDoc" FormName="adicionar-documento">
+                        <div class="mb-3">
+                            <label>Deseja anexar documentos?
+                                <InputFile OnChange="HandleFileSelection" multiple />
+                            </label>
+                            @if (arquivosParaUpload.Any())
+                            {
+                                <p class="mt-2">Arquivos selecionados para upload:</p>
+                                <ul>
+                                    @foreach (var file in arquivosParaUpload)
+                                    {
+                                        <li>@file.Name (@((file.Size / 1024).ToString("N0")) KB)</li>
+                                    }
+                                </ul>
+                            }
+                            
+                            <button type="submit" class="btn btn-success" disabled="@isProcessing"> 
+                                @if (isProcessing)
+                                {
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    <text>Anexando...</text>
+                                }
+                                else
+                                {
+                                    <text>Anexar documento</text>
+                                }
+                            </button>
+                        </div>
+                    </EditForm>
                 </div>
-            </div>
-        </EditForm>
-    }
+                <div>
+                    <EditForm Model="ordem" OnSubmit="FormDataCancel" FormName="pegar-Ordem-Servico">
+                        <button type="submit" class="btn btn-danger" disabled="@isProcessing">
+                            @if (isProcessing)
+                            {
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                <span class="visually-hidden">Processando...</span>
+                            }
+                            else
+                            {
+                                <text>Cancelar</text>
+                            }
+                        </button>
+                    </EditForm>
+                </div>
+                @if (!isShowingCompletionForm)
+                {
+                    <div>
+                        <button type="button" class="btn btn-success" @onclick="() => isShowingCompletionForm = true" disabled="@isProcessing">
+                            Concluir OS (Detalhar Ações)
+                        </button>
+                    </div>
+                }
+                else {
+                    <EditForm Model="ordem" OnSubmit="FormDataFinish" FormName="form-conclusao">
+                        <div class="card my-3 p-3 border-success">
+                            <h4>Relatório de Conclusão</h4>
+
+                            <div class="mb-3">
+                                <label for="DescricaoSolucao" class="form-label">Descrição das Ações Realizadas:</label>
+                                <InputTextArea id="DescricaoSolucao" @bind-Value="ordem.DescricaoSolucao" rows="5" class="form-control" required />
+                                <ValidationMessage For="@(() => ordem.DescricaoSolucao)" />
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-secondary" @onclick="() => isShowingCompletionForm = false">
+                                    Cancelar
+                                </button>
+                                <button type="submit" class="btn btn-success" disabled="@isProcessing">
+                                    @if (isProcessing)
+                                    {
+                                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                        <text>Finalizando...</text>
+                                    }
+                                    else
+                                    {
+                                        <text>Concluir e Salvar</text>
+                                    }
+                                </button>
+                            </div>
+                        </div>
+                    </EditForm>
+                }
+            }
+
+            else if (ordem.Status == StatusOS.Concluida) {
+                <p><strong>Técnico Responsável:</strong> @ordem.TecnicoResponsavel.Nome</p>
+                <p><strong>Descrição da solução:</strong> @ordem.DescricaoSolucao</p>
+                <p><strong>Data de Conclusão:</strong> @ordem.DataConclusão</p>
+
+            }
+
+            else {
+                <p><strong>Técnico Responsável:</strong> @ordem.TecnicoResponsavel.Nome</p>
+            }
+        </section>
+    </PageSection>
 }
-
-else if (ordem.Status == StatusOS.Concluida) {
-    <p><strong>Técnico Responsável:</strong> @ordem.TecnicoResponsavel.Nome</p>
-    <p><strong>Descrição da solução:</strong> @ordem.DescricaoSolucao</p>
-    <p><strong>Data de Conclusão:</strong> @ordem.DataConclusão</p>
-
-}
-
-else {
-    <p><strong>Técnico Responsável:</strong> @ordem.TecnicoResponsavel.Nome</p>
-}
-
-}
-
 @code {
     private OrdemServico ordem = null!;
     private Equipamento equipamento = null!;

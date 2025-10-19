@@ -7,7 +7,7 @@ namespace Preventech.Core.Services;
 public class EmailService
 {
     private string emailAddress = "ploudosmingote@gmail.com";
-    private string emailAppPassword = "lxor abxl awlt jzsl";    
+    private string emailAppPassword = "lxor abxl awlt jzsl";
 
     private readonly HttpClient _httpClient;
 
@@ -58,7 +58,7 @@ public class EmailService
             {
                 bodyBuilder.Attachments.Add(
                     attachmentFileName,
-                    attachmentData, 
+                    attachmentData,
                     ContentType.Parse(MimeTypes.GetMimeType(attachmentFileName))
                 );
             }

@@ -98,7 +98,7 @@ builder.Services.AddDataProtection()
         ValidationAlgorithm = ValidationAlgorithm.HMACSHA512
     });
 
-Uri base_uri = new ("http://localhost:8080/");
+Uri base_uri = new("http://localhost:8080/");
 
 builder.Services.AddScoped<OrdemServicoService>();
 

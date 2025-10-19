@@ -79,7 +79,7 @@ public partial class PerfilExtension
                 };
             })
             .Where(s => s != null);
-        
+
         string strPerfil = string.Join(", ", flags);
 
         // Adiciona espaço antes de letras maiúsculas que não estão no início da string

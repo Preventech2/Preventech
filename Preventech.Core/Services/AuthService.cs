@@ -20,7 +20,7 @@ public class AuthService(IJSRuntime jsRuntime)
         {
             // Serializa o usuário completo automaticamente
             var usuarioJson = JsonSerializer.Serialize(usuario, _jsonOptions);
-            
+
             var jsCode = $@"
                 (async () => {{
                     const Usuario = {usuarioJson};
@@ -48,7 +48,7 @@ public class AuthService(IJSRuntime jsRuntime)
                     return false;
                 }})()
             ";
-            
+
             return await _jsRuntime.InvokeAsync<bool>("eval", jsCode);
         }
         catch (Exception ex)
@@ -85,7 +85,7 @@ public class AuthService(IJSRuntime jsRuntime)
                     return false;
                 })()
             ";
-            
+
             return await _jsRuntime.InvokeAsync<bool>("eval", jsCode);
         }
         catch (Exception ex)
