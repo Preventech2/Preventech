@@ -1,39 +1,30 @@
-@page "/localizacoes"
+@page "/laboratorios"
 @rendermode InteractiveServer
 
 @using Microsoft.AspNetCore.Components.QuickGrid
 @using Preventech.Core.DTOs
 
-@if (localizacoes == null)
-{
-    <p><em>Carregando...</em></p>
-}
-else if (!localizacoes.Any())
-{
-    <p><em>Nenhuma localização cadastrada.</em></p>
-}
-else
-{
-    <h3>Lista de Localizações</h3>
-}
+<HeaderTitle Title="Laboratórios" />
+
 <MostrarMensagem @bind-Mensagem="mensagem" />
-
-<QuickGrid TGridItem="Localizacao" Items="@localizacoes">
-    <PropertyColumn Sortable="true" Property="@(item => item.Id)" Title="ID" />
-    <PropertyColumn Sortable="true" Property="@(item => item.Apelido)" Title="Nome" />
-    <PropertyColumn Sortable="true" Property="@(item => "C" + item.Campus)" Title="Campus" />
-    <PropertyColumn Property="@(item => "P" + item.Predio)" Title="Prédio" />
-    <PropertyColumn Property="@(item => item.Andar)" Title="Andar" />
-    <PropertyColumn Property="@(item => item.Numero)" Title="Sala" />
-    <PropertyColumn Property="@(item => item.Responsavel.Nome)" Title="Responsável" />
-    <TemplateColumn Title="Editar">
-        <button @onclick="@(() => AcionarEditar(context))">
-            Editar
-        </button>
-    </TemplateColumn>
-</QuickGrid>
-
-<button @onclick="@(() => IsCadastrarActive = true)">Cadastrar novo laboratório</button>
+<PageSection>
+    <section class="header-section">
+        <h4>Laboratórios</h4>
+        <button class="btn-icon" @onclick="@(() => IsCadastrarActive = true)"><img class="icon" src="img/add-icon.svg" alt="" /></button>
+    </section>
+    <QuickGrid TGridItem="Localizacao" Items="@localizacoes">
+        @* <PropertyColumn Sortable="true" Property="@(item => item.Id)" Title="ID" /> *@
+        <PropertyColumn Sortable="true" Property="@(item => item.Apelido)" Title="Nome" />
+        <PropertyColumn Sortable="true" Property="@(item => "C" + item.Campus)" Title="Campus" />
+        <PropertyColumn Property="@(item => "P" + item.Predio)" Title="Prédio" />
+        <PropertyColumn Property="@(item => item.Andar)" Title="Andar" />
+        <PropertyColumn Property="@(item => item.Numero)" Title="Sala" />
+        <PropertyColumn Property="@(item => item.Responsavel.Nome)" Title="Responsável" />
+        <TemplateColumn Class="col-actions" Title="Ações">
+            <button class="btn-icon" @onclick="() => AcionarEditar(context)"><img class="icon" src="img/edit-icon.svg" alt="" /></button>
+        </TemplateColumn>
+    </QuickGrid>
+</PageSection>
 
 <CadastrarLocalizacao @bind-IsActive="@IsCadastrarActive" />
 <EditarLocalizacao @bind-IsActive="@IsEditarActive" @bind-Local="Local" />
@@ -50,7 +41,8 @@ else
     protected override async Task OnInitializedAsync()
     {
         ApiResponse<List<Localizacao>> response = await localizacoesService.GetLocalizacoes();
-        mensagem = response.Message;
+        if (!response.Success)
+            mensagem = response.Message ?? string.Empty;
         localizacoes = response.Data?.AsQueryable() ?? new List<Localizacao>().AsQueryable();
     }
 

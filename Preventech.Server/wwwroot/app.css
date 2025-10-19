@@ -168,6 +168,7 @@ select:focus {
     outline: none;
 }
 
+/* Desabilitando seleção de texto */
 .no-select {
     -webkit-user-select: none; /* Safari */
     -moz-user-select: none;    /* Firefox */
@@ -263,6 +264,7 @@ select:focus {
     }
 }
 
+/* Icones de ações como editar e deletar */
 .icon {
     width: 2rem;
     height: 2rem;
@@ -287,4 +289,23 @@ select:focus {
 
 .col-actions .btn-icon, .col-actions-2 section {
     width: 100%;
+}
+
+/* html scrollbar */
+::-webkit-scrollbar {
+    width: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--preto);
+    /* border: 2px solid var(--branco); */
+}
+
+::-webkit-scrollbar-track {
+    background-color: var(--branco);
+}
+
+/* Quando algum modal está aberto desabilita o scroll do body */
+body:has(.modal-opened) {
+    overflow: hidden;
 }

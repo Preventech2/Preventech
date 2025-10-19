@@ -22,13 +22,6 @@
             </TemplateColumn>
         </QuickGrid>
     } 
-    else 
-    {
-        <div>
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            <p><em>Cadastrando...</em></p>
-        </div>
-    }
 </PageSection>
 
 <ModalEditarGrupo @bind-IsActive="@IsEditModalActive" @bind-GrupoId="@GrupoId" OnGrupoEditado="OnGrupoEditadoHandler" />

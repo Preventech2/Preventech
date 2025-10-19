@@ -11,7 +11,7 @@
     <div class="container-fluid">
         <AuthorizeView>
             <Authorized>
-                <a class="navbar-brand" href="meu-perfil">@userInfo?.DisplayName()</a>
+                <a class="navbar-brand" href="meu-perfil">@userInfo.DisplayName()</a>
             </Authorized>
             <NotAuthorized>
                 <a class="navbar-brand" href="">Usuario</a>
@@ -50,12 +50,36 @@
         </Authorized>
     </AuthorizeView>
 
+    <AuthorizeView Roles="@PerfilExtension.VisualizarEquipamento">
+        <Authorized>
+            <nav class="nav flex-column">
+                <div class="nav-item pad-x">
+                    <NavLink class="nav-link" href="/equipamentos">
+                        <span class="bi bi-equipamentos-fill-nav-menu" aria-hidden="true"></span> Equipamentos
+                    </NavLink>
+                </div>
+            </nav>
+        </Authorized>
+    </AuthorizeView>
+
+    <AuthorizeView Roles="@PerfilExtension.VisualizarLaboratorio">
+        <Authorized>
+            <nav class="nav flex-column">
+                <div class="nav-item pad-x">
+                    <NavLink class="nav-link" href="/laboratorios">
+                        <span class="bi bi-labs-fill-nav-menu" aria-hidden="true"></span> Laboratórios
+                    </NavLink>
+                </div>
+            </nav>
+        </Authorized>
+    </AuthorizeView>
+
     <AuthorizeView Roles="@PerfilExtension.VisualizarOrdemDeServico">
         <Authorized>
             <nav class="nav flex-column">
                 <div class="nav-item pad-x">
-                    <NavLink class="nav-link" href="/ordens-servico/user">
-                        <span class="bi bi-briefcase-fill" aria-hidden="true"></span> Minhas OSs
+                    <NavLink class="nav-link" href="/ordens-servico">
+                        <span class="bi bi-manutencao-fill-nav-menu" aria-hidden="true"></span> Manutenções
                     </NavLink>
                 </div>
             </nav>
@@ -66,17 +90,10 @@
 <footer><p class="no-select">Powered by Preventech</p></footer>
 
 @code {
-
-    private async Task resetar() => modal = 0;
-    private int modal = 0;
-    private UserInfo? userInfo;
     [CascadingParameter]
     private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
 
-    protected void AtivarModal(int num) {
-        modal = num;
-        StateHasChanged();
-    }
+    private UserInfo userInfo = new UserInfo();
 
     protected override async Task OnInitializedAsync()
     {

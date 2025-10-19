@@ -5,31 +5,24 @@
 @using Preventech.Core.DTOs
 @inject EquipamentoService equipamentoService
 
-@if (equipamentos == null)
-{
-    <p><em>Carregando...</em></p>
-}
-else if (!equipamentos.Any())
-{
-    <p><em>Nenhum equipamento cadastrado.</em></p>
-}
-else
-{
-    <h3>Lista de Equipamentos</h3>
-}
+<HeaderTitle Title="Equipamentos" />
 
 <MostrarMensagem @bind-Mensagem="mensagem" />
-<QuickGrid TGridItem="Equipamento" Items="@equipamentos">
-    <PropertyColumn Sortable="true" Property="@(item => item.Id)" Title="ID" />
-    <PropertyColumn Sortable="true" Property="@(item => item.Patrimonio)" Title="Patrimônio" />
-    <PropertyColumn Sortable="true" Property="@(item => item.Nome)" Title="Nome" />
-    <PropertyColumn Property="@(item => item.Local)" Title="Local" />
-    <TemplateColumn Title="Editar">
-        <button class="btn-icon" @onclick="() => AcionarEditar(context)"><img class="icon" src="img/edit-icon.svg" alt="" /></button>
-    </TemplateColumn>
-</QuickGrid>
-
-<button @onclick="@(() => IsCadastrarActive = true)">Adicionar</button>
+<PageSection>
+    <section class="header-section">
+        <h4>Equipamentos</h4>
+        <button class="btn-icon" @onclick="@(() => IsCadastrarActive = true)"><img class="icon" src="img/add-icon.svg" alt="" /></button>
+    </section>
+    <QuickGrid TGridItem="Equipamento" Items="@equipamentos">
+        @* <PropertyColumn Sortable="true" Property="@(item => item.Id)" Title="ID" /> *@
+        <PropertyColumn Sortable="true" Property="@(item => item.Patrimonio)" Title="Patrimônio" />
+        <PropertyColumn Sortable="true" Property="@(item => item.Nome)" Title="Nome" />
+        <PropertyColumn Property="@(item => item.Local)" Title="Local" />
+        <TemplateColumn Class="col-actions" Title="Ações">
+            <button class="btn-icon" @onclick="() => AcionarEditar(context)"><img class="icon" src="img/edit-icon.svg" alt="" /></button>
+        </TemplateColumn>
+    </QuickGrid>
+</PageSection>
 
 <CadastrarEquipamento @bind-IsActive="@IsCadastrarActive" />
 <EditarEquipamento @bind-IsActive="@IsEditarActive" @bind-equipamento="equipamento" />
@@ -52,7 +45,8 @@ else
     protected override async Task OnInitializedAsync()
     {
         ApiResponse<List<Equipamento>> response = await equipamentoService.GetEquipamentosAsync();
-        mensagem = response.Message ?? string.Empty;
+        if (!response.Success)
+            mensagem = response.Message ?? string.Empty;
         equipamentos = response.Data?.AsQueryable() ?? (new List<Equipamento>()).AsQueryable();
     }
 

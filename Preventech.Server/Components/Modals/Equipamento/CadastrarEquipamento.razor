@@ -9,7 +9,7 @@
 <Modal IsActive="IsActive" IsActiveChanged="@OnIsActiveChanged">
     <MostrarMensagem @bind-Mensagem="mensagem" />
 
-    <EditForm Model="equipamento" FormName="cadastrar-Equipamento">
+    <EditForm class="edit-form" Model="equipamento" FormName="cadastrar-Equipamento">
         <label>Nome:</label>
         <InputText @bind-Value="equipamento!.Nome" class="form-control" />
         <label>Patrimônio:</label>

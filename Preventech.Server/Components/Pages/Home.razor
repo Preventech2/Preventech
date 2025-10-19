@@ -15,22 +15,19 @@
     <Authorized>
         <p>Você está logado.</p>
         <ul>
-            <li><a href="/localizacoes">Visualizar Localizações</a></li>
+            <li><a href="/laboratorios">Visualizar Localizações</a></li>
             <li><a href="/equipamentos">Visualizar Equipamentos</a></li>
             <li><a href="/cadastrar/usuario">Cadastrar Usuário</a></li>
             <li><a href="/cadastrar/ordem-servico">Cadastrar Ordem de Serviço</a></li>
             <li><a href="/ordens-servico">Visualizar Ordens de Serviço</a></li>
         </ul>
     </Authorized>
-    <NotAuthorized>
-        <p>Você não está logado. Por favor, faça login para acessar mais funcionalidades.</p>
-    </NotAuthorized>
 </AuthorizeView>
 
 <AuthorizeView Roles="@PerfilExtension.VisualizarLaboratorio">
     <Authorized>
         <PageSection>
-            <h5>Laboratórios</h5>
+            <h4>Dashboard Laboratórios</h4>
         </PageSection>
     </Authorized>
 </AuthorizeView>

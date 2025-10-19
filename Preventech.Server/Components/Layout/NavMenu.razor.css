@@ -69,6 +69,18 @@
     background-image: url("img/admin-icon.svg");
 }
 
+.bi-manutencao-fill-nav-menu {
+    background-image: url("img/manutencao-icon.svg");
+}
+
+.bi-labs-fill-nav-menu {
+    background-image: url("img/labs-icon.svg");
+}
+
+.bi-equipamentos-fill-nav-menu {
+    background-image: url("img/equipamentos-icon.svg");
+}
+
 .nav-item {
     font-size: 0.9rem;
     /* padding-bottom: 0.5rem; */
@@ -97,11 +109,6 @@
     margin-left: 0.25rem;
     margin-right: 0.25rem;
 }
-
-/* .nav-item:active,
-.nav-item:hover {
-    background-color: var(--azul-escuro);
-} */
 
 .nav-item ::deep a.active {
     background-color: var(--azul-escuro);
