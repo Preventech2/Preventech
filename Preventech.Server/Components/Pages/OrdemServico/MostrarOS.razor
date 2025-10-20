@@ -36,7 +36,7 @@ else if (!ordens.Any())
         <PropertyColumn Class="d-none d-md-table-cell" Title="Técnico Responsável" Property="@(item => item.TecnicoResponsavel != null ? item.TecnicoResponsavel.Nome : "(não atribuído)")" />
         <TemplateColumn Title="">
             <div>
-                <a href="/ordens-servico/@context.Id">Mais</a> 
+                <button class="btn-icon" @onclick='@(() => NavigationManager.NavigateTo($"/ordens-servico/{@context.Id}"))'><img class="icon" src="img/more-icon.svg" alt="" /></button>
             </div>
         </TemplateColumn>
     </QuickGrid>

@@ -11,23 +11,22 @@
 
 <h1>Bem vindo ao Preventech!</h1>
 
-<AuthorizeView>
+<AuthorizeView Roles="@PerfilExtension.EditarOrdemDeServico">
     <Authorized>
-        <p>Você está logado.</p>
-        <ul>
-            <li><a href="/laboratorios">Visualizar Localizações</a></li>
-            <li><a href="/equipamentos">Visualizar Equipamentos</a></li>
-            <li><a href="/cadastrar/usuario">Cadastrar Usuário</a></li>
-            <li><a href="/cadastrar/ordem-servico">Cadastrar Ordem de Serviço</a></li>
-            <li><a href="/ordens-servico">Visualizar Ordens de Serviço</a></li>
-        </ul>
+        <PageSection>
+            <section class="header-section">
+                <h4>Tarefas pendentes</h4>
+            </section>
+        </PageSection>
     </Authorized>
 </AuthorizeView>
 
 <AuthorizeView Roles="@PerfilExtension.VisualizarLaboratorio">
     <Authorized>
         <PageSection>
-            <h4>Dashboard Laboratórios</h4>
+            <section class="header-section">
+                <h4>Dashboard Laboratórios</h4>
+            </section>
         </PageSection>
     </Authorized>
 </AuthorizeView>
