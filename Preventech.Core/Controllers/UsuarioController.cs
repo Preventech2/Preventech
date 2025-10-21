@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +15,7 @@ namespace Preventech.Core.Controllers
         private readonly ApplicationDbContext _context = context;
 
         [HttpPost("cadastro")]
+        [AllowAnonymous]
         public async Task<ApiResponse<Usuario>> CadastroUsuario([FromBody] Usuario usuario)
         {
             if (usuario == null)
@@ -68,6 +70,7 @@ namespace Preventech.Core.Controllers
         }
 
         [HttpPost("login")]
+        [AllowAnonymous]
         public async Task<ApiResponse<Usuario>> LoginUsuario([FromBody] Usuario usuario)
         {
             if (usuario == null)
@@ -125,7 +128,15 @@ namespace Preventech.Core.Controllers
             {
                 var usuarios = await _context.Usuarios
                     .Include(u => u.Grupo) // Inclui o grupo na consulta
-                    .ToListAsync();
+                    .Select(u => new Usuario
+                    {
+                        Id = u.Id,
+                        Cpf = u.Cpf,
+                        Nome = u.Nome,
+                        Grupo = u.Grupo
+                    })
+                    .ToListAsync();                
+
                 return new ApiResponse<List<Usuario>>
                 {
                     Success = true,
@@ -162,6 +173,14 @@ namespace Preventech.Core.Controllers
                 var usuarioEncontrado = await _context.Usuarios
                     .Include(u => u.Grupo) // Inclui o grupo na consulta
                     .Where(u => u.Cpf == usuario.Cpf)
+                    .Select(u => new Usuario
+                    {
+                        Id = u.Id,
+                        Cpf = u.Cpf,
+                        Nome = u.Nome,
+                        Email = u.Email,
+                        Grupo = u.Grupo
+                    })
                     .FirstOrDefaultAsync();
 
                 if (usuarioEncontrado == null)

@@ -17,7 +17,7 @@ public class AuthConstants
     /// <summary>
     /// Configurações do cookie de autenticação
     /// </summary>
-    public const string Sid = "555"; // Valor fixo para demonstração, substituir por lógica real de sessão
+    public const string Sid = "373"; // Valor fixo para demonstração, substituir por lógica real de sessão
     public const string CookieName = "AuthToken";
     public const bool CookieHttpOnly = true;
     public const SameSiteMode CookieSameSite = SameSiteMode.Strict; // Options: Lax, Strict,
