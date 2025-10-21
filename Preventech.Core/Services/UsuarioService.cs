@@ -2,17 +2,15 @@ using System;
 using System.Net.Http.Json;
 using Preventech.Core.Models;
 using Preventech.Core.DTOs;
+using Microsoft.Extensions.Logging;
+using System.Security.Cryptography;
 
 namespace Preventech.Core.Services;
 
-public class UsuarioService
+public class UsuarioService(HttpClient httpClient, ILogger<UsuarioService> logger)
 {
-    private readonly HttpClient _httpClient;
-
-    public UsuarioService(HttpClient httpClient)
-    {
-        _httpClient = httpClient;
-    }
+    private readonly ILogger<UsuarioService> _logger = logger;
+    private readonly HttpClient _httpClient = httpClient;
 
     public async Task<ApiResponse<Usuario>> AddUsuarioAsync(Usuario usuario)
     {
@@ -26,10 +24,11 @@ public class UsuarioService
     {
         var response = await _httpClient.PostAsJsonAsync($"api/usuarios/login", usuario);
         var result = await response.Content.ReadFromJsonAsync<ApiResponse<Usuario>>()
-        ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<Usuario>.");
+        ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<Usuario> while login.");
+
         return result;
     }
-
+    
     public async Task<ApiResponse<List<Usuario>>> GetUsuariosAsync()
     {
         var response = await _httpClient.GetAsync("api/usuarios");
@@ -38,9 +37,9 @@ public class UsuarioService
         return result;
     }
 
-    public async Task<ApiResponse<Usuario>> GetUsuarioByIdAsync(int id)
+    public async Task<ApiResponse<Usuario>> InviteUsuarioAsync(Usuario usuario)
     {
-        var response = await _httpClient.GetAsync($"api/usuarios/{id}");
+        var response = await _httpClient.PostAsJsonAsync("api/usuarios/invite", usuario);
         var result = await response.Content.ReadFromJsonAsync<ApiResponse<Usuario>>()
         ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<Usuario>.");
         return result;

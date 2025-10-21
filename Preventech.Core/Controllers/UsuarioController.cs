@@ -9,14 +9,9 @@ namespace Preventech.Core.Controllers
 {
     [Route("api/usuarios")]
     [ApiController]
-    public class UsuarioController : ControllerBase
+    public class UsuarioController(ApplicationDbContext context) : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
-
-        public UsuarioController(ApplicationDbContext context)
-        {
-            _context = context;
-        }
+        private readonly ApplicationDbContext _context = context;
 
         [HttpPost("cadastro")]
         public async Task<ApiResponse<Usuario>> CadastroUsuario([FromBody] Usuario usuario)
@@ -126,6 +121,45 @@ namespace Preventech.Core.Controllers
                 {
                     Success = false,
                     Message = $"Erro ao buscar usuários: {ex.Message}",
+                    Data = null
+                };
+            }
+        }
+
+        [HttpPost("invite")]
+        public async Task<ApiResponse<Usuario>> InviteUsuario([FromBody] Usuario usuario)
+        {
+            if (usuario == null)
+            {
+                return new ApiResponse<Usuario>
+                {
+                    Success = false,
+                    Message = "Dados do usuário inválidos",
+                    Data = null
+                };
+            }
+
+            try
+            {
+                // Adiciona o usuario ao contexto
+                _context.Usuarios.Add(usuario);
+
+                // Salva as mudanças no banco de dados
+                await _context.SaveChangesAsync();
+
+                return new ApiResponse<Usuario>
+                {
+                    Success = true,
+                    Message = "Usuário convidado com sucesso",
+                    Data = usuario
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse<Usuario>
+                {
+                    Success = false,
+                    Message = $"Erro ao convidar usuário: {ex.Message}",
                     Data = null
                 };
             }

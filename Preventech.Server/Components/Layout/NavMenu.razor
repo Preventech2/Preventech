@@ -1,14 +1,22 @@
-﻿@rendermode InteractiveServer
+﻿@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@using Preventech.Core.Models
+@using Preventech.Core.Services
 
-@inject AuthenticationStateService authStateService
+@rendermode InteractiveServer
+
+@inject UserClaimsHelper UserClaimsHelper
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-    @if(!string.IsNullOrEmpty(NomeUsuario)) {
-        <a class="navbar-brand" href="">@NomeUsuario</a>
-    } else {
-        <a class="navbar-brand" href="">Convidado</a>
-    }
+        <AuthorizeView>
+            <Authorized>
+                <a class="navbar-brand" href="">@userInfo?.Name</a>
+            </Authorized>
+            <NotAuthorized>
+                <a class="navbar-brand" href="">Usuario</a>
+            </NotAuthorized>
+        </AuthorizeView>
     </div>
 </div>
 
@@ -16,7 +24,7 @@
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="nav flex-column">
-        <div class="nav-item px-3">
+        <div class="nav-item pad-x">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
             </NavLink>
@@ -25,10 +33,10 @@
     <AuthorizeView>
         <Authorized>
             @* Adicione aqui os links que o usuário autenticado pode ver. *@
-            @if (usuario != null)
+            @if (userInfo != null)
             
             {
-                <div class="nav-item px-3">
+                <div class="nav-item pad-x">
                     <NavLink class="nav-link" href="@url">
                        <span class="bi bi-briefcase-fill" aria-hidden="true"></span> Minhas OSs
                     </NavLink>
@@ -39,22 +47,14 @@
 </div>
 
 @code {
-    private string? NomeUsuario = null;
-    private Usuario? usuario = null;
+    private UserInfo? userInfo;
+    private string url = "/ordens-servico/user";
 
-    private string url = "/ordens-servico/user/";
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
-        usuario = await authStateService.GetUsuarioAsync();
-        url += usuario?.Id.ToString();
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender) {
-        if (firstRender)
-        {        
-            NomeUsuario = usuario?.Nome;
-            StateHasChanged();
-        }
+        userInfo = await UserClaimsHelper.GetCurrentUserInfoAsync();
     }
 }

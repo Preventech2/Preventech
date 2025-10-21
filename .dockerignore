@@ -1,0 +1,5 @@
+for-developers/
+.git/
+.github/
+bin/
+obj/

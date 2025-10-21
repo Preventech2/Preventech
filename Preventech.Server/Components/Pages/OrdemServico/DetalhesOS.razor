@@ -3,8 +3,8 @@
 
 @using Microsoft.AspNetCore.Components.QuickGrid
 @using Preventech.Core.DTOs
-
-@inject AuthenticationStateService authStateService
+@using Preventech.Core.Services
+@inject UserClaimsHelper UserClaimsHelper
 
 <PageTitle>Visualizar Ordem de Serviço</PageTitle>
  
@@ -54,7 +54,7 @@ else
     </EditForm>      
 }
 
-else if (ordem.TecnicoResponsavel.Id == usuario.Id && ordem.Status != StatusOS.Concluida) {
+else if (ordem.TecnicoResponsavel.Id == userInfo?.Id && ordem.Status != StatusOS.Concluida) {
     <div>
         <EditForm Model="ordem" OnSubmit="FormDataCancel" FormName="pegar-Ordem-Servico">
             <button type="submit" class="btn btn-danger" disabled="@isProcessing">
@@ -96,7 +96,7 @@ else {
 @code {
     private OrdemServico ordem = null!;
     private Equipamento equipamento = null!;
-    private Usuario usuario = null!;
+    private UserInfo? userInfo = null;
 
     [Parameter]
     public Guid id { get; set; }
@@ -113,6 +113,9 @@ else {
 
     protected override async Task OnInitializedAsync()
     {
+        // Get current user info from claims
+        userInfo = await UserClaimsHelper.GetCurrentUserInfoAsync();
+
         ApiResponse<OrdemServico>? response = await ordemService.GetOrdemServicoByIdAsync(id);
         
         if (response != null && response.Data != null)
@@ -143,21 +146,6 @@ else {
                 Patrimonio = "N/A"
             };
         }
-
-        Usuario? responseUser = await authStateService.GetUsuarioAsync();
-
-        if (responseUser != null)
-        {
-            usuario = responseUser;
-        }
-
-        else
-        {
-            usuario = new Usuario
-            {
-                Nome = "Usuário não identificado"
-            };
-        }
     }
     private string GetStatusIcon(StatusOS status)
     {
@@ -174,6 +162,16 @@ else {
 
     private async Task FormData()
     {
+        if (userInfo == null || !userInfo.IsAuthenticated) return;
+
+        // Create a Usuario object from userInfo for the API
+        var usuario = new Usuario
+        {
+            Id = userInfo.Id,
+            Nome = userInfo.Name,
+            Cpf = userInfo.Cpf
+        };
+
         ordem.TecnicoResponsavel = usuario;
         ordem.TecnicoResponsavelId = usuario.Id; 
         ordem!.Status = StatusOS.EmProgresso;

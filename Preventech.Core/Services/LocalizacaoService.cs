@@ -2,6 +2,10 @@ using System;
 using System.Net.Http.Json;
 using Preventech.Core.Models;
 using Preventech.Core.DTOs;
+using Quartz.Util;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.AspNetCore.Http;
+using Microsoft.JSInterop;
 
 namespace Preventech.Core.Services;
 
@@ -14,78 +18,65 @@ public class LocalizacaoService
         _httpClient = httpClient;
     }
 
-    public async Task<ApiResponse<List<Localizacao>>> GetLocalizacoes()
+    public static string Query(Localizacao loc) {
+        var itens = new Dictionary<string, string>() { };
+        if (!loc.Apelido.IsNullOrWhiteSpace())
+            itens.Add("Apelido", loc.Apelido!);
+
+        if (loc.Campus > 0)
+            itens.Add("Campus", loc.Campus.ToString());
+
+        if (loc.Predio > 0)
+            itens.Add("Predio", loc.Predio.ToString());
+
+        if (loc.Andar > 0)
+            itens.Add("Andar", loc.Andar.ToString());
+
+        if (loc.Numero > 0)
+            itens.Add("Sala", loc.Numero.ToString());
+
+        
+        var res = string.Join("&", from item in itens select $"{item.Key}={item.Value}");
+        if (res.IsNullOrWhiteSpace()) return res;
+
+        return "?" + res;
+    }
+
+    public async Task<ApiResponse<List<Localizacao>>> GetLocalizacoes(Localizacao loc)
     {
-        var response = await _httpClient.GetAsync("api/localizacao");
+        var query = Query(loc);
+        var response = await _httpClient.GetAsync($"/api/localizacao{query}");
         var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<Localizacao>>>()
         ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<List<Equipamento>>.");
         return result;
     }
 
-    public async Task<ApiResponse<List<Localizacao>>> GetLocalizacoesPorCampus(int campus)
-    {
-        var response = await _httpClient.GetAsync($"api/localizacao/{campus}");
-        var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<Localizacao>>>()
-        ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<List<Localizacao>>.");
-        return result;
-    }
-
-    public async Task<ApiResponse<List<Localizacao>>> GetLocalizacoesPorPredio(int campus, int predio)
-    {
-        var response = await _httpClient.GetAsync($"api/localizacao/{campus}/{predio}");
-        var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<Localizacao>>>()
-        ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<List<Localizacao>>.");
-        return result;
-    }
-
-    public async Task<ApiResponse<List<Localizacao>>> GetLocalizacoesPorAndar(int campus, int predio, int andar)
-    {
-        var response = await _httpClient.GetAsync($"api/localizacao/{campus}/{predio}/{andar}");
-        var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<Localizacao>>>()
-        ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<List<Localizacao>>.");
-        return result;
-    }
-
-    public async Task<ApiResponse<Equipamento>?> AddLocalizacaoAsync(Localizacao local)
+    public async Task<ApiResponse<Localizacao>?> AddLocalizacaoAsync(Localizacao local)
     {
 
-        var response = await _httpClient.PostAsJsonAsync("api/localizacao/cadastro", local);
+        var response = await _httpClient.PostAsJsonAsync("api/localizacao", local);
         Console.WriteLine(response.StatusCode);
         if (response.IsSuccessStatusCode)
         {
-            return await response.Content.ReadFromJsonAsync<ApiResponse<Equipamento>>();
+            return await response.Content.ReadFromJsonAsync<ApiResponse<Localizacao>>();
         }
         else
         {
             var errorContent = await response.Content.ReadAsStringAsync();
-            throw new HttpRequestException($"Erro ao cadastrar equipamento: {response.StatusCode} - {errorContent}");
+            throw new HttpRequestException($"Erro ao cadastrar localizacao: {response.StatusCode} - {errorContent}");
         }
     }
 
-    public async Task<ApiResponse<Equipamento>?> AddLocalizacaoAsync(Localizacao inicial, Localizacao final)
-    {
-
-        var response = await _httpClient.PostAsJsonAsync("api/equipamentos/cadastro/range", new Localizacao[]{inicial, final});
+    public async Task<ApiResponse<Localizacao>> EditarLocalizacaoAsync(Localizacao loc) {
+        var response = await _httpClient.PatchAsJsonAsync("api/localizacao/", loc);
         if (response.IsSuccessStatusCode)
         {
-            return await response.Content.ReadFromJsonAsync<ApiResponse<Equipamento>>();
+            return await response.Content.ReadFromJsonAsync<ApiResponse<Localizacao>>();
         }
         else
         {
             var errorContent = await response.Content.ReadAsStringAsync();
             throw new HttpRequestException($"Erro ao cadastrar equipamento: {response.StatusCode} - {errorContent}");
         }
-    }
-
-    public async Task UpdateEquipamentoAsync(Equipamento Equipamento)
-    {
-        var response = await _httpClient.PutAsJsonAsync($"api/equipamentos/{Equipamento.Patrimonio}", Equipamento);
-        response.EnsureSuccessStatusCode();
-    }
-
-    public async Task DeleteEquipamentoAsync(string patrimonio)
-    {
-        var response = await _httpClient.DeleteAsync($"api/equipamentos/{patrimonio}");
-        response.EnsureSuccessStatusCode();
     }
 }

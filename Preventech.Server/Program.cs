@@ -2,10 +2,13 @@ using Preventech.Server.Components;
 using Preventech.Core.DatabaseContexts;
 using Preventech.Core.Services;
 using Microsoft.EntityFrameworkCore;
-using Preventech.Server.SecurityServices;
 using Microsoft.AspNetCore.Components.Authorization;
 using Quartz;
+using Preventech.Core.Constants;
+using Preventech.Server;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,14 +26,64 @@ builder.Services.AddControllers();
 //    options.HttpsPort = 7111; // Porta HTTPS definida para suprimir o aviso de segurança
 //});
 
-// Add Authorization and Authentication services
-
-builder.Services.AddAuthorization();
+// authorization and authentication services
 builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddScoped<AuthenticationStateProvider, CookieAuthStateProvider>();
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<UserClaimsHelper>();
 
-// Add scope to the AuthenticationStateProvider
-builder.Services.AddScoped<AuthenticationStateProvider, AuthenticationStateService>();
-builder.Services.AddScoped<AuthenticationStateService>();
+builder.Services.AddAuthentication(o =>
+{
+    o.DefaultAuthenticateScheme = AuthConstants.CookieName;
+}).AddCookie(AuthConstants.CookieName, o =>
+{
+    o.LoginPath = "/login";
+    o.LogoutPath = "/logout";
+    o.AccessDeniedPath = "/login";
+    o.Cookie.Name = AuthConstants.CookieName;
+    o.Cookie.SameSite = AuthConstants.CookieSameSite;
+    o.ExpireTimeSpan = TimeSpan.FromSeconds(AuthConstants.CookieExpiry);
+    o.SlidingExpiration = false; // Define se o cookie deve ser renovado automaticamente
+    o.Events = new CookieAuthenticationEvents
+    {
+        OnValidatePrincipal = ctx =>
+        {
+            if (ctx.Principal?.Identity?.IsAuthenticated ?? false)
+            {
+                var Claims = ctx.Principal.Claims;
+
+                // Verifica se o cookie expirou
+                var expirationClaim = Claims.FirstOrDefault(c => c.Type == ClaimTypes.Expiration)?.Value;
+                if (!string.IsNullOrEmpty(expirationClaim) && DateTime.TryParse(expirationClaim, out var expiration))
+                {
+                    if (DateTime.Now > expiration)
+                    {
+                        ctx.RejectPrincipal();
+                        return ctx.HttpContext.SignOutAsync(AuthConstants.CookieName);
+                    }
+                }
+
+                if (Claims == null)
+                {
+                    ctx.RejectPrincipal();
+                    return ctx.HttpContext.SignOutAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme);
+                }
+                else
+                {
+                    var sid = Claims.Where(c => c.Type == ClaimTypes.Sid).FirstOrDefault()?.Value ?? "";
+                    if (sid != "555")
+                    {
+                        ctx.RejectPrincipal();
+                        return ctx.HttpContext.SignOutAsync(
+                            CookieAuthenticationDefaults.AuthenticationScheme);
+                    }
+                }
+            }
+            return Task.CompletedTask;
+        }
+    };
+});
 
 // Configure PostgreSQL
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -62,7 +115,13 @@ builder.Services.AddHttpClient<EmailService>(client =>
     client.BaseAddress = new Uri("http://localhost:8080/");
 });
 
+builder.Services.AddHttpClient<LocalizacaoService>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:8080/");
+});
+
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -85,5 +144,23 @@ app.MapControllers();
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+// faz cache de arquivos css -> menos requisições
+app.Use(async (context, next) =>
+{
+    string path = context.Request.Path;
+
+    if (path.EndsWith(".css") || path.EndsWith(".js") || path.EndsWith(".png"))
+    {
+        var tempo = 7 * 24 * 60 * 60;
+        context.Response.Headers.Append("Cache-Control", $"max-age={tempo}");
+    }
+    else
+    {
+        context.Response.Headers.Append("Cache-Control", "no-cache");
+        context.Response.Headers.Append("Cache-Control", "private, no-store");
+    }
+    await next();
+});
 
 app.Run();

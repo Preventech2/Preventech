@@ -1,8 +1,8 @@
 ﻿@page "/logout"
+@using Microsoft.AspNetCore.Authentication
 
 @rendermode InteractiveServer
 
-@inject AuthenticationStateService authStateService
 @inject NavigationManager navigationManager
 
 <PageTitle>Logout</PageTitle>
@@ -10,11 +10,11 @@
 <h3>LogoutUsuario</h3>
 
 @code {
-    protected override async Task OnAfterRenderAsync(bool firstRender) {
-        if (firstRender)
-        {
-            await authStateService.MarkUserAsLoggedOut();
-            navigationManager.NavigateTo("/", true);
-        }
+    [Inject]
+    private AuthService authService { get; set; } = null!;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await authService.Logout();
     }
 }

@@ -1,8 +1,10 @@
-﻿@page "/cadastrar/equipamento"
+@page "/cadastrar/preditiva"
 @rendermode InteractiveServer
 @inject IJSRuntime jsr
 
 <PageTitle>Cadastrar um equipamento</PageTitle>
+
+<h2>Cadastrar Equipamento</h2>
 
 <h1>Cadastrar Equipamento</h1>
 @if (!string.IsNullOrEmpty(mensagemResultado))
@@ -88,7 +90,7 @@
             // tem que mudar, atualmente o equipamentoService apenas chama a API e ela só retorna um sucesso
             // testando API
 
-            ApiResponse<Equipamento>? resultado = await equipamentoService.AddEquipamentoAsync(equipamento!);
+            var resultado = await equipamentoService.AddEquipamentoAsync(equipamento!);
 
             await jsr.InvokeVoidAsync("console.log", resultado);
             if (resultado != null && resultado.Success)

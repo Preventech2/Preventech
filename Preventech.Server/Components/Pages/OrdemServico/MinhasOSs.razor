@@ -1,8 +1,10 @@
-@page "/ordens-servico/user/{responsavelId:int}"
+@page "/ordens-servico/user"
 @rendermode InteractiveServer
 
 @using Microsoft.AspNetCore.Components.QuickGrid
 @using Preventech.Core.DTOs
+@using Preventech.Core.Services
+@inject UserClaimsHelper UserClaimsHelper
 
 <PageTitle>Visualizar Ordens de Servico</PageTitle>
  
@@ -40,17 +42,26 @@ else
 
 @code {
     private IQueryable<OrdemServico> ordens = null!;
+    private UserInfo? userInfo = null;
 
     [Inject]
     OrdemServicoService ordemService { get; set; } = null!;
 
-    [Parameter]
-    public int responsavelId { get; set; }
-
     protected override async Task OnInitializedAsync()
     {
-        ApiResponse<List<OrdemServico>> response = await ordemService.GetOrdemServicoByResponsavelAsync(responsavelId);
-        ordens = response.Data?.AsQueryable() ?? new List<OrdemServico>().AsQueryable();
+        // Get current user info from claims
+        userInfo = await UserClaimsHelper.GetCurrentUserInfoAsync();
+        
+        if (userInfo != null && userInfo.IsAuthenticated && userInfo.Id > 0)
+        {
+            // Use the existing method with the user ID from claims
+            ApiResponse<List<OrdemServico>> response = await ordemService.GetOrdemServicoByResponsavelAsync(userInfo.Id);
+            ordens = response.Data?.AsQueryable() ?? new List<OrdemServico>().AsQueryable();
+        }
+        else
+        {
+            ordens = new List<OrdemServico>().AsQueryable();
+        }
     }
     @inject NavigationManager NavigationManager
     void VerDetalhes(OrdemServico ordem)

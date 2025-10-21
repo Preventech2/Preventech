@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MailKit" Version="2.6.0" />
+    <PackageReference Include="MailKit" Version="4.13.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components" Version="9.0.9" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.9" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.3.0" />
@@ -20,9 +20,11 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.9" />
+    <PackageReference Include="Microsoft.JSInterop" Version="9.0.9" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     <PackageReference Include="Quartz" Version="3.15.0" />
     <PackageReference Include="Quartz.AspNetCore" Version="3.15.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,8 @@
 ﻿@page "/"
 
-@rendermode InteractiveServer
+@attribute [Authorize]
+
+@inject NavigationManager navigationManager
 
 <PageTitle>Home</PageTitle>
 
@@ -10,8 +12,8 @@
     <Authorized>
         <p>Você está logado.</p>
         <ul>
-            <li><a href="/cadastrar/localizacao">Cadastrar localizacao</a></li>
-            <li><a href="/cadastrar/equipamento">Cadastrar Equipamento</a></li>
+            <li><a href="/localizacao/cadastrar">Cadastrar localizacao</a></li>
+            <li><a href="/equipamento/cadastrar">Cadastrar Equipamento</a></li>
             <li><a href="/equipamentos">Equipamentos</a></li>
             <li><a href="/cadastrar/usuario">Cadastrar Usuário</a></li>
             <li><a href="/usuarios">Usuários</a></li>
