@@ -26,6 +26,11 @@ public class Equipamento
     public string Patrimonio { get; set; } = string.Empty;
 
     /// <summary>
+    /// Como o equipamento se encontra atualmente
+    /// </summary>
+    public StatusEquipamento Status { get; set; } = StatusEquipamento.Invalido;
+
+    /// <summary>
     /// Localização do patrimônio
     /// </summary>
     public Localizacao Local { get; set; } = Localizacao.Vazia;

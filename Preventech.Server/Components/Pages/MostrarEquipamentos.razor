@@ -14,15 +14,22 @@
 <PageSection>
     <section class="header-section">
         <h4>Equipamentos</h4>
-        <button class="btn-icon" @onclick="@(() => IsCadastrarActive = true)"><img class="icon" src="img/add-icon.svg" alt="" /></button>
+        <button class="btn-icon" @onclick="@(() => IsCadastrarActive = true)"><img class="icon" src="img/add-icon.svg"
+                alt="" /></button>
     </section>
-    <QuickGrid TGridItem="Equipamento" Items="@equipamentos">
-        @* <PropertyColumn Sortable="true" Property="@(item => item.Id)" Title="ID" /> *@
+    <QuickGrid TGridItem="Equipamento" Items="@equipamentos.AsQueryable()">
         <PropertyColumn Sortable="true" Property="@(item => item.Patrimonio)" Title="Patrimônio" />
         <PropertyColumn Class="d-none d-md-table-cell" Sortable="true" Property="@(item => item.Nome)" Title="Nome" />
-        <PropertyColumn Property="@(item => item.Local)" Title="Local" />
+        <PropertyColumn Property="@(item => item.Local)" Title="Laboratório" />
+        <TemplateColumn Title="Status">
+            <span class="@(GetStatus(context.Status))"></span>
+            <span>
+                @ReprStatus(context.Status)
+            </span>
+        </TemplateColumn>
         <TemplateColumn Class="col-actions" Title="Ações">
-            <button class="btn-icon" @onclick="() => AcionarEditar(context)"><img class="icon" src="img/edit-icon.svg" alt="" /></button>
+            <button class="btn-icon" @onclick="() => AcionarEditar(context)"><img class="icon" src="img/edit-icon.svg"
+                    alt="" /></button>
         </TemplateColumn>
     </QuickGrid>
 </PageSection>
@@ -32,30 +39,47 @@
 
 
 @code {
-
     private Equipamento equipamento = Equipamento.Vazio;
 
     /// Todos os equipamentos que existem no sistema
-    private IQueryable<Equipamento> equipamentos = (new List<Equipamento>()).AsQueryable();
+    private List<Equipamento> equipamentos = new();
 
     /// Define se o modal de cadastro foi selecionado
     bool IsCadastrarActive = false;
 
     /// Define se o modal de edição foi selecionado
     bool IsEditarActive = false;
-
     string mensagem = string.Empty;
     protected override async Task OnInitializedAsync()
     {
-        ApiResponse<List<Equipamento>> response = await equipamentoService.GetEquipamentosAsync();
+        var response =
+        await equipamentoService.GetEquipamentos(Equipamento.Vazio);
         if (!response.Success)
             mensagem = response.Message ?? string.Empty;
-        equipamentos = response.Data?.AsQueryable() ?? (new List<Equipamento>()).AsQueryable();
+        equipamentos = response.Data ?? new();
     }
 
-    private async Task AcionarEditar(Equipamento item)
+    private void AcionarEditar(Equipamento item)
     {
         equipamento = item;
         IsEditarActive = true;
     }
+
+    private string GetStatus(StatusEquipamento status) => status switch
+    {
+        StatusEquipamento.Inoperante => "status-inoperante",
+        StatusEquipamento.ComAvaria => "status-avaria",
+        StatusEquipamento.ManutencaoEmDia => "status-emdia",
+        StatusEquipamento.Funcionando => "status-funcionando",
+        _ => "status-invalido"
+    };
+
+    private string ReprStatus(StatusEquipamento status) => status switch
+    {
+        StatusEquipamento.Inoperante => "Inoperante",
+        StatusEquipamento.ComAvaria => "Funcionando com avaria",
+        StatusEquipamento.ManutencaoEmDia => "Manutenções em dia",
+        StatusEquipamento.Funcionando => "Funcionando",
+        _ => "Inválido"
+    };
 }

@@ -67,15 +67,15 @@
     {
         equipamento = new Equipamento();
 
-        ApiResponse<List<Localizacao>>? res = await localizacaoService.GetLocalizacoes(Localizacao.Vazia);
+        var res = await localizacaoService.GetLocalizacoes(Localizacao.Vazia);
         
         if (res.Success == false)
             mensagem = res.Message;
         else
             mensagem = string.Empty;
 
-        if (res.Data != null)
-            locais = res.Data.AsQueryable();
+        if (res.Data is List<Localizacao> locs)
+            locais = locs.AsQueryable();
     }
 
     private async Task FormData()
@@ -85,8 +85,9 @@
         StateHasChanged();
         try
         {
-            var resultado = await equipamentoService.AddEquipamentoAsync(equipamento!);
-            mensagem = resultado.Message ?? "Erro inesperado ao cadastrar o equipamento.";
+            if (await equipamentoService.AddEquipamentoAsync(equipamento!) is ApiResponse<Equipamento> res) {
+                mensagem = res.Message ?? "Erro inesperado ao cadastrar o equipamento.";
+            }
         }
         catch (Exception ex)
         {

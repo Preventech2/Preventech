@@ -50,51 +50,32 @@
     public EventCallback<bool> IsActiveChanged { get; set; }
 
     [Parameter]
-    public Equipamento equipamento { get; set; }
+    public Equipamento equipamento { get; set; } = Equipamento.Vazio;
 
     [Parameter]
     public EventCallback<Equipamento> equipamentoChanged { get; set; }
 
     /// Lista de equipamentos
-    IQueryable<Equipamento> equipamentos;
+    List<Equipamento> equipamentos = new();
 
     /// lista de localizações
-    IQueryable<Localizacao> localizacoes;
+    List<Localizacao> localizacoes = new();
+
     bool isProcessing = false;
     public string mensagem = string.Empty;
 
-    protected override async Task OnInitializedAsync()
-    {
-        await InitializeEquipamento();
-    }
+    protected override async Task OnInitializedAsync() => await InitializeEquipamento();
 
     private async Task InitializeEquipamento()
     {
-        equipamento = new Equipamento { Local = new Localizacao() };
-        ApiResponse<List<Equipamento>>? res = await equipamentoService.GetEquipamentos(Equipamento.Vazio);
-        
-        if (res.Success == false)
-            mensagem = res.Message;
-        else
-            mensagem = string.Empty;
-        
+        equipamento = Equipamento.Vazio;
+        var res = await equipamentoService.GetEquipamentos(Equipamento.Vazio);
+        var resloc = await localizacaoService.GetLocalizacoes(Localizacao.Vazia);
 
-        if (res.Data != null)
-            equipamentos = res.Data!.AsQueryable();
-        else
-            equipamentos = (new List<Equipamento>()).AsQueryable();
+        mensagem = !res.Success ? res.Message : !resloc.Success ? resloc.Message : string.Empty;
 
-        ApiResponse<List<Localizacao>>? resloc = await localizacaoService.GetLocalizacoes(Localizacao.Vazia);
-
-        if (resloc.Success == false)
-            mensagem = resloc.Message;
-        else
-            mensagem = string.Empty;
-
-        if (resloc.Data != null)
-            localizacoes = resloc.Data!.AsQueryable();
-        else
-            localizacoes = (new List<Localizacao>()).AsQueryable();
+        equipamentos = res.Data ?? new();
+        localizacoes = resloc.Data ?? new();
     }
 
     private async Task EditarEquip()
@@ -111,7 +92,6 @@
                 mensagem = res.Message;
             else
                 equipamento = Equipamento.Vazio;
-            Console.WriteLine($"Equipamento editado com sucesso: {res.Data?.Nome}");
         }
         catch (Exception ex)
         {
