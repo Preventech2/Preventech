@@ -286,3 +286,12 @@ REFERENCES public."Patrimonio" (id) MATCH FULL
 ON DELETE SET NULL ON UPDATE CASCADE;
 -- ddl-end --
 
+CREATE TABLE IF NOT EXISTS "OrdemServicoPeca" (
+    "OrdensDeServicoId" uuid NOT NULL,
+    "PecasId" uuid NOT NULL,
+    CONSTRAINT "PK_OrdemServicoPeca" PRIMARY KEY ("OrdensDeServicoId", "PecasId"),
+    CONSTRAINT "FK_OrdemServicoPeca_OrdensServico_OrdensDeServicoId" FOREIGN KEY ("OrdensDeServicoId") 
+        REFERENCES "OrdensServico" ("Id") ON DELETE CASCADE,
+    CONSTRAINT "FK_OrdemServicoPeca_Pecas_PecasId" FOREIGN KEY ("PecasId") 
+        REFERENCES "Pecas" ("Id") ON DELETE CASCADE
+);

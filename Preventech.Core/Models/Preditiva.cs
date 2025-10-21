@@ -12,8 +12,6 @@ public class Preditiva
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
-
-    [Column(TypeName = "bigint")]
     public DateTimeOffset Frequencia { get; set; }
 
     /// <summary>

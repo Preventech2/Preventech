@@ -52,6 +52,8 @@
         <p><em>Carregando equipamentos</em></p>
     }
 
+    <PecaSelection @ref="pecaSelectionComponent" />
+
     <button type="submit" class="btn btn-primary" disabled="@isProcessing">
         @if (isProcessing)
         {
@@ -81,6 +83,7 @@
     private bool sucesso = false;
     private bool isProcessing = false;
     private UserInfo? userInfo = null;
+    private PecaSelection pecaSelectionComponent = null!;
     protected override async Task OnInitializedAsync()
     {
         userInfo = await UserClaimsHelper.GetCurrentUserInfoAsync();
@@ -99,6 +102,7 @@
         ordemServico!.Status = StatusOS.Parada;
         ordemServico!.TecnicoResponsavel = null;
         ordemServico!.RequisitanteId = userInfo?.Id;
+        ordemServico!.Pecas = pecaSelectionComponent.PecasSelecionadas;
         
         Core.DTOs.ApiResponse<OrdemServico> response = await OSservice.AddOrdemServicoAsync(ordemServico) ?? new Core.DTOs.ApiResponse<OrdemServico>();
         mensagemResultado = response.Message;

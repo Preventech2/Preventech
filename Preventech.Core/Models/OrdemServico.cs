@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Preventech.Core.Services;
 
 namespace Preventech.Core.Models;
 
@@ -36,6 +37,8 @@ public class OrdemServico
     
     public int? RequisitanteId { get; set; }
     public Usuario? Requisitante { get; set; }
+
+    public List<Peca>? Pecas { get; set; } = new();
     
     public static Guid GerarIdOrdem()
     {

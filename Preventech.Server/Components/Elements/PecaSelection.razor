@@ -1,0 +1,110 @@
+@page "/select-pecas"
+@rendermode InteractiveServer
+@inject PecaService PecaService
+
+<input type="text" placeholder="Busque o nome da peça..." @bind="Filtro" @bind:event="oninput" class="form-control rounded-0" />
+
+<div class="d-flex flex-column">
+    @if (pecasFiltradas.Any())
+    {
+        @foreach (var peca in pecasFiltradas)
+        {
+            <button type="button"
+                class="btn btn-secondary btn-sm d-flex align-items-center justify-content-between w-100 rounded-0"
+                @onclick="() => AdicionarPeca(peca)" title="Adicionar @peca.Descricao">
+
+                @peca.Descricao
+
+                <span aria-hidden="true" style="line-height: 1; font-size: 1.2em; font-weight: 600;">+</span>
+            </button>
+        }
+    }
+    else
+    {
+        <p class="mt-2">Nenhuma peça encontrada.</p>
+    }
+</div>
+
+@if (pecasSelecionadas.Any())
+{
+    <div class="d-flex flex-wrap gap-2 my-3">
+        @foreach (var peca in pecasSelecionadas)
+        {
+            <button type="button" class="btn btn-primary btn-sm rounded-pill d-flex align-items-center gap-1"
+                @onclick="() => RemoverPeca(peca)" title="Remover @peca.Descricao">
+
+                @peca.Descricao
+                <span aria-hidden="true" style="line-height: 1; font-size: 1.1em; font-weight: 600;">&times;</span>
+            </button>
+        }
+    </div>
+}
+else
+{
+    <p class="mt-2">Nenhuma peça selecionada ainda.</p>
+}
+
+@code {
+    private List<Peca> todasPecas = new();
+    private List<Peca> pecasFiltradas = new();
+    private List<Peca> pecasSelecionadas = new();
+    public List<Peca> PecasSelecionadas => pecasSelecionadas;
+
+    private string filtro = string.Empty;
+    private string Filtro
+    {
+        get => filtro;
+        set
+        {
+            filtro = value;
+            FiltrarPecas();
+        }
+    }
+
+    private Guid? pecaSelecionadaId;
+    private Guid? PecaSelecionadaId
+    {
+        get => pecaSelecionadaId;
+        set { }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await PecaService.GetPecasAsync();
+        todasPecas = response.Data ?? new List<Peca>();
+        pecasFiltradas = todasPecas;
+    }
+
+    private void FiltrarPecas()
+    {
+        if (string.IsNullOrWhiteSpace(filtro))
+        {
+            pecasFiltradas = todasPecas
+            .Where( p => !pecasSelecionadas.Any(ps => ps.Id == p.Id)).ToList();
+        }
+        else
+        {
+            pecasFiltradas = todasPecas
+            .Where(p => p.Descricao.Contains(filtro, StringComparison.OrdinalIgnoreCase)
+            && !pecasSelecionadas.Any(ps => ps.Id == p.Id)).ToList();
+        }
+    }
+
+    private void AdicionarPeca(Peca peca)
+    {
+        if (peca != null && !pecasSelecionadas.Any(ps => ps.Id == peca.Id))
+        {
+            pecasSelecionadas.Add(peca);
+            FiltrarPecas();
+        }
+    }
+
+    private void RemoverPeca(Peca peca)
+    {
+        if (peca != null)
+        {
+            pecasSelecionadas.Remove(peca);
+            FiltrarPecas();
+        }
+    }
+}

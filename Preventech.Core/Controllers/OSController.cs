@@ -33,7 +33,13 @@ namespace Preventech.Core.Controllers
 
             try
             {
-                // Adiciona o equipamento ao contexto
+                // Adiciona as peças ao contexto
+                if (ordem.Pecas != null && ordem.Pecas.Any())
+                    foreach (var peca in ordem.Pecas)
+                        _context.Pecas.Attach(peca);
+                    
+                
+                // Adiciona a OS ao contexto
                 _context.OrdensServico.Add(ordem);
 
                 // Salva as mudanças no banco de dados
@@ -118,7 +124,7 @@ namespace Preventech.Core.Controllers
                     .Include(o => o.Requisitante)
                     .Include(o => o.TecnicoResponsavel)
                     .Where(e => e.TecnicoResponsavelId == id)
-                    .ToListAsync(); 
+                    .ToListAsync();
 
                 return new ApiResponse<List<OrdemServico>>
                 {
@@ -175,7 +181,8 @@ namespace Preventech.Core.Controllers
                 existingOrdem.TecnicoResponsavelId = updatedOrdem.TecnicoResponsavelId;
                 existingOrdem.RequisitanteId = updatedOrdem.RequisitanteId;
                 existingOrdem.EquipamentoId = updatedOrdem.EquipamentoId;
-                
+                existingOrdem.Pecas = updatedOrdem.Pecas;
+
                 await _context.SaveChangesAsync();
 
                 return new ApiResponse<OrdemServico>
