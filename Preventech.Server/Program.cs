@@ -66,17 +66,15 @@ builder.Services.AddAuthentication(o =>
                 if (Claims == null)
                 {
                     ctx.RejectPrincipal();
-                    return ctx.HttpContext.SignOutAsync(
-                        CookieAuthenticationDefaults.AuthenticationScheme);
+                    return ctx.HttpContext.SignOutAsync(AuthConstants.CookieName);
                 }
                 else
                 {
                     var sid = Claims.Where(c => c.Type == ClaimTypes.Sid).FirstOrDefault()?.Value ?? "";
-                    if (sid != "555")
+                    if (sid != AuthConstants.Sid)
                     {
                         ctx.RejectPrincipal();
-                        return ctx.HttpContext.SignOutAsync(
-                            CookieAuthenticationDefaults.AuthenticationScheme);
+                        return ctx.HttpContext.SignOutAsync(AuthConstants.CookieName);
                     }
                 }
             }

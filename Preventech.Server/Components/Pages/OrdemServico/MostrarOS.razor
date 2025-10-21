@@ -22,7 +22,7 @@ else if (!ordens.Any())
         <h4>Lista de Ordens de Serviço</h4>
         <button class="btn-icon" @onclick="@(() => NavigationManager.NavigateTo("/cadastrar/ordem-servico"))"><img class="icon" src="img/add-icon.svg" alt="" /></button>
     </section>
-    <QuickGrid Items="@ordens">
+    <QuickGrid Items="@ordens" >
         <TemplateColumn Title="Status">
             <div>
                 <img src="@GetStatusIcon(context.Status)" alt="Status Icon"
@@ -36,7 +36,7 @@ else if (!ordens.Any())
         <PropertyColumn Class="d-none d-md-table-cell" Title="Técnico Responsável" Property="@(item => item.TecnicoResponsavel != null ? item.TecnicoResponsavel.Nome : "(não atribuído)")" />
         <TemplateColumn Title="">
             <div>
-                <button class="btn-icon" @onclick='@(() => NavigationManager.NavigateTo($"/ordens-servico/{@context.Id}"))'><img class="icon" src="img/more-icon.svg" alt="" /></button>
+                <button class="btn-icon" @onclick='@(() => NavigationManager.NavigateTo($"/ordens-servico/{@context.Id}"))'><img class="icon" src="img/external-link-icon.svg" alt="" /></button>
             </div>
         </TemplateColumn>
     </QuickGrid>
