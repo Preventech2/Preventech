@@ -54,6 +54,7 @@ namespace Preventech.Core.Controllers
                     ExpiresUtc = DateTime.UtcNow.AddSeconds(AuthConstants.CookieExpiry)
                 }
             );
+            
             return Redirect("/");
         }
 

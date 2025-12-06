@@ -169,6 +169,7 @@ select:focus {
     outline: none;
 }
 
+/* * * Coisas gerais * * */
 /* Desabilitando seleção de texto */
 .no-select {
     -webkit-user-select: none; /* Safari */
@@ -310,6 +311,26 @@ select:focus {
 .icon {
     width: 2rem;
     height: 2rem;
+}
+
+.header-icon-section {
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.header-icon-section:hover {
+    background-color: var(--azul-claro);
+    /* border-radius: 50%; */
+    border-radius: 5px;
+}
+
+.header-icon {
+    width: 1.25rem;
+    height: 1.25rem;
 }
 
 .btn-icon {

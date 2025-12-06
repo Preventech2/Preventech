@@ -1,0 +1,107 @@
+:root {
+    --preto: #31383E;
+    --cinza-escuro: #818F9C;
+    --cinza-claro: #C6CCD2;
+    --branco: #F4F5F6;
+    --azul-escuro: #0A62AE;
+    --azul: #85ABCC;
+    --azul-claro: #D7E4EF;
+    --vermelho-claro: #DB5757;
+    --vermelho: #D22D2D;
+    --verde-claro: #83DB57;
+    --verde: #64D22D;
+    --amarelo-claro: #FFCC33;
+    --amarelo: #FFBF00;
+}
+
+.notificacao-main {
+    position: fixed;
+    top: calc(3.5rem + 10px);
+    right: 10px;
+    height: 60%;
+    width: 300px;
+    background-color: var(--branco);
+    border-radius: 5px;
+    color: var(--preto);
+    /* box-shadow: 0 -0px 10px rgba(49, 56, 62, 0.5); */
+    overflow-y: scroll;
+    overflow-x: visible;
+    border: 1px solid var(--cinza-claro);
+}
+
+.notificacao-header {
+    padding: 10px;
+    border-bottom: 2px solid var(--cinza-claro);
+}
+
+.notificacao-title h5 {
+    margin: 0;
+    color: var(--preto);
+    font-weight: 600;
+}
+
+.notificacao-lista {
+    display: flex;
+    flex-direction: column;
+}
+
+.notificacao-item {
+    padding: 6px;
+    padding-bottom: 3px;
+    padding-left: 10px;
+    border-bottom: 2px solid var(--cinza-claro);
+    background-color: var(--branco);
+    box-shadow: 0 2px 4px rgba(49, 56, 62, 0.1);
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.notificacao-item:last-child {
+    border-bottom: none;
+}
+
+.notificacao-item:hover {
+    h6, p, .notificacao-data {
+        color: var(--branco);
+    }
+    background-color: var(--azul-escuro) !important;
+}
+
+.notificacao-item.nao-lida {
+    background-color: var(--azul-claro);
+}
+
+.notificacao-item.lida {
+    background-color: var(--branco);
+    border-left-color: var(--cinza-claro);
+    opacity: 0.8;
+}
+
+.notificacao-conteudo h6 {
+    margin: 0 0 5px 0;
+    color: var(--preto);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.notificacao-conteudo p {
+    margin: 0;
+    color: var(--preto);
+    font-size: 13px;
+    line-height: 1.4;
+    /* Limita o texto a uma linha, senão adiciona três pontos */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.notificacao-data {
+    font-size: 11px;
+    color: var(--cinza-escuro);
+    font-style: italic;
+}
+
+/* Deixa scroll bar invisível */
+.notificacao-main::-webkit-scrollbar {
+    display: none;
+}

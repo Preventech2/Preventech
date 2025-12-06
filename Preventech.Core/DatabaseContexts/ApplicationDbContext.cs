@@ -21,6 +21,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<DocumentoAnexado> DocumentosAnexados { get; set; }
     public DbSet<HabilidadeSistema> HabilidadesSistema { get; set; }
     public DbSet<Habilidade> Habilidades { get; set; }
+    public DbSet<NotificacaoSite> NotificacoesSite { get; set; }
+    public DbSet<NotificacaoSiteUsuario> NotificacoesSiteUsuarios { get; set; }
 
 
     //public DbSet<Peca> Pecas { get; set; }

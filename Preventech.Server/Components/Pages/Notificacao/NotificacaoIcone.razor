@@ -1,0 +1,64 @@
+﻿@namespace Preventech.Server.Components.Pages
+
+@rendermode InteractiveServer
+
+@inject NotificacaoSiteService notificacaoSiteService
+@inject UserClaimsHelper userClaimsHelper
+
+<section class="header-icon-section" @onclick="OnIconClick">
+    <img src="@icon" class="header-icon" />
+</section>
+
+<MostrarNotificacoes Notificacoes="notificacoes" IsActive="@IsActive" />
+
+@code {
+    UserInfo userInfo = new UserInfo();
+    public string icon { get; set; } = "img/notification-inactive-icon.svg";
+    public List<NotificacaoSiteUsuario> notificacoes = new List<NotificacaoSiteUsuario>();
+    public bool IsActive { get; set; } = false;
+
+    private void OnIconClick()
+    {
+        IsActive = !IsActive;
+
+        if (IsActive)
+        {
+            
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            userInfo = await userClaimsHelper.GetCurrentUserInfoAsync();
+
+            await LoadNotificacoesAsync();
+            UpdateIcon();
+            StateHasChanged();
+        }
+    }
+
+    private void UpdateIcon()
+    {
+        if (notificacoes.Any(n => !n.Lida))
+        {
+            icon = "img/notification-active-icon.svg";
+        }
+        else
+        {
+            icon = "img/notification-inactive-icon.svg";
+        }
+    }
+
+    private async Task LoadNotificacoesAsync()
+    {
+        ApiResponse<List<NotificacaoSiteUsuario>> api =
+            await notificacaoSiteService.GetNotificacoesAsync(userInfo.GetUsuario());
+
+        if (api.Success && api.Data != null)
+        {
+            notificacoes = api.Data;
+        }
+    }
+}

@@ -30,7 +30,7 @@ public class UserClaimsHelper(AuthenticationStateProvider authStateProvider)
     /// </summary>
     /// <param name="user">The ClaimsPrincipal containing user claims</param>
     /// <returns>UserInfo object with Name, Cpf, and Id</returns>
-    public static UserInfo ExtractUserInfoFromClaims(ClaimsPrincipal user)
+    private static UserInfo ExtractUserInfoFromClaims(ClaimsPrincipal user)
     {
         var name = user.Identity?.Name
             ?? user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value
@@ -84,7 +84,7 @@ public class UserClaimsHelper(AuthenticationStateProvider authStateProvider)
     /// </summary>
     /// <param name="user">The ClaimsPrincipal from HttpContext.User</param>
     /// <returns>UserInfo object with Name and Cpf</returns>
-    public static UserInfo GetUserInfo(ClaimsPrincipal user)
+    private static UserInfo GetUserInfo(ClaimsPrincipal user)
     {
         return ExtractUserInfoFromClaims(user);
     }

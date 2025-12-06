@@ -12,6 +12,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel;
 using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption;
+using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,14 +23,15 @@ builder.Services.AddRazorComponents()
 // Add API controller support
 builder.Services.AddControllers();
 
+Uri base_uri = new("http://localhost:8080/");
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<AuthenticationStateProvider, CookieAuthStateProvider>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<UserClaimsHelper>();
-
+// builder.Configuration.
 // Header service para gerenciar títulos das páginas
-builder.Services.AddSingleton<HeaderService>();
+builder.Services.AddScoped<HeaderService>();
 
 builder.Services.AddAuthentication(o =>
 {
@@ -96,8 +98,6 @@ builder.Services.AddDataProtection()
         ValidationAlgorithm = ValidationAlgorithm.HMACSHA512
     });
 
-Uri base_uri = new("http://localhost:8080/");
-
 builder.Services.AddScoped<OrdemServicoService>();
 
 builder.Services.AddHttpClient<EquipamentoService>(client =>
@@ -127,6 +127,11 @@ builder.Services.AddHttpClient<GrupoPerfilService>(client =>
 });
 
 builder.Services.AddHttpClient<EmailService>(client =>
+{
+    client.BaseAddress = base_uri;
+});
+
+builder.Services.AddHttpClient<NotificacaoSiteService>(client =>
 {
     client.BaseAddress = base_uri;
 });

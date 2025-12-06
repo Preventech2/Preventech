@@ -40,7 +40,7 @@
         IsEditModalActive = true;
     }
 
-    public async Task OnHabilidadeEditada()
+    public void OnHabilidadeEditada()
     {
         IsEditModalActive = false;
         UpdateGrid();
@@ -53,15 +53,18 @@
         IsAddModalActive = true;
     }
 
-    public async Task OnHabilidadeAdicionada()
+    public void OnHabilidadeAdicionada()
     {
         IsAddModalActive = false;
         UpdateGrid();
     }
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnAfterRender(bool firstRender)
     {
-        UpdateGrid();
+        if (firstRender)
+        {
+            UpdateGrid();
+        }
     }
 
     public void UpdateGrid()

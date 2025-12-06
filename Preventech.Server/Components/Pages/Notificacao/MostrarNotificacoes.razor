@@ -1,0 +1,34 @@
+﻿@rendermode InteractiveServer
+
+@namespace Preventech.Server.Components.Pages
+
+<main class="notificacao-main @(IsActive ? "" : "invisivel")">
+    <section class="notificacao-header">
+        <div class="notificacao-title">
+            <h5>Notificações</h5>
+        </div>
+        <div class="notificacao-actions">
+            @* <button class="btn btn-sm btn-primary">Marcar todas como lidas</button> *@
+        </div>
+    </section>
+    <section class="notificacao-lista">
+        @foreach (var notificacaoUsuario in Notificacoes)
+        {
+            <div class="notificacao-item @(notificacaoUsuario.Lida ? "lida" : "nao-lida")">
+                <div class="notificacao-conteudo">
+                    <h6>@notificacaoUsuario.Notificacao.Titulo</h6>
+                    <p>@notificacaoUsuario.Notificacao.Mensagem</p>
+                    <span class="notificacao-data">@notificacaoUsuario.Notificacao.DataPublicacao.ToString("g")</span>
+                </div>
+            </div>
+        }
+    </section>
+</main>
+
+@code {
+    [Parameter, EditorRequired]
+    public List<NotificacaoSiteUsuario> Notificacoes { get; set; }
+
+    [Parameter, EditorRequired]
+    public bool IsActive { get; set; }
+}

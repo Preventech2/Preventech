@@ -52,7 +52,12 @@
     string mensagem = string.Empty;
     protected override async Task OnInitializedAsync()
     {
-        var response =
+        await CarregarEquipamentos();
+    }
+
+    private async Task CarregarEquipamentos()
+    {
+        var response = 
         await equipamentoService.GetEquipamentos(Equipamento.Vazio);
         if (!response.Success)
             mensagem = response.Message ?? string.Empty;
