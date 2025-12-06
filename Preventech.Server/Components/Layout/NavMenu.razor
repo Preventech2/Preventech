@@ -27,7 +27,7 @@
 <input type="checkbox" checked="@IsMenuOpen" title="Navigation menu" class="navbar-toggler" />
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="nav flex-column">
+    <nav class="nav flex-column no-select">
         <div class="nav-item pad-x">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
@@ -44,7 +44,7 @@
     <AuthorizeView Roles="@PerfilExtension.Admin">
         <Authorized>
             @* Adicione aqui os links que o usuário com papel Admin pode ver. *@
-            <nav class="nav flex-column">
+            <nav class="nav flex-column no-select">
                 <div class="nav-item pad-x">
                     <NavLink class="nav-link" href="/admin/painel" Match="NavLinkMatch.All">
                         <span class="bi bi-admin-fill-nav-menu" aria-hidden="true"></span> Admin
@@ -56,7 +56,7 @@
 
     <AuthorizeView Roles="@PerfilExtension.VisualizarEquipamento">
         <Authorized>
-            <nav class="nav flex-column">
+            <nav class="nav flex-column no-select">
                 <div class="nav-item pad-x">
                     <NavLink class="nav-link" href="/equipamentos">
                         <span class="bi bi-equipamentos-fill-nav-menu" aria-hidden="true"></span> Equipamentos
@@ -68,7 +68,7 @@
 
     <AuthorizeView Roles="@PerfilExtension.VisualizarLaboratorio">
         <Authorized>
-            <nav class="nav flex-column">
+            <nav class="nav flex-column no-select">
                 <div class="nav-item pad-x">
                     <NavLink class="nav-link" href="/laboratorios">
                         <span class="bi bi-labs-fill-nav-menu" aria-hidden="true"></span> Laboratórios
@@ -80,7 +80,7 @@
 
     <AuthorizeView Roles="@PerfilExtension.VisualizarOrdemDeServico">
         <Authorized>
-            <nav class="nav flex-column">
+            <nav class="nav flex-column no-select">
                 <div class="nav-item pad-x">
                     <NavLink class="nav-link" href="/ordens-servico">
                         <span class="bi bi-manutencao-fill-nav-menu" aria-hidden="true"></span> Manutenções
@@ -89,8 +89,8 @@
             </nav>
         </Authorized>
     </AuthorizeView>
-
 </div>
+
 <footer><p class="no-select">Powered by Preventech</p></footer>
 
 @code {

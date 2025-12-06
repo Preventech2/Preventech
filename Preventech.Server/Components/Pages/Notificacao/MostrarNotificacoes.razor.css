@@ -14,22 +14,36 @@
     --amarelo: #FFBF00;
 }
 
-.notificacao-main {
+.notificacao-article {
     position: fixed;
     top: calc(3.5rem + 10px);
     right: 10px;
     height: 60%;
+    max-height: 500px;
+    width: auto;
+    display: flex;
+    flex-direction: row-reverse;
+    z-index: 1000;
+}
+
+.notificacao-article.mostrando-detalhes {
+    width: calc(100% - 270px);
+}
+
+.notificacao-main {
+    height: 100%;
     width: 300px;
     background-color: var(--branco);
-    border-radius: 5px;
+    border: 1px solid var(--cinza-claro);
     color: var(--preto);
-    /* box-shadow: 0 -0px 10px rgba(49, 56, 62, 0.5); */
     overflow-y: scroll;
     overflow-x: visible;
-    border: 1px solid var(--cinza-claro);
 }
 
 .notificacao-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
     padding: 10px;
     border-bottom: 2px solid var(--cinza-claro);
 }
@@ -105,3 +119,87 @@
 .notificacao-main::-webkit-scrollbar {
     display: none;
 }
+
+/* Parte de mostrar informação da notificação */
+.notificacao-informacao {
+    height: 100%;
+    flex: 1;
+    background-color: var(--branco);
+    border: 1px solid var(--cinza-claro);
+    border-right: none;
+    flex-direction: column;
+    overflow-y: auto;
+    direction: rtl;
+}
+
+.notificacao-informacao .notificacao-header {
+    direction: ltr;
+}
+
+.notificacao-informacao:not(.invisivel) {
+    display: flex;
+}
+
+.notificacao-detalhes {
+    padding: 20px;
+    padding-top: 10px;
+    flex: 1;
+    direction: ltr;
+}
+
+.notificacao-detalhes .notificacao-data {
+    display: block;
+    font-size: 12px;
+    color: var(--cinza-escuro);
+    font-style: italic;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--cinza-claro);
+}
+
+.notificacao-detalhes p {
+    margin: 0;
+    color: var(--preto);
+    font-size: 15px;
+    line-height: 1.6;
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+.notificacao-informacao .notificacao-header {
+    border-bottom: 1px solid var(--cinza-claro);
+    /* background-color: var(--azul-claro); */
+}
+
+.notificacao-informacao .notificacao-title {
+    display: flex;
+    align-items: center;
+}
+
+.notificacao-informacao .notificacao-title h5 {
+    color: var(--azul-escuro);
+}
+
+.notificacao-informacao .notificacao-actions button {
+    padding: 5px 12px;
+    font-size: 13px;
+}
+
+/* Configura para apenas um dos menus aparecer de cada vez quando em telas pequenas */
+@media (max-width: 850px) {
+    .notificacao-article.mostrando-detalhes .notificacao-main {
+        display: none !important;
+    }
+}
+
+/* Dimensão para celular */
+@media (max-width: 640px) {
+    .notificacao-article {
+        top: calc(7rem + 10px);
+    }
+
+    .notificacao-article.mostrando-detalhes {
+        width: calc(100% - 20px);
+    }
+}
+    

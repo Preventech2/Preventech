@@ -7,6 +7,7 @@
     border-radius: 7.5px;
     background-color: var(--branco);
     margin-bottom: 1rem;
+    overflow-x: hidden;
 }
 
 .page-section {

@@ -25,6 +25,7 @@ main {
     flex-direction: column;
     min-height: 100%;
     flex: 1;
+    overflow-x: hidden;
 }
 
 .sidebar {

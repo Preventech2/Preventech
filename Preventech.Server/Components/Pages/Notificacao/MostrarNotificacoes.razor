@@ -2,28 +2,44 @@
 
 @namespace Preventech.Server.Components.Pages
 
-<main class="notificacao-main @(IsActive ? "" : "invisivel")">
-    <section class="notificacao-header">
-        <div class="notificacao-title">
-            <h5>Notificações</h5>
-        </div>
-        <div class="notificacao-actions">
-            @* <button class="btn btn-sm btn-primary">Marcar todas como lidas</button> *@
-        </div>
-    </section>
-    <section class="notificacao-lista">
-        @foreach (var notificacaoUsuario in Notificacoes)
-        {
-            <div class="notificacao-item @(notificacaoUsuario.Lida ? "lida" : "nao-lida")">
-                <div class="notificacao-conteudo">
-                    <h6>@notificacaoUsuario.Notificacao.Titulo</h6>
-                    <p>@notificacaoUsuario.Notificacao.Mensagem</p>
-                    <span class="notificacao-data">@notificacaoUsuario.Notificacao.DataPublicacao.ToString("g")</span>
-                </div>
+<article class="notificacao-article @(IsActive ? "" : "invisivel") @(Mostrando ? "mostrando-detalhes" : "")">
+    <main class="notificacao-main @(IsActive ? "" : "invisivel") no-select">
+        <section class="notificacao-header">
+            <div class="notificacao-title">
+                <h5>Notificações</h5>
             </div>
-        }
-    </section>
-</main>
+            <div class="notificacao-actions">
+                @* <button class="btn btn-sm btn-primary">Marcar todas como lidas</button> *@
+            </div>
+        </section>
+        <section class="notificacao-lista">
+            @foreach (var notificacaoUsuario in Notificacoes)
+            {
+                <div class="notificacao-item @(notificacaoUsuario.Lida ? "lida" : "nao-lida")" @onclick="() => MostrarInformacao(notificacaoUsuario)">
+                    <div class="notificacao-conteudo">
+                        <h6>@notificacaoUsuario.Notificacao.Titulo</h6>
+                        <p>@notificacaoUsuario.Notificacao.Mensagem</p>
+                        <span class="notificacao-data">@notificacaoUsuario.Notificacao.DataPublicacao.ToString("g")</span>
+                    </div>
+                </div>
+            }
+        </section>
+    </main>
+    <main class="notificacao-informacao @((IsActive && Mostrando) ? "" : "invisivel")">
+        <section class="notificacao-header">
+            <div class="notificacao-title">
+                <h5>@notificacaoSelecionada?.Notificacao.Titulo</h5>
+            </div>
+            <div class="notificacao-actions">
+                <button class="btn btn-sm btn-primary" @onclick="FecharInformacao">Fechar</button>
+            </div>
+        </section>
+        <section class="notificacao-detalhes">
+            <span class="notificacao-data">@notificacaoSelecionada?.Notificacao.DataPublicacao.ToString("g")</span>
+            <p>@GetMensagemSegura(notificacaoSelecionada?.Notificacao.Mensagem)</p>
+        </section>
+    </main>
+</article>
 
 @code {
     [Parameter, EditorRequired]
@@ -31,4 +47,45 @@
 
     [Parameter, EditorRequired]
     public bool IsActive { get; set; }
+
+    public bool Mostrando { get; set; } = false;
+    private NotificacaoSiteUsuario? notificacaoSelecionada = null;
+
+    private MarkupString GetMensagemSegura(string? mensagem)
+    {
+        if (string.IsNullOrEmpty(mensagem))
+            return new MarkupString("");
+
+        // Sanitiza: converte caracteres HTML especiais para entidades
+        var mensagemSegura = System.Net.WebUtility.HtmlEncode(mensagem);
+        
+        // Substitui \n por <br> APÓS sanitizar
+        mensagemSegura = mensagemSegura.Replace("\n", "<br>");
+        
+        return new MarkupString(mensagemSegura);
+    }
+
+    private void MostrarInformacao(NotificacaoSiteUsuario notificacao)
+    {
+        if (notificacaoSelecionada == null || notificacaoSelecionada.Notificacao.Id == notificacao.Notificacao.Id)
+        {
+            Mostrando = !Mostrando;
+        }
+        
+        if (Mostrando)
+        {
+            notificacaoSelecionada = notificacao;
+        }
+        else
+        {
+            notificacaoSelecionada = null;
+        }
+    }
+
+    private void FecharInformacao()
+    {
+        Mostrando = false;
+        notificacaoSelecionada = null;
+        IsActive = true;
+    }
 }

@@ -31,10 +31,6 @@
     display: none;
 }
 
-.navbar-toggler:checked {
-    background-color: rgba(255, 255, 255, 0.5);
-}
-
 .top-row {
     min-height: 3.5rem;
     background-color: rgba(0, 0, 0, 0.4);
@@ -157,10 +153,6 @@
     display: flex;
 }
 
-:has(.navbar-toggler:not(:checked)) footer {
-    display: none;
-}
-
 footer {
     display: flex;
     flex-direction: column;
@@ -177,9 +169,17 @@ footer p {
     margin-left: 0.75rem;
 }
 
+.navbar-toggler:not(:checked)~footer {
+    display: none;
+}
+
 @media (min-width: 641px) {
     .btn-navbar-toggler {
         display: none;
+    }
+
+    footer {
+        display: flex !important;
     }
 
     .navbar-toggler {
