@@ -424,3 +424,8 @@ input[type=file]::file-selector-button:hover {
     height: 100%;
     object-fit: cover;
 }
+
+/* Configuração necessária para notificações */
+.navbar-toggler:checked~.notificacao-main {
+    display: none !important;
+}

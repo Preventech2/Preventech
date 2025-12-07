@@ -10,6 +10,7 @@
             </div>
             <div class="notificacao-actions">
                 @* <button class="btn btn-sm btn-primary">Marcar todas como lidas</button> *@
+                <img src="img/close-btn-icon.svg" class="notificacao-close-icon" @onclick="FecharNotificacoes" />
             </div>
         </section>
         <section class="notificacao-lista">
@@ -47,6 +48,8 @@
 
     [Parameter, EditorRequired]
     public bool IsActive { get; set; }
+    [Parameter]
+    public EventCallback<bool> IsActiveChanged { get; set; }
 
     public bool Mostrando { get; set; } = false;
     private NotificacaoSiteUsuario? notificacaoSelecionada = null;
@@ -87,5 +90,14 @@
         Mostrando = false;
         notificacaoSelecionada = null;
         IsActive = true;
+        IsActiveChanged.InvokeAsync(IsActive);
+    }
+
+    private void FecharNotificacoes()
+    {
+        IsActive = false;
+        Mostrando = false;
+        notificacaoSelecionada = null;
+        IsActiveChanged.InvokeAsync(IsActive);
     }
 }

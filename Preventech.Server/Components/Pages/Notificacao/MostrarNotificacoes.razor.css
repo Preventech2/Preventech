@@ -40,6 +40,12 @@
     overflow-x: visible;
 }
 
+.notificacao-close-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    cursor: pointer;
+}
+
 .notificacao-header {
     display: flex;
     flex-direction: row;
@@ -171,7 +177,7 @@
     /* background-color: var(--azul-claro); */
 }
 
-.notificacao-informacao .notificacao-title {
+.notificacao-title {
     display: flex;
     align-items: center;
 }

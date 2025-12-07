@@ -3,13 +3,15 @@
 @using Preventech.Core.Models
 @using Preventech.Core.Services
 @using Preventech.Server.Components.Modals
+
 @rendermode InteractiveServer
 
 @inject UserClaimsHelper UserClaimsHelper
+@inject MenuStateService MenuStateService
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="navmenu-top">
-        <button class="btn-icon btn-navbar-toggler" @onclick="@(() => IsMenuOpen = !IsMenuOpen)"><img class="icon" src="img/menu-btn.svg" alt="" /></button>
+        <button class="btn-icon btn-navbar-toggler" @onclick="ToggleMenu"><img class="icon" src="img/menu-btn.svg" alt="" /></button>
         <AuthorizeView>
             <Authorized>
                 @* trocar para pegar a foto de perfil do usuário *@
@@ -99,11 +101,17 @@
 
     private UserInfo userInfo = new UserInfo();
 
-    private bool IsMenuOpen = false;
+    public bool IsMenuOpen { get; set; } = false;
 
     protected override async Task OnInitializedAsync()
     {
         userInfo = await UserClaimsHelper.GetCurrentUserInfoAsync();
+    }
+
+    private void ToggleMenu()
+    {
+        IsMenuOpen = !IsMenuOpen;
+        MenuStateService.NotifyMenuToggled();
     }
 
 }

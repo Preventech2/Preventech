@@ -32,6 +32,8 @@ builder.Services.AddScoped<UserClaimsHelper>();
 // builder.Configuration.
 // Header service para gerenciar títulos das páginas
 builder.Services.AddScoped<HeaderService>();
+// Menu state service para comunicação entre componentes
+builder.Services.AddScoped<MenuStateService>();
 
 builder.Services.AddAuthentication(o =>
 {

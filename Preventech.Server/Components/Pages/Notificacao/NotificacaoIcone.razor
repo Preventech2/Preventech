@@ -4,17 +4,20 @@
 
 @inject NotificacaoSiteService notificacaoSiteService
 @inject UserClaimsHelper userClaimsHelper
+@inject MenuStateService menuStateService
+@implements IDisposable
 
 <section class="header-icon-section" @onclick="OnIconClick">
     <img src="@icon" class="header-icon" />
 </section>
 
-<MostrarNotificacoes Notificacoes="notificacoes" IsActive="@IsActive" />
+<MostrarNotificacoes Notificacoes="notificacoes" @bind-IsActive="@IsActive" />
 
 @code {
     UserInfo userInfo = new UserInfo();
     public string icon { get; set; } = "img/notification-inactive-icon.svg";
     public List<NotificacaoSiteUsuario> notificacoes = new List<NotificacaoSiteUsuario>();
+    [Parameter]
     public bool IsActive { get; set; } = false;
 
     private void OnIconClick()
@@ -36,7 +39,20 @@
             await LoadNotificacoesAsync();
             UpdateIcon();
             StateHasChanged();
+            
+            menuStateService.OnMenuToggled += HandleMenuToggled;
         }
+    }
+
+    private void HandleMenuToggled()
+    {
+        IsActive = false;
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        menuStateService.OnMenuToggled -= HandleMenuToggled;
     }
 
     private void UpdateIcon()

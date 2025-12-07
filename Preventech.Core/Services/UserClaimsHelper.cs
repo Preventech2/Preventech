@@ -9,9 +9,9 @@ public class UserClaimsHelper(AuthenticationStateProvider authStateProvider)
     private readonly AuthenticationStateProvider _authStateProvider = authStateProvider;
 
     /// <summary>
-    /// Gets the current user's information from claims
+    /// Gets the current user's information. Use when you need the current user authenticated data
     /// </summary>
-    /// <returns>UserInfo object with Name and Cpf, or null if not authenticated</returns>
+    /// <returns>UserInfo object with Name and Cpf, or UserInfo with no data if not authenticated</returns>
     public async Task<UserInfo> GetCurrentUserInfoAsync()
     {
         var authState = await _authStateProvider.GetAuthenticationStateAsync();
@@ -77,16 +77,6 @@ public class UserClaimsHelper(AuthenticationStateProvider authStateProvider)
             Roles = roles,
             IsAuthenticated = user.Identity?.IsAuthenticated ?? false
         };
-    }
-
-    /// <summary>
-    /// Gets user information synchronously from ClaimsPrincipal (useful in controllers)
-    /// </summary>
-    /// <param name="user">The ClaimsPrincipal from HttpContext.User</param>
-    /// <returns>UserInfo object with Name and Cpf</returns>
-    private static UserInfo GetUserInfo(ClaimsPrincipal user)
-    {
-        return ExtractUserInfoFromClaims(user);
     }
 }
 
