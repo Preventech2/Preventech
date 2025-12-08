@@ -1,4 +1,3 @@
-using System;
 using Microsoft.EntityFrameworkCore;
 using Preventech.Core.Models;
 
@@ -11,6 +10,8 @@ public class ApplicationDbContext : DbContext
     {
     }
 
+
+    public DbSet<Atualizacao> Atualizacoes { get; set; }
     public DbSet<Equipamento> Equipamentos { get; set; }
     public DbSet<Usuario> Usuarios { get; set; }
     public DbSet<GrupoPerfil> GruposPerfis { get; set; }
@@ -26,11 +27,17 @@ public class ApplicationDbContext : DbContext
     //public DbSet<Peca> Pecas { get; set; }
 
     // ================ existe a chance de que os relacionamentos não sejam descobertos ================
-    // ================ existe a chance de que os relacionamentos não sejam descobertos ================
     // Agora não precisamos do OnModelCreating porque usamos Data Annotations!
-    // protected override void OnModelCreating(ModelBuilder modelBuilder)
-    // {
-    //     // Configurações automáticas via Data Annotations
-    // }
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Atualizacao>().HasData(
+            new Atualizacao { Id = IndiceAtualizacao.Localizacao, Ultima = DateTime.UnixEpoch },
+            new Atualizacao { Id = IndiceAtualizacao.Equipamento, Ultima = DateTime.UnixEpoch },
+            new Atualizacao { Id = IndiceAtualizacao.Preditiva, Ultima = DateTime.UnixEpoch },
+            new Atualizacao { Id = IndiceAtualizacao.Preventiva, Ultima = DateTime.UnixEpoch }
+        );
+    }
+
+
 }
 

@@ -5,6 +5,7 @@
 
 @using Microsoft.AspNetCore.Components.QuickGrid
 @using Preventech.Core.DTOs
+@inject ProtectedSessionStorage ProtectedSessionStore
 
 @inject LocalizacaoService localizacoesService
 
@@ -42,10 +43,24 @@
 
     protected override async Task OnInitializedAsync()
     {
-        ApiResponse<List<Localizacao>> response = await localizacoesService.GetLocalizacoes();
+        var tempo = DateTime.UnixEpoch;
+        var result = await ProtectedSessionStore.GetAsync<DateTime>("AtualizacaoLocal");   
+        if (!result.Success) {
+            await ProtectedSessionStore.SetAsync("AtualizacaoLocal", tempo);
+        }
+
+        var date = result.Success ? result.Value : tempo;
+        var response = await localizacoesService.GetLocalizacoes(Localizacao.Vazia, tempo);
         if (!response.Success)
             mensagem = response.Message ?? string.Empty;
-        localizacoes = response.Data?.AsQueryable() ?? new List<Localizacao>().AsQueryable();
+        
+        await ProtectedSessionStore.SetAsync("AtualizacaoLocal", response.Timestamp);
+        if (response.Data == null)
+            localizacoes = await ProtectedSessionStore.GetAsync<List<Localizacao>>("Local");
+        else {
+            localizacoes = response.Data?.Select(x => LocalizacaoExtension.Descompactar(x, Localizacao.Vazia)).AsQueryable() ?? new List<Localizacao>().AsQueryable();
+            
+        }
     }
 
     private void AcionarEditar(Localizacao item)

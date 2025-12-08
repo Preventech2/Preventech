@@ -70,12 +70,12 @@
     {
         equipamento = Equipamento.Vazio;
         var res = await equipamentoService.GetEquipamentos(Equipamento.Vazio);
-        var resloc = await localizacaoService.GetLocalizacoes(Localizacao.Vazia);
+        var resloc = await localizacaoService.GetLocalizacoes(Localizacao.Vazia, DateTime.MinValue);
 
         mensagem = !res.Success ? res.Message : !resloc.Success ? resloc.Message : string.Empty;
 
         equipamentos = res.Data ?? new();
-        localizacoes = resloc.Data ?? new();
+        localizacoes = resloc.Data!.Select(x => LocalizacaoExtension.Descompactar(x, Localizacao.Vazia)).ToList() ?? new ();
     }
 
     private async Task EditarEquip()

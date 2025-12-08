@@ -67,15 +67,15 @@
     {
         equipamento = new Equipamento();
 
-        var res = await localizacaoService.GetLocalizacoes(Localizacao.Vazia);
+        var res = await localizacaoService.GetLocalizacoes(Localizacao.Vazia, DateTime.MinValue);
         
         if (res.Success == false)
             mensagem = res.Message;
         else
             mensagem = string.Empty;
 
-        if (res.Data is List<Localizacao> locs)
-            locais = locs.AsQueryable();
+        if (res.Data is List<string> locs)
+            locais = locs.Select(x => LocalizacaoExtension.Descompactar(x, Localizacao.Vazia)).AsQueryable();
     }
 
     private async Task FormData()

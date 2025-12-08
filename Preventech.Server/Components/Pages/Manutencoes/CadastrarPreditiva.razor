@@ -1,6 +1,5 @@
 @page "/cadastrar/preditiva"
 @rendermode InteractiveServer
-@inject IJSRuntime jsr
 
 <PageTitle>Cadastrar um equipamento</PageTitle>
 
@@ -74,11 +73,11 @@
     protected override async Task OnInitializedAsync()
     {
         equipamento ??= new Equipamento();
-        var res = await localizacaoService.GetLocalizacoes(Localizacao.Vazia);
+        var res = await localizacaoService.GetLocalizacoes(Localizacao.Vazia, DateTime.MinValue);
         sucesso = res.Success;
         mensagemResultado = res.Message;
         if (res.Data != null)
-            locais = res.Data.AsQueryable();
+            locais = res.Data.Select(x => LocalizacaoExtension.Descompactar(x, Localizacao.Vazia)).AsQueryable();
     }
 
     private async Task FormData()

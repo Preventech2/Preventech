@@ -1,5 +1,4 @@
 FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine AS base
-# instalar o .net -> rodar o EFCore -> banco de dados funciona :)
 RUN apk add --no-cache dotnet9-sdk
 WORKDIR /app
 EXPOSE 8080
@@ -8,7 +7,6 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 ENV PATH=$PATH:/root/.dotnet/tools
 
-RUN dotnet tool install --global dotnet-ef
 RUN dotnet workload install wasm-tools
 COPY ["Preventech.Core/Preventech.Core.csproj", "Preventech.Core/"]
 COPY ["Preventech.Server/Preventech.Server.csproj", "Preventech.Server/"]
@@ -26,8 +24,6 @@ RUN dotnet publish "Preventech.Server.csproj" --no-restore -c Release -o /app/pu
 
 FROM base AS final
 WORKDIR /app
-
-RUN dotnet tool install --global dotnet-ef
 
 ENV PATH="$PATH:/root/.dotnet/tools"
 

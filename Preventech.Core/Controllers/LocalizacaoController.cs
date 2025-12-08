@@ -1,10 +1,9 @@
-using Microsoft.Extensions.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Preventech.Core.Models;
 using Preventech.Core.DatabaseContexts;
 using Preventech.Core.DTOs;
-using Preventech.Core.Services;
+using Preventech.Core.Extensions;
 
 namespace Preventech.Core.Controllers
 {
@@ -13,6 +12,22 @@ namespace Preventech.Core.Controllers
     public class LocalizacaoController(ApplicationDbContext context) : ControllerBase
     {
 
+
+        [HttpGet("timestamp")]
+        public async Task<DateTime> GetUltimaAtualizacao()
+        {
+            try 
+            {
+                var query = await context.Atualizacoes
+                    .Where(x => x.Id == IndiceAtualizacao.Localizacao)
+                    .Select(x => x.Ultima)
+                    .FirstOrDefaultAsync();
+                return DateTime.SpecifyKind(query, DateTimeKind.Utc);
+            } catch (Exception) {
+                return DateTime.UnixEpoch;
+            }
+        }
+
         /// <summary>
         /// Handler GET para localizações com filtro, valores inválidos 
         /// são wildcards
@@ -20,48 +35,41 @@ namespace Preventech.Core.Controllers
         /// <param name="filtro">Filtro para localizações</param>
         /// <returns>Lista de localizações que condizem ao filtro</returns>
         [HttpGet]
-        public async Task<ApiResponse<List<Localizacao>>> GetLocalizacoes([FromQuery] Localizacao filtro)
+        public async Task<string> GetLocalizacoes([FromQuery] Localizacao filtro, [FromQuery] DateTime atualizacao)
         {
+            atualizacao = DateTime.SpecifyKind(atualizacao, DateTimeKind.Utc);
             try
             {
                 var query = context.Localizacoes
                     .Include(loc => loc.Responsavel)
-                    .AsQueryable()
-                    .Where(query =>
-                        (filtro.Campus <= 0 || query.Campus == filtro.Campus)
-                     && (filtro.Predio <= 0 || query.Predio == filtro.Predio)
-                     && (filtro.Andar <= 0 || query.Andar == filtro.Andar)
-                     && (filtro.Numero <= 0 || query.Numero == filtro.Numero)
-                     && (string.IsNullOrWhiteSpace(filtro.Apelido) || query.Apelido == filtro.Apelido)
-                    );
+                    .AsQueryable();
 
+                query = query.Where(q => q.AtualizadoEm >= atualizacao);
+
+                if (filtro.Campus > 0) 
+                    query = query.Where(q => q.Campus == filtro.Campus);
+                
+                if (filtro.Predio > 0)
+                    query = query.Where(q => q.Predio == filtro.Predio);
+
+                if (filtro.Andar > 0)
+                    query = query.Where(q => q.Andar == filtro.Andar);
+
+                if (filtro.Numero > 0)
+                    query = query.Where(q => q.Numero == filtro.Numero);
+
+                if (!string.IsNullOrWhiteSpace(filtro.Apelido))
+                    query = query.Where(q => q.Apelido == filtro.Apelido);
+
+                if (!query.Any()) return string.Empty;
 
                 var res = await query.ToListAsync();
 
-                if (!query.Any())
-                    return new ApiResponse<List<Localizacao>>
-                    {
-                        Success = false,
-                        Message = $"Localização não encontrada",
-                        Data = null
-                    };
-
-                return new ApiResponse<List<Localizacao>>
-                {
-                    Success = true,
-                    Message = $"Salas recuperadas",
-                    Data = res
-                };
-
+                return LocalizacaoExtension.Compactar(res, filtro, atualizacao);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return new ApiResponse<List<Localizacao>>
-                {
-                    Success = false,
-                    Message = $"Erro ao buscar localização: {ex.Message}",
-                    Data = null
-                };
+                return string.Empty;
             }
         }
 
@@ -73,12 +81,17 @@ namespace Preventech.Core.Controllers
         [HttpPost]
         public async Task<ApiResponse<Localizacao>> CadastrarLocalizacao([FromBody] Localizacao localizacao)
         {
+            localizacao.AtualizadoEm = DateTime.Now;
             try
             {
                 localizacao.Responsavel = (await context.Usuarios.FindAsync(localizacao.Responsavel.Id))!;
                 await context.Localizacoes.AddAsync(localizacao);
-                await context.SaveChangesAsync();
 
+                var atualizacao = await context.Atualizacoes
+                    .FindAsync(IndiceAtualizacao.Localizacao).AsTask()
+                    .ContinueWith(x => x.Result!.Ultima = DateTime.UtcNow);
+
+                await context.SaveChangesAsync();
                 return new ApiResponse<Localizacao>
                 {
                     Success = true,
@@ -103,46 +116,34 @@ namespace Preventech.Core.Controllers
         /// <param name="localizacao">localização para ser editada</param>
         /// <returns>Localização editada</returns>
         [HttpPatch]
-        public async Task<ApiResponse<Localizacao>> EditarLocalizacao([FromBody] Localizacao localizacao)
+        public async Task<ApiResponse> EditarLocalizacao([FromBody] Localizacao localizacao)
         {
+            localizacao.AtualizadoEm = DateTime.Now;
             try
             {
-                // await context.Localizacoes
-                //     .Where(x => x.Id == localizacao.Id)
-                //     .ExecuteUpdateAsync(setter => setter
-                //         .SetProperty(loc => loc.Apelido, localizacao.Apelido)
-                //         .SetProperty(loc => loc.Campus, localizacao.Campus)
-                //         .SetProperty(loc => loc.Predio, localizacao.Predio)
-                //         .SetProperty(loc => loc.Andar, localizacao.Andar)
-                //         .SetProperty(loc => loc.Numero, localizacao.Numero)
-                //         .SetProperty(loc => loc.Responsavel, localizacao.Responsavel)
-                //     );
-
                 var locExistente = await context.Localizacoes
                     .Include(loc => loc.Responsavel)
                     .FirstOrDefaultAsync(loc => loc.Id == localizacao.Id);
 
                 if (locExistente == null)
                 {
-                    return new ApiResponse<Localizacao>
+                    return new ApiResponse
                     {
                         Success = false,
-                        Message = "Localização não encontrada",
-                        Data = null
+                        Message = "Localização não encontrada"
                     };
                 }
 
-                var locResponsavel = await context.Usuarios.FindAsync(localizacao.Responsavel.Id);
+                var locResponsavel = await context.Usuarios
+                    .FindAsync(localizacao.Responsavel.Id);
 
                 if (locResponsavel == null)
-                {
-                    return new ApiResponse<Localizacao>
+                    return new ApiResponse
                     {
                         Success = false,
-                        Message = "Responsável não encontrado",
-                        Data = null
+                        Message = "Responsável não encontrado"
                     };
-                }
+                
 
                 locExistente.Apelido = localizacao.Apelido;
                 locExistente.Campus = localizacao.Campus;
@@ -151,22 +152,25 @@ namespace Preventech.Core.Controllers
                 locExistente.Numero = localizacao.Numero;
                 locExistente.Responsavel = locResponsavel;
 
+                var atualizacao = await context.Atualizacoes
+                    .FindAsync(IndiceAtualizacao.Localizacao).AsTask()
+                    .ContinueWith(x => x.Result!.Ultima = DateTime.UtcNow);
+            
+
                 await context.SaveChangesAsync();
 
-                return new ApiResponse<Localizacao>
+                return new ApiResponse
                 {
                     Success = true,
                     Message = "Localização editada com sucesso",
-                    Data = localizacao
                 };
             }
             catch (Exception ex)
             {
-                return new ApiResponse<Localizacao>
+                return new ApiResponse
                 {
                     Success = false,
-                    Message = $"Erro ao editar localização: {ex.Message}",
-                    Data = null
+                    Message = $"Erro ao editar localização: {ex.Message}"
                 };
             }
         }
@@ -177,30 +181,27 @@ namespace Preventech.Core.Controllers
         /// <param name="localizacao">Localização para deletar</param>
         /// <returns>Localização deletada</returns>
         [HttpDelete]
-        public async Task<ApiResponse<Localizacao>> RemoverLocalização([FromBody] Localizacao localizacao)
+        public async Task<ApiResponse> RemoverLocalização([FromBody] Localizacao localizacao)
         {
+            localizacao.AtualizadoEm = DateTime.Now;
             try
             {
                 await context.Localizacoes
                     .Where(loc => loc == localizacao)
                     .ExecuteDeleteAsync();
 
-                // Salva as mudanças no banco de dados
-
-                return new ApiResponse<Localizacao>
+                return new ApiResponse
                 {
                     Success = true,
-                    Message = "Localização deletada com sucesso",
-                    Data = localizacao
+                    Message = "Localização deletada com sucesso"
                 };
             }
             catch (Exception ex)
             {
-                return new ApiResponse<Localizacao>
+                return new ApiResponse
                 {
                     Success = false,
-                    Message = $"Erro ao deletar localização: {ex.Message}",
-                    Data = null
+                    Message = $"Erro ao deletar localização: {ex.Message}"
                 };
             }
         }

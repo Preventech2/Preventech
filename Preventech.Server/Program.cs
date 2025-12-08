@@ -12,6 +12,9 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel;
 using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption;
+using Microsoft.AspNetCore.ResponseCompression;
+using System.IO.Compression;
+using Laraue.EfCoreTriggers.PostgreSql.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +24,6 @@ builder.Services.AddRazorComponents()
 
 // Add API controller support
 builder.Services.AddControllers();
-
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<AuthenticationStateProvider, CookieAuthStateProvider>();
@@ -35,6 +37,7 @@ builder.Services.AddAuthentication(o =>
 {
     o.DefaultAuthenticateScheme = AuthConstants.CookieName;
 })
+
 .AddCookie(AuthConstants.CookieName, o =>
 {
     o.LoginPath = "/login";
@@ -83,9 +86,22 @@ builder.Services.AddAuthentication(o =>
     };
 });
 
+builder.Services.AddResponseCompression(options =>
+{
+     options.EnableForHttps = true;
+     options.Providers.Add<BrotliCompressionProvider>();
+     options.Providers.Add<GzipCompressionProvider>();
+});
+
+ builder.Services.Configure<BrotliCompressionProviderOptions>(options => 
+ {
+ options.Level = CompressionLevel.Optimal; // Optimize for size
+ });
+
 // Configure PostgreSQL
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+);
 
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo("/var/local"))
@@ -159,6 +175,8 @@ builder.Services.AddHttpClient<HabilidadeService>(client =>
 
 var app = builder.Build();
 
+//app.UseResponseCompression();
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -186,7 +204,7 @@ app.Use(async (context, next) =>
 {
     string path = context.Request.Path;
 
-    if (path.EndsWith(".css") || path.EndsWith(".js") || path.EndsWith(".png"))
+    if (path.EndsWith(".css") || path.EndsWith(".js") || path.EndsWith(".png") || path.EndsWith(".svg"))
     {
         var tempo = (int)TimeSpan.FromDays(7).TotalSeconds;
         context.Response.Headers.Append("Cache-Control", $"max-age={tempo}");

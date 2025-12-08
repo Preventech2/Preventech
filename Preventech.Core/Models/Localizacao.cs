@@ -1,4 +1,3 @@
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Mvc;
@@ -28,17 +27,17 @@ public class Localizacao
     /// Número do campus
     /// </summary>
     /// 
-    public int Campus { get; set; }
+    public int Campus { get; set; } = 0;
 
     /// <summary>
     /// Número do prédio
     /// </summary>
-    public int Predio { get; set; }
+    public int Predio { get; set; } = 0;
 
     /// <summary>
     /// Número do andar
     /// </summary>
-    public int Andar { get; set; }
+    public int Andar { get; set; } = 0;
 
     /// <summary>
     /// Número da sala
@@ -50,9 +49,14 @@ public class Localizacao
     /// </summary>
     public Usuario Responsavel { get; set; } = new();
 
+    /// <summary>
+    /// Última atualização desta localização
+    /// </summary>
+    public DateTime AtualizadoEm { get; set; } = DateTime.Now;
+
     public Localizacao() { }
 
-    public Localizacao(string Apelido, int Campus, int Predio, int Andar, int Numero, Usuario Responsavel)
+    public Localizacao(string? Apelido, int Campus, int Predio, int Andar, int Numero, Usuario Responsavel)
     {
         this.Apelido = Apelido;
         this.Campus = Campus;
@@ -62,7 +66,7 @@ public class Localizacao
         this.Responsavel = Responsavel;
     }
 
-    public override string ToString() => $"{Apelido ?? "s/n"} gerido por {Responsavel.Nome} em c{Campus}p{Predio}s{Numero}";
+    public override string ToString() => $"{Apelido ?? "s/n"} gerido por {Responsavel.Nome}";
 
     /// <summary>
     /// Localização vazia utilizada para passar sobre filtros

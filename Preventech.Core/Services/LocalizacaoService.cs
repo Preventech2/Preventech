@@ -10,7 +10,7 @@ namespace Preventech.Core.Services;
 
 public class LocalizacaoService(HttpClient httpClient)
 {
-    public static string Query(Localizacao loc, string Prefixo = "")
+    public static string Query(Localizacao loc, DateTime tempo, string Prefixo = "")
     {
         var itens = new Dictionary<string, string>() { };
         if (!string.IsNullOrWhiteSpace(loc.Apelido))
@@ -28,6 +28,7 @@ public class LocalizacaoService(HttpClient httpClient)
         if (loc.Numero > 0)
             itens.Add($"{Prefixo}Sala", loc.Numero.ToString());
 
+        itens.Add($"atualizacao", tempo.ToString());
 
         var res = string.Join("&", from item in itens select $"{item.Key}={item.Value}");
         if (string.IsNullOrWhiteSpace(res)) return string.Empty;
@@ -35,19 +36,20 @@ public class LocalizacaoService(HttpClient httpClient)
         return "?" + res;
     }
 
-    public async Task<ApiResponse<List<Localizacao>>> GetLocalizacoes()
+    public async Task<DateTime> GetUltimaAtualizacaoAsync()
     {
-        var response = await httpClient.GetAsync($"/api/localizacao");
-        var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<Localizacao>>>()
-        ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<List<Equipamento>>.");
-        return result;
+        var response = await httpClient
+            .GetAsync("/api/localizacao/timestamp")
+            .ContinueWith(x => x.Result.Content.ReadFromJsonAsync<DateTime>())
+            .Unwrap();
+        return response;
     }
 
-    public async Task<ApiResponse<List<Localizacao>>> GetLocalizacoes([FromQuery] Localizacao loc)
+    public async Task<ApiResponse<List<string>>> GetLocalizacoes(Localizacao loc, DateTime tempo)
     {
-        var query = Query(loc);
+        var query = Query(loc, tempo);
         var response = await httpClient.GetAsync($"/api/localizacao{query}");
-        var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<Localizacao>>>()
+        var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<string>>>()
         ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<List<Equipamento>>.");
         return result;
     }

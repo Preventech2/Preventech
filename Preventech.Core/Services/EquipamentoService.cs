@@ -33,7 +33,7 @@ public class EquipamentoService(HttpClient httpClient)
     /// <param name="equip">Equipamento para fazer pesquisa</param>
     /// <param name="Prefixo">Prefixo para valores internos</param>
     /// <returns>string com a pesquisa pronta</returns>
-    public static string Query(Equipamento equip, string Prefixo = "")
+    public static string Query(Equipamento equip, DateTime tempo, string Prefixo = "")
     {
         var itens = new Dictionary<string, string>() { };
         if (!string.IsNullOrWhiteSpace(equip.Nome))
@@ -43,7 +43,7 @@ public class EquipamentoService(HttpClient httpClient)
             itens.Add($"{Prefixo}Patrimonio", WebUtility.UrlEncode(equip.Patrimonio));
 
         var res = string.Join("&", from item in itens select $"{item.Key}={item.Value}");
-        res = LocalizacaoService.Query(equip.Local, "Local.") + res;
+        res = LocalizacaoService.Query(equip.Local, tempo, "Local.") + res;
         if (string.IsNullOrWhiteSpace(res)) return string.Empty;
 
         res = res[0] == '?' ? res : '?' + res;
@@ -54,11 +54,12 @@ public class EquipamentoService(HttpClient httpClient)
     /// Retorna todos os equipamentos que se encaixam no filtro colocado
     /// </summary>
     /// <param name="filtro">Filtro para equipamento, valores nulos/inválidos são considerados como wildcards</param>
+    /// <param name="tempo">Tempo da última atualização</param>
     /// <returns>Equipamentos que encaixam ao filtro</returns>
     /// <exception cref="InvalidOperationException"></exception>
     public async Task<ApiResponse<List<Equipamento>>> GetEquipamentos(Equipamento filtro)
     {
-        var query = Query(filtro);
+        var query = Query(filtro, DateTime.MinValue);
         var response = await httpClient.GetFromJsonAsync<ApiResponse<List<Equipamento>>>($"api/equipamentos{query}", _options);
         return response ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<List<Equipamento>>.");
     }
@@ -67,7 +68,7 @@ public class EquipamentoService(HttpClient httpClient)
     public async Task<ApiResponse<Equipamento>> GetEquipamentoByIdRealAsync(int id)
     {
         var response = await GetEquipamentos(new Equipamento { Id = id });
-        return new ApiResponse<Equipamento>
+        return new ApiResponse<Equipamento> 
         {
             Success = response.Success,
             Message = response.Message,
