@@ -5,6 +5,7 @@ using Preventech.Core.DTOs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Serialization.Metadata;
+using System.Text.Json;
 
 namespace Preventech.Core.Services;
 
@@ -28,6 +29,19 @@ public class NotificacaoSiteService(HttpClient httpClient)
         NotificacaoSiteUsuarioDTO nsu = new(destinatario, notificacao);
 
         var response = await _httpClient.PostAsJsonAsync("api/notificacoes/cadastro", nsu);
+        
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            
+            return new ApiResponse<bool>
+            {
+                Success = false,
+                Message = $"Erro HTTP {response.StatusCode}: {errorContent}",
+                Data = false
+            };
+        }
+        
         var result = await response.Content.ReadFromJsonAsync<ApiResponse<bool>>()
         ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<bool>.");
         return result;

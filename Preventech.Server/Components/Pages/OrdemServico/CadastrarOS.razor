@@ -110,7 +110,7 @@
 
         ordemServico = new OrdemServico();
 
-        ApiResponse<List<Equipamento>> response = await EquipService.GetEquipamentosAsync();
+        ApiResponse<List<Equipamento>> response = await EquipService.GetEquipamentos(Equipamento.Vazio);
         equipamentos = response.Data?.AsQueryable() ?? new List<Equipamento>().AsQueryable();
     }
     

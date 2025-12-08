@@ -19,7 +19,7 @@ public class NotificacaoSite : INotificacao
     public int Id { get; set; }
     [StringLength(80)]
     public string Titulo { get; set; } = "";
-    [StringLength(300)]
+    [StringLength(500)]
     public string Mensagem { get; set; } = "";
     public DateTime DataPublicacao { get; set; }
     public DateTime DataExpiracao { get; set; }

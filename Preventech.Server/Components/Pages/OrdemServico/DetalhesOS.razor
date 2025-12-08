@@ -7,7 +7,9 @@
 @using Microsoft.AspNetCore.Components.QuickGrid
 @using Preventech.Core.DTOs
 @using Preventech.Core.Services
+@using Preventech.Core.Templates
 @inject UserClaimsHelper UserClaimsHelper
+@inject NotificacaoSiteService notificacaoSiteService
 
 <HeaderTitle Title="Ordem de Serviço" />
  
@@ -211,7 +213,7 @@ else
         userInfo = await UserClaimsHelper.GetCurrentUserInfoAsync();
 
         ApiResponse<OrdemServico>? response = await ordemService.GetOrdemServicoByIdAsync(id);
-        
+
         if (response != null && response.Data != null)
         {
             ordem = response.Data;
@@ -317,21 +319,22 @@ else
         
         if (ordem.Requisitante != null && ordem.Requisitante.Email != null) {
             message = "Enviando email para " + ordem.Requisitante.Nome;
-            string? email = ordem.Requisitante.Email;
-
-            string subject = "[Preventech] Ordem de Serviço Concluída";
-            string body = $"<p>Olá {ordem.Requisitante.Nome},</p>" +
-                $"<p>Sua Ordem de Serviço <strong>{ordem.Titulo}</strong> (ID: {ordem.Id}) " +
-                $"foi concluída com sucesso pelo técnico {ordem.TecnicoResponsavel.Nome}.</p>" +
-                (string.IsNullOrWhiteSpace(ordem.DescricaoSolucao) 
-                    ? "" 
-                    : $"<p><strong>Ações Realizadas:</strong><br>{ordem.DescricaoSolucao.Replace("\n", "<br>")}</p>") +
-                "<p>Você pode entrar em contato conosco para mais informações.</p>" +
-                "<p style='margin-top: 20px;'>Atenciosamente,<br>" +
-                "<strong>Equipe Preventech</strong></p>";
-
-            message = await emailService.SendEmailAttach(email, subject, body, relatorioBytes, fileName);
             
+            NotificacaoEmail notificacaoEmail = new NotificacaoEmail(
+                titulo: NotificacaoTemplates.OrdemServico.TituloConcluida,
+                mensagem: NotificacaoTemplates.OrdemServico.MensagemEmailConcluida(ordem),
+                destinatario: ordem.Requisitante.Email
+            );
+
+            message = emailService.EnviarEmailComArquivo(notificacaoEmail, relatorioBytes, fileName);
+
+            NotificacaoSite notificacaoSite = new NotificacaoSite(
+                titulo: NotificacaoTemplates.OrdemServico.TituloConcluida,
+                mensagem: NotificacaoTemplates.OrdemServico.MensagemSiteConcluida(ordem)
+            );
+
+            _ = notificacaoSiteService.EnviarNotificacaoAsync(notificacaoSite, ordem.Requisitante);
+
             mensagemResultado = "Notificamos o requisitante por email.";
         }
 

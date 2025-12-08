@@ -1,5 +1,6 @@
 @page "/signup"
 @using Preventech.Core.DTOs
+@using Preventech.Core.Templates
 
 @rendermode InteractiveServer
 
@@ -7,6 +8,7 @@
 @inject AuthService authService
 @inject UsuarioService usuarioService
 @inject EmailService emailService
+@inject NotificacaoSiteService notificacaoSiteService
 
 <h3>Cadastro</h3>
 
@@ -58,16 +60,30 @@
     public async Task OnSubmit()
     {
         isProcessing = true;
+        
+        // Checa se todos os campos foram preenchidos
+        if (string.IsNullOrWhiteSpace(usuario.Cpf) ||
+            string.IsNullOrWhiteSpace(usuario.Nome) ||
+            string.IsNullOrWhiteSpace(usuario.Email) ||
+            string.IsNullOrWhiteSpace(usuario.Senha))
+        {
+            mensagem = "Por favor, preencha todos os campos.";
+            isProcessing = false;
+            return;
+        }
+
         ApiResponse<Usuario> response = await usuarioService.AddUsuarioAsync(usuario) ?? new ApiResponse<Usuario>();
         mensagem = response.Message;
+
         if (response.Success && response.Data != null)
         {
             mensagem = "Usuário cadastrado com sucesso!";
-            SendEmail();
 
             response = await usuarioService.LoginUsuarioAsync(response.Data);
             if (response.Success && response.Data != null)
             {
+                usuario = response.Data;
+                await SendNotificacoes();
                 await authService.Login(response.Data);
                 navigationManager.NavigateTo("/");
             }
@@ -86,8 +102,22 @@
         isProcessing = false;
     }
 
-    public void SendEmail()
+    public async Task SendNotificacoes()
     {
-        emailService.SendEmail(usuario.Email!, "[Preventech] Bem-vindo!", "Seu cadastro foi realizado com sucesso!");
+        UserInfo userInfo = new();
+        userInfo.Nome = usuario.Nome!;
+
+        NotificacaoEmail notificacaoEmail = new NotificacaoEmail(
+            titulo: NotificacaoTemplates.BoasVindas.Titulo,
+            mensagem: NotificacaoTemplates.BoasVindas.MensagemEmail(userInfo.DisplayName()),
+            destinatario: usuario.Email!);
+
+        emailService.EnviarEmail(notificacaoEmail);
+
+        NotificacaoSite notificacaoSite = new NotificacaoSite(
+            titulo: NotificacaoTemplates.BoasVindas.Titulo,
+            mensagem: NotificacaoTemplates.BoasVindas.MensagemSite(userInfo.DisplayName()));
+
+        await notificacaoSiteService.EnviarNotificacaoAsync(notificacaoSite, usuario);
     }
 }
