@@ -84,7 +84,7 @@
     h6, p, .notificacao-data {
         color: var(--branco);
     }
-    background-color: var(--azul-escuro) !important;
+    background-color: var(--azul) !important;
 }
 
 .notificacao-item.nao-lida {
@@ -98,10 +98,13 @@
 }
 
 .notificacao-conteudo h6 {
-    margin: 0 0 5px 0;
+    margin: 0;
     color: var(--preto);
     font-weight: 600;
-    font-size: 14px;
+    font-size: 0.875rem;
+    padding: 0rem;
+    padding-left: 0;
+    padding-right: 0;
 }
 
 .notificacao-conteudo p {
@@ -186,9 +189,77 @@
     color: var(--azul-escuro);
 }
 
-.notificacao-informacao .notificacao-actions button {
-    padding: 5px 12px;
+.notificacao-actions {
+    display: flex;
+    align-items: center;
+    flex-direction: row-reverse;
+    gap: 0.75rem;
+}
+
+.action-btn-container {
+    height: 1.5rem;
+    width: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.action-btn-container:hover {
+    background-color: var(--azul-claro);
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.notificacao-mostrar-mais {
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-top: 1px solid var(--cinza-claro);
+}
+
+.mostrar-mais-btn {
+    color: var(--azul-escuro);
+    text-decoration: none;
     font-size: 13px;
+    font-weight: 500;
+    padding: 5px 15px;
+    transition: all 0.2s ease;
+}
+
+.mostrar-mais-btn:hover {
+    color: var(--azul);
+    text-decoration: underline;
+}
+
+.notificacao-conteudo-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.notificacao-conteudo .leitura-icon-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    transition: all 0.2s ease;
+}
+
+.notificacao-conteudo .leitura-icon-container:hover img {
+    cursor: pointer;
+    transform: scale(110%, 110%);
+}
+
+.leitura-icon-container {
+    height: 100%;
+    width: auto;
+}
+
+.notificacao-leitura-icon {
+    width: auto;
+    height: 0.75rem;
+    vertical-align: middle;
 }
 
 /* Configura para apenas um dos menus aparecer de cada vez quando em telas pequenas */

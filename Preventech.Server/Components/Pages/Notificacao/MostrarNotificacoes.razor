@@ -2,6 +2,8 @@
 
 @namespace Preventech.Server.Components.Pages
 
+@inject NotificacaoSiteService NotificacaoSiteService
+
 <article class="notificacao-article @(IsActive ? "" : "invisivel") @(Mostrando ? "mostrando-detalhes" : "")">
     <main class="notificacao-main @(IsActive ? "" : "invisivel") no-select">
         <section class="notificacao-header">
@@ -9,21 +11,39 @@
                 <h5>Notificações</h5>
             </div>
             <div class="notificacao-actions">
-                @* <button class="btn btn-sm btn-primary">Marcar todas como lidas</button> *@
-                <img src="img/close-btn-icon.svg" class="notificacao-close-icon" @onclick="FecharNotificacoes" />
+                <div class="action-btn-container">
+                    <img src="img/close-btn-icon.svg" class="notificacao-close-icon" @onclick="FecharNotificacoes" />
+                </div>
+                <div class="action-btn-container">
+                    <img class="notificacao-leitura-icon" src="img/read-all-notification.svg" @onclick="() => _ = LerTodasNotificacoes()" />
+                </div>
             </div>
         </section>
         <section class="notificacao-lista">
-            @foreach (var notificacaoUsuario in Notificacoes)
+            @foreach (var notificacaoUsuario in Notificacoes.Take(mostrarCount))
             {
                 <div class="notificacao-item @(notificacaoUsuario.Lida ? "lida" : "nao-lida")" @onclick="() => MostrarInformacao(notificacaoUsuario)">
                     <div class="notificacao-conteudo">
-                        <h6>@notificacaoUsuario.Notificacao.Titulo</h6>
+                        <div class="notificacao-conteudo-header">
+                            <h6>@notificacaoUsuario.Notificacao.Titulo</h6>
+                            @if (!notificacaoUsuario.Lida)
+                            {
+                                <div class="leitura-icon-container" @onclick="() => _ = LerNotificacao(notificacaoUsuario)" @onclick:stopPropagation="true">
+                                    <img class="notificacao-leitura-icon" src="img/read-single-notification.svg" />
+                                </div>
+                            }
+                        </div>
                         <p>@notificacaoUsuario.Notificacao.Mensagem</p>
                         <span class="notificacao-data">@notificacaoUsuario.Notificacao.DataPublicacao.ToString("g")</span>
                     </div>
                 </div>
             }
+            <div class="notificacao-mostrar-mais">
+                @if (Notificacoes.Count > mostrarCount)
+                {
+                    <button class="btn mostrar-mais-btn" @onclick="() => mostrarCount += 10">Mostrar mais</button>
+                }
+            </div>
         </section>
     </main>
     <main class="notificacao-informacao @((IsActive && Mostrando) ? "" : "invisivel")">
@@ -46,8 +66,17 @@
     [Parameter, EditorRequired]
     public List<NotificacaoSiteUsuario> Notificacoes { get; set; }
 
+    private int mostrarCount = 10;
+
+    [Parameter, EditorRequired]
+    public EventCallback<List<NotificacaoSiteUsuario>> NotificacoesChanged { get; set; }
+
+    [Parameter]
+    public EventCallback OnMensagemLida { get; set; }
+
     [Parameter, EditorRequired]
     public bool IsActive { get; set; }
+
     [Parameter]
     public EventCallback<bool> IsActiveChanged { get; set; }
 
@@ -68,7 +97,7 @@
         return new MarkupString(mensagemSegura);
     }
 
-    private void MostrarInformacao(NotificacaoSiteUsuario notificacao)
+    private async Task MostrarInformacao(NotificacaoSiteUsuario notificacao)
     {
         if (notificacaoSelecionada == null || notificacaoSelecionada.Notificacao.Id == notificacao.Notificacao.Id)
         {
@@ -78,10 +107,39 @@
         if (Mostrando)
         {
             notificacaoSelecionada = notificacao;
+            await LerNotificacao(notificacao);
         }
         else
         {
             notificacaoSelecionada = null;
+        }
+    }
+
+    private async Task LerNotificacao(NotificacaoSiteUsuario notificacao)
+    {
+        if (!notificacao.Lida)
+        {
+            ApiResponse<bool> response = await NotificacaoSiteService.MarcarComoLidaAsync(notificacao);
+            if (response.Success)
+            {
+                notificacao.Lida = true;
+                await NotificacoesChanged.InvokeAsync(Notificacoes);
+                await OnMensagemLida.InvokeAsync();
+            }
+        }
+    }
+
+    private async Task LerTodasNotificacoes()
+    {
+        foreach (var notificacao in Notificacoes.Where(n => !n.Lida))
+        {
+            ApiResponse<bool> response = await NotificacaoSiteService.MarcarComoLidaAsync(notificacao);
+            if (response.Success)
+            {
+                notificacao.Lida = true;
+                await NotificacoesChanged.InvokeAsync(Notificacoes);
+                await OnMensagemLida.InvokeAsync();
+            }
         }
     }
 

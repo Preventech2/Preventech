@@ -23,20 +23,6 @@
     </Authorized>
 </AuthorizeView>
 
-<PageSection>
-    <section class="notificacoes-section">
-        Titulo: <InputText @bind-Value="titulo"></InputText><br/>
-        Mensagem: <InputText @bind-Value="mensagem"></InputText>
-        <button @onclick="sendMensagem">Enviar</button>
-        <h4>Notificações</h4>
-        <QuickGrid Items="nsus.AsQueryable()" TGridItem="NotificacaoSiteUsuario">
-            <PropertyColumn Property="@(x => x.Notificacao.Titulo)" Title="Título" Sortable="true" />
-            <PropertyColumn Property="@(x => x.Notificacao.Mensagem)" Title="Mensagem" Sortable="true" />
-            <PropertyColumn Property="@(x => x.Notificacao.DataPublicacao)" Title="Data de Publicação" Sortable="true" Format="g" />
-        </QuickGrid>
-    </section>
-</PageSection>
-
 <AuthorizeView Roles="@PerfilExtension.VisualizarLaboratorio">
     <Authorized>
         <PageSection>
@@ -46,29 +32,3 @@
         </PageSection>
     </Authorized>
 </AuthorizeView>
-
-@code
-{
-    private string titulo = string.Empty;
-    private string mensagem = string.Empty;
-    UserInfo userInfo = new UserInfo();
-    public List<NotificacaoSiteUsuario> nsus = new List<NotificacaoSiteUsuario>();
-    
-    protected override async Task OnInitializedAsync()
-    {
-        userInfo = await userClaimsHelper.GetCurrentUserInfoAsync();
-    }
-
-    public async Task sendMensagem()
-    {
-        NotificacaoSite notificacao = new NotificacaoSite
-        {
-            Titulo = titulo,
-            Mensagem = mensagem,
-        };
-
-        ApiResponse<List<NotificacaoSiteUsuario>> api = await notificacaoSiteService.GetNotificacoesAsync(userInfo.GetUsuario());
-        nsus = api.Data!;
-        @* ApiResponse<bool> response = await notificacaoSiteService.ApagarNotificacaoAsync(); *@
-    }
-}

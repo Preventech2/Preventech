@@ -427,5 +427,6 @@ input[type=file]::file-selector-button:hover {
 
 /* Configuração necessária para notificações */
 .navbar-toggler:checked~.notificacao-main {
+    /* Fecha a janela das notificações quando o menu mobile está aberto */
     display: none !important;
 }

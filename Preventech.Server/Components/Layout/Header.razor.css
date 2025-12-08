@@ -13,6 +13,7 @@ header h4 {
 }
 
 menu {
+    width: 100%;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -20,6 +21,8 @@ menu {
     display: flex;
     flex-direction: row;
     align-items: center;
+    justify-content: end;
+    gap: 1rem;
 }
 
 menu a {

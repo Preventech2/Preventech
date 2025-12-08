@@ -20,8 +20,8 @@
     <stop offset="100%" stop-color="#434B56"/>
    </linearGradient>
    <linearGradient spreadMethod="pad" y2="1" x2="0.5" y1="0" x1="0.5" id="svg_5">
-    <stop offset="0" stop-opacity="0.99219" stop-color="#0a68b5"/>
-    <stop offset="1" stop-opacity="0.99219" stop-color="#0a5282"/>
+    <stop offset="0" stop-opacity="0.99219" stop-color="#1395ffff"/> // 0a68b5
+    <stop offset="1" stop-opacity="0.99219" stop-color="#0a5282"/> // 0a5282 // 85ABCC
    </linearGradient>
   </defs>
   <g fill-rule="evenodd" fill="none" id="icons">

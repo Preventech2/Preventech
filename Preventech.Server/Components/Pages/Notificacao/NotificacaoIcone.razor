@@ -8,26 +8,39 @@
 @implements IDisposable
 
 <section class="header-icon-section" @onclick="OnIconClick">
-    <img src="@icon" class="header-icon" />
+    <img id="notification-icon" src="@icon" class="header-icon @(Animating ? "shake-animation" : "")" />
 </section>
 
-<MostrarNotificacoes Notificacoes="notificacoes" @bind-IsActive="@IsActive" />
+<MostrarNotificacoes @bind-Notificacoes="notificacoes" OnMensagemLida="UpdateIcon" @bind-IsActive="@IsActive" />
 
 @code {
     UserInfo userInfo = new UserInfo();
+
     public string icon { get; set; } = "img/notification-inactive-icon.svg";
+
     public List<NotificacaoSiteUsuario> notificacoes = new List<NotificacaoSiteUsuario>();
+
     [Parameter]
     public bool IsActive { get; set; } = false;
+
+    private bool Animating = false;
 
     private void OnIconClick()
     {
         IsActive = !IsActive;
 
-        if (IsActive)
+        if (IsActive && Animating == false)
         {
-            
+            Animating = true;
+            _ = RunIconAnimationAsync();
         }
+    }
+
+    private async Task RunIconAnimationAsync()
+    {
+        Animating = true;
+        await Task.Delay(500);
+        Animating = false;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -75,6 +88,7 @@
         if (api.Success && api.Data != null)
         {
             notificacoes = api.Data;
+            UpdateIcon();
         }
     }
 }
