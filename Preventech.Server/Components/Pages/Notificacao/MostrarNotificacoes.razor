@@ -20,7 +20,7 @@
             </div>
         </section>
         <section class="notificacao-lista">
-            @foreach (var notificacaoUsuario in Notificacoes.Take(mostrarCount))
+            @foreach (var notificacaoUsuario in Notificacoes.OrderByDescending((e) => e.Notificacao.DataPublicacao).Take(mostrarCount))
             {
                 <div class="notificacao-item @(notificacaoUsuario.Lida ? "lida" : "nao-lida")" @onclick="() => MostrarInformacao(notificacaoUsuario)">
                     <div class="notificacao-conteudo">
@@ -64,7 +64,7 @@
 
 @code {
     [Parameter, EditorRequired]
-    public List<NotificacaoSiteUsuario> Notificacoes { get; set; }
+    public List<NotificacaoSiteUsuario> Notificacoes { get; set; } = new();
 
     private int mostrarCount = 10;
 

@@ -204,7 +204,6 @@ else
     private const long MAX_FILE_SIZE = 1024 * 1024 * 50; // 50MB
 
     private string mensagemResultado = string.Empty;
-    private bool sucesso = false;
     private bool isProcessing = false;
 
     protected override async Task OnInitializedAsync()
@@ -226,14 +225,13 @@ else
 
         if (ordem.EquipamentoId.HasValue)
         {
-            ApiResponse<Equipamento> responseEquip = await EquipService.GetEquipamentoByIdRealAsync(ordem.EquipamentoId.Value);
-    
-            if (responseEquip != null && responseEquip.Data != null)
+            ApiResponse<List<Equipamento>> responseEquip = await EquipService.GetEquipamentos(new Equipamento{ Id = ordem.EquipamentoId.Value });
+
+            if (responseEquip != null && responseEquip.Data != null && responseEquip.Data.Any())
             {
-                equipamento = responseEquip.Data;
+                equipamento = responseEquip.Data.FirstOrDefault()!;
             }
         }
-
         else
         {
             equipamento = new Equipamento
@@ -277,8 +275,7 @@ else
         mensagemResultado = response.Message;
 
         isProcessing = false;
-        sucesso = true;
-    }
+            }
 
     private async Task FormDataCancel()
     {
@@ -291,8 +288,7 @@ else
         mensagemResultado = response.Message;
 
         isProcessing = false;
-        sucesso = true;
-    }
+            }
 
     private async Task FormDataFinish()
     {
@@ -300,7 +296,7 @@ else
         {
             // Isso será tratado pelo Blazor Validation, mas é bom como fallback.
             mensagemResultado = "A Descrição das Ações é obrigatória para a conclusão.";
-            sucesso = false;
+            
             return;
         }
 
@@ -344,8 +340,7 @@ else
 
         isShowingCompletionForm = false;
         isProcessing = false;
-        sucesso = true;
-    }
+            }
 
     private async Task FormAddDoc()
     {
@@ -384,19 +379,18 @@ else
 
         if (arquivosComErro == 0)
         {
-            sucesso = true;
-            mensagemResultado = $"Todos os {arquivosParaUpload.Count} documentos anexados com sucesso!";
+                        mensagemResultado = $"Todos os {arquivosParaUpload.Count} documentos anexados com sucesso!";
         }
         
         else if (arquivosComErro == arquivosParaUpload.Count)
         {
-            sucesso = false;
+            
             mensagemResultado = $"NENHUM arquivo foi anexado. Detalhes: {errosAcumulados}";
         }
         
         else
         {
-            sucesso = true; // Parcialmente bem-sucedido
+            // Parcialmente bem-sucedido
             mensagemResultado = $"Upload concluído. Alguns documentos falharam ({arquivosComErro} de {arquivosParaUpload.Count}). Detalhes: {errosAcumulados}";
         }
 
@@ -423,7 +417,7 @@ else
             else 
             {
                 mensagemResultado = $"O arquivo {file.Name} excede o tamanho máximo permitido de {MAX_FILE_SIZE / (1024 * 1024)} MB. Remova-o para continuar.";
-                sucesso = false;
+                
                 arquivosParaUpload.Clear(); // Opcional: Limpar tudo se houver um arquivo muito grande
                 break;
             }

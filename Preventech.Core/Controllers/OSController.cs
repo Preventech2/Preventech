@@ -176,6 +176,8 @@ namespace Preventech.Core.Controllers
                 existingOrdem.TecnicoResponsavelId = updatedOrdem.TecnicoResponsavelId;
                 existingOrdem.RequisitanteId = updatedOrdem.RequisitanteId;
                 existingOrdem.EquipamentoId = updatedOrdem.EquipamentoId;
+                existingOrdem.DataConclusão = updatedOrdem.DataConclusão;
+                existingOrdem.DescricaoSolucao = updatedOrdem.DescricaoSolucao;
 
                 await _context.SaveChangesAsync();
 
