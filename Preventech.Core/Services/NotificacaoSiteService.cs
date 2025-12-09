@@ -29,11 +29,11 @@ public class NotificacaoSiteService(HttpClient httpClient)
         NotificacaoSiteUsuarioDTO nsu = new(destinatario, notificacao);
 
         var response = await _httpClient.PostAsJsonAsync("api/notificacoes/cadastro", nsu);
-        
+
         if (!response.IsSuccessStatusCode)
         {
             var errorContent = await response.Content.ReadAsStringAsync();
-            
+
             return new ApiResponse<bool>
             {
                 Success = false,
@@ -41,7 +41,7 @@ public class NotificacaoSiteService(HttpClient httpClient)
                 Data = false
             };
         }
-        
+
         var result = await response.Content.ReadFromJsonAsync<ApiResponse<bool>>()
         ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<bool>.");
         return result;

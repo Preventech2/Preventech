@@ -8,8 +8,8 @@ namespace Preventech.Core.Models;
 [PrimaryKey(nameof(UsuarioId), nameof(NotificacaoId))]
 public class NotificacaoSiteUsuario
 {
-    public NotificacaoSiteUsuario() 
-    { 
+    public NotificacaoSiteUsuario()
+    {
         Usuario = new Usuario();
         Notificacao = new NotificacaoSite();
     }

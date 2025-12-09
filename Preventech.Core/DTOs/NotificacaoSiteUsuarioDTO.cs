@@ -5,8 +5,8 @@ namespace Preventech.Core.DTOs;
 
 public class NotificacaoSiteUsuarioDTO
 {
-    public NotificacaoSiteUsuarioDTO() 
-    { 
+    public NotificacaoSiteUsuarioDTO()
+    {
         Usuario = new Usuario();
         Notificacao = new NotificacaoSite();
     }

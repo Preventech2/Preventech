@@ -49,7 +49,7 @@ public class EmailService(HttpClient httpClient)
             email.From.Add(MailboxAddress.Parse(emailAddress));
             email.To.Add(MailboxAddress.Parse(notificacao.Destinatario));
             email.Subject = notificacao.Titulo;
-            
+
             var bodyBuilder = new BodyBuilder { HtmlBody = notificacao.Mensagem };
 
             if (attachmentData != null && attachmentData.Length > 0)
