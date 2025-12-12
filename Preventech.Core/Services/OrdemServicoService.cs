@@ -36,6 +36,17 @@ public class OrdemServicoService
     public async Task<ApiResponse<List<OrdemServico>>> GetOrdemServicoByResponsavelAsync(int id)
     {
         var response = await _httpClient.GetAsync($"api/ordem-servico/user/{id}");
+        
+        if (!response.IsSuccessStatusCode)
+        {
+            return new ApiResponse<List<OrdemServico>>
+            {
+                Success = false,
+                Message = $"Erro ao buscar ordens de serviço: {response.StatusCode}",
+                Data = null
+            };
+        }
+        
         var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<OrdemServico>>>()
         ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<OrdemServico>.");
         return result;

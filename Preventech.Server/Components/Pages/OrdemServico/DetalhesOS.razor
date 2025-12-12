@@ -1,5 +1,7 @@
 @page "/ordens-servico/{id:guid}"
 
+@namespace Preventech.Server.Components.Pages
+
 @attribute [Authorize(Roles = PerfilExtension.VisualizarOrdemDeServico)]
 
 @rendermode InteractiveServer
@@ -32,8 +34,8 @@ else
                 [Aberta em @ordem.Abertura]
             </div>
             <br>
-            <p><strong>Descrição:</strong> @ordem.Descricao</p>
-            <p><strong>Observações:</strong> @ordem.Observacoes</p>
+            <p><strong>Descrição:</strong> @(String.IsNullOrWhiteSpace(ordem.Descricao) ? "(Nenhuma descrição)" : ordem.Descricao)</p>
+            <p><strong>Observações:</strong> @(String.IsNullOrWhiteSpace(ordem.Observacoes) ? "(Nenhuma observação)" : ordem.Observacoes)</p>
             <p><strong>Id:</strong> @ordem.Id</p>
             <p><strong>Equipamento:</strong> @equipamento.ToString()</p>
             <p>

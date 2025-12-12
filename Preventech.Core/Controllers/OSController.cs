@@ -110,12 +110,13 @@ namespace Preventech.Core.Controllers
             }
         }
 
-        [HttpGet("/user/{id}")]
+        [HttpGet("user/{id}")]
         public async Task<ApiResponse<List<OrdemServico>>> GetOSByResponsavel(int id)
         {
             try
             {
                 var ordens = await _context.OrdensServico
+                    .AsNoTracking()
                     .Include(o => o.Requisitante)
                     .Include(o => o.TecnicoResponsavel)
                     .Where(e => e.TecnicoResponsavelId == id)

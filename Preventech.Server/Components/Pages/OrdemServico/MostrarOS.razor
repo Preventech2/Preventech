@@ -1,6 +1,8 @@
 @page "/ordens-servico"
 @rendermode InteractiveServer
 
+@namespace Preventech.Server.Components.Pages
+
 @using Microsoft.AspNetCore.Components.QuickGrid
 @using Preventech.Core.DTOs
 
@@ -31,7 +33,7 @@ else if (!ordens.Any())
             </div>
         </TemplateColumn>
         <PropertyColumn Property="@(item => item.Titulo)" Title="Título" />
-        <PropertyColumn Class="d-none d-md-table-cell" Property="@(item => item.Descricao)" Title="Descrição" />
+        <PropertyColumn Class="d-none d-lg-table-cell" Property="@(item => item.Descricao)" Title="Descrição" />
         <PropertyColumn Property="@(item => item.Abertura)" Title="Abertura" />
         <PropertyColumn Class="d-none d-md-table-cell" Title="Técnico Responsável" Property="@(item => item.TecnicoResponsavel != null ? item.TecnicoResponsavel.Nome : "(não atribuído)")" />
         <TemplateColumn Title="">
@@ -56,7 +58,7 @@ else if (!ordens.Any())
     @inject NavigationManager NavigationManager
     void VerDetalhes(OrdemServico ordem)
     {
-    NavigationManager.NavigateTo($"/ordemservico/{ordem.Id}");
+        NavigationManager.NavigateTo($"/ordemservico/{ordem.Id}");
     }
 
     private string GetStatusIcon(StatusOS status)

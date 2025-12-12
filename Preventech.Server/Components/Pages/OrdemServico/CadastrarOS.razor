@@ -1,5 +1,7 @@
 ﻿@page "/cadastrar/ordem-servico"
 
+@namespace Preventech.Server.Components.Pages
+
 @attribute [Authorize(Roles = PerfilExtension.CriarOrdemDeServico)]
 
 @rendermode InteractiveServer
@@ -37,29 +39,18 @@
 
         @if(equipamentos != null && equipamentos.Any()) 
         {
-            @* <div class="mb-3">
-                <label>Equipamento:
-                    <InputSelect @bind-Value="ordemServico!.EquipamentoId" class="form-control">
-                        @foreach (Equipamento equipamento in equipamentos)
-                        {
-                            <option value="@equipamento.Id">@equipamento.ToString()</option>
-                        }
-                    </InputSelect>
-                </label>
-                <br />
-                <span>Não encontrou o equipamento? <a href="/cadastrar/equipamento" target="_blank">Cadastre-o!</a></span>
-            </div> *@
             <div class="mb-3">
                 <label for="grupo">
                     Equipamento
                 </label>
-            <InputSelect @bind-Value="ordemServico!.EquipamentoId" class="form-control">
-                <option value="0">Selecionar equipamento</option>
-                @foreach (Equipamento equipamento in equipamentos)
-                {
-                    <option value="@equipamento.Id">@equipamento.ToString()</option>
-                }
-            </InputSelect>
+                <input type="text" class="form-control input-filter" placeholder="Digite n° de patrimônio ou nome..." @oninput="@((ChangeEventArgs e) => FilterEquipamentos(e.Value?.ToString()))" />
+                <InputSelect @bind-Value="ordemServico!.EquipamentoId" class="form-control">
+                    <option value="0">Selecionar equipamento</option>
+                    @foreach (var equipamento in equipamentosFiltrados.Take(10))
+                    {
+                        <option value="@equipamento.Id">@equipamento.ToString()</option>
+                    }
+                </InputSelect>
             </div>
         }
         else
@@ -67,7 +58,6 @@
             <p><em>Carregando equipamentos</em></p>
             <span>Não encontrou o equipamento? <a href="/cadastrar/equipamento" target="_blank">Cadastre-o!</a></span>
         }
-
         <br />
         <button type="submit" class="btn btn-primary" disabled="@isProcessing">
             @if (isProcessing)
@@ -88,6 +78,7 @@
     private OrdemServico? ordemServico { get; set; } = null;
     
     private IQueryable<Equipamento> equipamentos = null!;
+    private IQueryable<Equipamento> equipamentosFiltrados = null!;
 
     [Inject]
     OrdemServicoService OSservice { get; set; } = null!;
@@ -112,6 +103,7 @@
 
         ApiResponse<List<Equipamento>> response = await EquipService.GetEquipamentos(Equipamento.Vazio);
         equipamentos = response.Data?.AsQueryable() ?? new List<Equipamento>().AsQueryable();
+        equipamentosFiltrados = equipamentos;
     }
     
     private async Task FormData()
@@ -218,5 +210,17 @@
             }
         }
         StateHasChanged(); // Força a atualização da UI para mostrar a lista de arquivos
+    }
+
+    public void FilterEquipamentos(string? filtro)
+    {
+        if (string.IsNullOrWhiteSpace(filtro))
+        {
+            equipamentosFiltrados = equipamentos;
+        }
+        else
+        {
+            equipamentosFiltrados = equipamentos.Where(e => e.Patrimonio.Contains(filtro) || e.Nome.Contains(filtro) || e.Nome.ToLower().Contains(filtro.ToLower()));
+        }
     }
 }
