@@ -17,162 +17,328 @@
  
 @if (ordem == null)
 {
-    <p><em>Carregando...</em></p>
+    <MostrarMensagem @bind-Mensagem="mensagemResultado" />
 }
 else
 {
     <PageSection>
         <section class="header-section">
-            <h4>@ordem.Titulo</h4>
-        </section>
-        <section>
-        
-            <div>
-                <img src="@GetStatusIcon(@ordem.Status)" alt="Status Icon"
-                    width="14" height="14" style="margin-right: 2px;" />
-                @ordem.Status
-                [Aberta em @ordem.Abertura]
+            <div class="d-flex align-items-center gap-2">
+                <img src="@GetStatusIcon(@ordem.Status)" alt="Status Icon" width="20" height="20" />
+                <h4 style="text-align: left;" class="mb-0">@ordem.Titulo</h4>
             </div>
-            <br>
-            <p><strong>Descrição:</strong> @(String.IsNullOrWhiteSpace(ordem.Descricao) ? "(Nenhuma descrição)" : ordem.Descricao)</p>
-            <p><strong>Observações:</strong> @(String.IsNullOrWhiteSpace(ordem.Observacoes) ? "(Nenhuma observação)" : ordem.Observacoes)</p>
-            <p><strong>Id:</strong> @ordem.Id</p>
-            <p><strong>Equipamento:</strong> @equipamento.ToString()</p>
-            <p>
-                <strong>Requisitado por: </strong> 
-                    @if (ordem.Requisitante == null) {
-                        <span> Carregando</span>
-                    }
+            <div style="display: flex; flex-direction: row;">
+                <a style="margin-right: 10px;" href="/ordens-servico/">Voltar</a>
+                <span class="badge bg-secondary">@ordem.Status</span>
+            </div>
+        </section>
 
-                    else {
-                        @ordem.Requisitante.Nome
-                    }
-            </p>
-            @foreach (var arquivo in @ordem.Arquivos)
-            {
-                <p>
-                    <strong>Arquivo:</strong> 
-                    <a href="api/documentos/@arquivo.Id/download" target="_blank" download="@arquivo.NomeArquivo">
-                        @arquivo.NomeArquivo 
-                        (@arquivo.DataEnvio.ToLocalTime()) </a>
-                </p>
-            }
+        <!-- Informações Principais -->
+        <section class="border-bottom pb-3">
+            <div class="row g-3">
+                <div class="col-12">
+                    <div class="alert alert-light mb-0" role="alert">
+                        <i class="bi bi-calendar-event me-2"></i>
+                        <strong>Aberta em:</strong> @ordem.Abertura.ToString("dd/MM/yyyy HH:mm")
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 text-muted">
+                                <i class="bi bi-card-text me-2"></i>Descrição
+                            </h6>
+                            <p class="card-text">@(String.IsNullOrWhiteSpace(ordem.Descricao) ? "(Nenhuma descrição)" : ordem.Descricao)</p>
+                        </div>
+                    </div>
+                </div>
 
-            @if (ordem.TecnicoResponsavel == null) {
-                <AuthorizeView Roles="@PerfilExtension.EditarOrdemDeServico">
-                    <Authorized Context="authContext">
-                    <EditForm Model="ordem" OnSubmit="FormData" FormName="pegar-Ordem-Servico">
-                        <button type="submit" class="btn btn-primary" disabled="@isProcessing">
-                            @if (isProcessing)
-                            {
-                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                <span class="visually-hidden">Processando...</span>
-                            }
-                            else
-                            {
-                                <text>Pegar ordem</text>
-                            }
-                        </button>
-                    </EditForm> 
-                    </Authorized>
-                </AuthorizeView>     
-            }
+                <div class="col-md-6">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 text-muted">
+                                <i class="bi bi-chat-left-text me-2"></i>Observações
+                            </h6>
+                            <p class="card-text">@(String.IsNullOrWhiteSpace(ordem.Observacoes) ? "(Nenhuma observação)" : ordem.Observacoes)</p>
+                        </div>
+                    </div>
+                </div>
 
-            else if (ordem.TecnicoResponsavel.Id == userInfo?.Id && ordem.Status != StatusOS.Concluida) {
-                <div>
-                    <EditForm Model="ordem" OnSubmit="FormAddDoc" FormName="adicionar-documento">
-                        <div class="mb-3">
-                            <label>Deseja anexar documentos?
-                                <InputFile OnChange="HandleFileSelection" multiple />
-                            </label>
-                            @if (arquivosParaUpload.Any())
-                            {
-                                <p class="mt-2">Arquivos selecionados para upload:</p>
-                                <ul>
-                                    @foreach (var file in arquivosParaUpload)
-                                    {
-                                        <li>@file.Name (@((file.Size / 1024).ToString("N0")) KB)</li>
-                                    }
-                                </ul>
-                            }
-                            
-                            <button type="submit" class="btn btn-success" disabled="@isProcessing"> 
-                                @if (isProcessing)
+                <div class="col-md-4">
+                    <div class="d-flex align-items-center gap-2 p-3 bg-light rounded">
+                        <i class="bi bi-gear text-primary"></i>
+                        <div>
+                            <small class="text-muted d-block">Equipamento</small>
+                            <strong>@((String.IsNullOrWhiteSpace(equipamento.Nome)) ? "Não Atribuído" : equipamento.ToString())</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="d-flex align-items-center gap-2 p-3 bg-light rounded">
+                        <i class="bi bi-person text-primary"></i>
+                        <div>
+                            <small class="text-muted d-block">Requisitante</small>
+                            <strong>
+                                @if (ordem.Requisitante == null)
                                 {
-                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                    <text>Anexando...</text>
+                                    <span class="spinner-border spinner-border-sm" role="status"></span>
                                 }
                                 else
                                 {
-                                    <text>Anexar documento</text>
+                                    @ordem.Requisitante.Nome
+                                }
+                            </strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="d-flex align-items-center gap-2 p-3 bg-light rounded">
+                        <i class="bi bi-hash text-primary"></i>
+                        <div>
+                            <small class="text-muted d-block">ID da OS</small>
+                            <strong class="d-block" style="max-width: 200px;" title="@ordem.Id">@ordem.Id</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Arquivos Anexados -->
+        @if (ordem.Arquivos.Any())
+        {
+            <section class="border-bottom pb-3">
+                <h5>
+                    <i class="bi bi-paperclip me-2"></i>Arquivos Anexados
+                </h5>
+                <div class="list-group mt-3">
+                    @foreach (var arquivo in ordem.Arquivos)
+                    {
+                        <a href="api/documentos/@arquivo.Id/download" target="_blank" download="@arquivo.NomeArquivo" 
+                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-file-earmark-text text-primary"></i>
+                                <div>
+                                    <div class="fw-semibold">@arquivo.NomeArquivo</div>
+                                    <small class="text-muted">@arquivo.DataEnvio.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</small>
+                                </div>
+                            </div>
+                            <i class="bi bi-download"></i>
+                        </a>
+                    }
+                </div>
+            </section>
+        }
+
+        <!-- Ações e Status do Técnico -->
+        <section>
+            @if (ordem.TecnicoResponsavel == null)
+            {
+                <AuthorizeView Roles="@PerfilExtension.EditarOrdemDeServico">
+                    <Authorized Context="authContext">
+                        <div class="alert alert-warning d-flex align-items-center gap-3" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+                            <div class="flex-grow-1">
+                                <h6 class="alert-heading mb-1">Ordem de Serviço Disponível</h6>
+                                <p class="mb-0">Esta OS ainda não possui técnico responsável. Deseja assumir a responsabilidade?</p>
+                            </div>
+                        </div>
+                        <EditForm Model="ordem" OnSubmit="FormData" FormName="pegar-Ordem-Servico">
+                            <button type="submit" class="btn btn-primary btn-lg shadow-sm" disabled="@isProcessing">
+                                @if (isProcessing)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    <span>Processando...</span>
+                                }
+                                else
+                                {
+                                    <span style="font-size: medium; font-weight: 600;">Pegar Ordem</span>
                                 }
                             </button>
-                        </div>
-                    </EditForm>
-                </div>
-                <div>
-                    <EditForm Model="ordem" OnSubmit="FormDataCancel" FormName="pegar-Ordem-Servico">
-                        <button type="submit" class="btn btn-danger" disabled="@isProcessing">
-                            @if (isProcessing)
-                            {
-                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                <span class="visually-hidden">Processando...</span>
-                            }
-                            else
-                            {
-                                <text>Cancelar</text>
-                            }
-                        </button>
-                    </EditForm>
-                </div>
-                @if (!isShowingCompletionForm)
-                {
-                    <div>
-                        <button type="button" class="btn btn-success" @onclick="() => isShowingCompletionForm = true" disabled="@isProcessing">
-                            Concluir OS (Detalhar Ações)
-                        </button>
+                        </EditForm>
+                    </Authorized>
+                </AuthorizeView>
+            }
+            else if (ordem.TecnicoResponsavel.Id == userInfo?.Id && ordem.Status != StatusOS.Concluida)
+            {
+                <div class="card shadow-sm border-0 mb-3">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-tools me-2"></i>Ações do Técnico
+                        </h5>
                     </div>
-                }
-                else {
-                    <EditForm Model="ordem" OnSubmit="FormDataFinish" FormName="form-conclusao">
-                        <div class="card my-3 p-3 border-success">
-                            <h4>Relatório de Conclusão</h4>
-
+                    <div class="card-body">
+                        <!-- Upload de Documentos -->
+                        <EditForm Model="ordem" OnSubmit="FormAddDoc" FormName="adicionar-documento" class="mb-4">
                             <div class="mb-3">
-                                <label for="DescricaoSolucao" class="form-label">Descrição das Ações Realizadas:</label>
-                                <InputTextArea id="DescricaoSolucao" @bind-Value="ordem.DescricaoSolucao" rows="5" class="form-control" required />
-                                <ValidationMessage For="@(() => ordem.DescricaoSolucao)" />
+                                <label class="form-label fw-semibold">
+                                    <i class="bi bi-cloud-upload me-2"></i>Anexar Documentos
+                                </label>
+                                <InputFile OnChange="HandleFileSelection" multiple class="form-control shadow-sm" />
+                                
+                                @if (arquivosParaUpload.Any())
+                                {
+                                    <div class="alert alert-info mt-3 mb-0">
+                                        <h6 class="alert-heading">
+                                            <i class="bi bi-file-earmark-check me-2"></i>Arquivos Selecionados:
+                                        </h6>
+                                        <ul class="mb-0">
+                                            @foreach (var file in arquivosParaUpload)
+                                            {
+                                                <li>
+                                                    <strong>@file.Name</strong> 
+                                                    <span class="badge bg-secondary">@((file.Size / 1024).ToString("N0")) KB</span>
+                                                </li>
+                                            }
+                                        </ul>
+                                    </div>
+                                }
                             </div>
+                            
+                            <button type="submit" class="btn btn-success shadow-sm" disabled="@isProcessing">
+                                @if (isProcessing)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                    <span>Anexando...</span>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-upload me-2"></i>
+                                    <span>Anexar Documentos</span>
+                                }
+                            </button>
+                        </EditForm>
 
-                            <div class="d-flex justify-content-between">
-                                <button type="button" class="btn btn-secondary" @onclick="() => isShowingCompletionForm = false">
-                                    Cancelar
+                        <!-- Botões de Ação -->
+                        <div class="d-flex gap-2 flex-wrap">
+                            @if (!isShowingCompletionForm)
+                            {
+                                <button type="button" class="btn btn-success shadow-sm" 
+                                        @onclick="() => isShowingCompletionForm = true" 
+                                        disabled="@isProcessing">
+                                    <i class="bi bi-check-circle me-2"></i>
+                                    Concluir OS
                                 </button>
-                                <button type="submit" class="btn btn-success" disabled="@isProcessing">
+                            }
+
+                            <EditForm Model="ordem" OnSubmit="FormDataCancel" FormName="cancelar-ordem" class="d-inline">
+                                <button type="submit" class="btn btn-outline-danger shadow-sm" disabled="@isProcessing">
                                     @if (isProcessing)
                                     {
-                                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                        <text>Finalizando...</text>
+                                        <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                        <span>Processando...</span>
                                     }
                                     else
                                     {
-                                        <text>Concluir e Salvar</text>
+                                        <i class="bi bi-x-circle me-2"></i>
+                                        <span>Cancelar OS</span>
                                     }
                                 </button>
+                            </EditForm>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formulário de Conclusão -->
+                @if (isShowingCompletionForm)
+                {
+                    <EditForm Model="ordem" OnSubmit="FormDataFinish" FormName="form-conclusao">
+                        <div class="card shadow border-success mb-3">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-clipboard-check me-2"></i>Relatório de Conclusão
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="DescricaoSolucao" class="form-label fw-semibold">
+                                        Descrição das Ações Realizadas: <span class="text-danger">*</span>
+                                    </label>
+                                    <InputTextArea id="DescricaoSolucao" 
+                                                   @bind-Value="ordem.DescricaoSolucao" 
+                                                   rows="6" 
+                                                   class="form-control shadow-sm" 
+                                                   placeholder="Descreva detalhadamente as ações realizadas para resolver a ordem de serviço..."
+                                                   required />
+                                    <ValidationMessage For="@(() => ordem.DescricaoSolucao)" class="text-danger" />
+                                </div>
+
+                                <div class="d-flex justify-content-between gap-2">
+                                    <button type="button" class="btn btn-outline-secondary" 
+                                            @onclick="() => isShowingCompletionForm = false">
+                                        <i class="bi bi-arrow-left me-2"></i>Voltar
+                                    </button>
+                                    <button type="submit" class="btn btn-success shadow-sm" disabled="@isProcessing">
+                                        @if (isProcessing)
+                                        {
+                                            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                            <span>Finalizando...</span>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-check-lg me-2"></i>
+                                            <span>Concluir e Salvar</span>
+                                        }
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </EditForm>
                 }
             }
-
-            else if (ordem.Status == StatusOS.Concluida) {
-                <p><strong>Técnico Responsável:</strong> @ordem.TecnicoResponsavel.Nome</p>
-                <p><strong>Descrição da solução:</strong> @ordem.DescricaoSolucao</p>
-                <p><strong>Data de Conclusão:</strong> @ordem.DataConclusão</p>
+            else if (ordem.Status == StatusOS.Concluida)
+            {
+                <div class="card shadow-sm border-success">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-check-circle-fill me-2"></i>Ordem de Serviço Concluída
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center gap-2 p-3 bg-light rounded">
+                                    <i class="bi bi-person-check text-success"></i>
+                                    <div>
+                                        <small class="text-muted d-block">Técnico Responsável</small>
+                                        <strong>@ordem.TecnicoResponsavel.Nome</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center gap-2 p-3 bg-light rounded">
+                                    <i class="bi bi-calendar-check text-success"></i>
+                                    <div>
+                                        <small class="text-muted d-block">Data de Conclusão</small>
+                                        <strong>@ordem.DataConclusão?.ToString("dd/MM/yyyy HH:mm")</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2 text-muted">
+                                            <i class="bi bi-file-text me-2"></i>Descrição da Solução
+                                        </h6>
+                                        <p class="card-text mb-0">@ordem.DescricaoSolucao</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             }
-
-            else {
-                <p><strong>Técnico Responsável:</strong> @ordem.TecnicoResponsavel.Nome</p>
+            else
+            {
+                <div class="alert alert-info d-flex align-items-center gap-3" role="alert">
+                    <i class="bi bi-info-circle-fill fs-4"></i>
+                    <div>
+                        <h6 class="alert-heading mb-1">Técnico Atribuído</h6>
+                        <p class="mb-0"><strong>@ordem.TecnicoResponsavel.Nome</strong> está responsável por esta ordem de serviço.</p>
+                    </div>
+                </div>
             }
         </section>
     </PageSection>
@@ -236,22 +402,18 @@ else
         }
         else
         {
-            equipamento = new Equipamento
-            {
-                Nome = "Não atribuído",
-                Patrimonio = "N/A"
-            };
+            equipamento = Equipamento.Vazio;
         }
     }
     private string GetStatusIcon(StatusOS status)
     {
         return status switch
         {
-            StatusOS.EmImpedimento => "img/em-impedimento.png",
-            StatusOS.Concluida => "img/concluida.png",
-            StatusOS.EmProgresso => "img/em-progresso.png",
-            StatusOS.Parada => "img/parada.png",
-            StatusOS.Deferida => "img/deferida.png",
+            StatusOS.EmImpedimento => "img/status-os/em-impedimento.svg",
+            StatusOS.EmProgresso => "img/status-os/em-progresso.svg",
+            StatusOS.Concluida => "img/status-os/concluida.svg",
+            StatusOS.Parada => "img/status-os/parada.svg",
+            StatusOS.Deferida => "img/status-os/deferida.svg",
             _ => ""
         };
     }

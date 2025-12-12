@@ -52,7 +52,7 @@
                 {
                     <QuickGrid Items="@ordensServicosPendentes.AsQueryable()" Context="ordem">
                         <TemplateColumn Title="Status" Context="ordem">
-                            <div>
+                            <div class="nowrap">
                                 <img src="@GetStatusIcon(ordem.Status)" alt="Status Icon"
                                     width="14" height="14" style="margin-right: 2px;" />
                                 @ordem.Status
@@ -127,11 +127,11 @@
     {
         return status switch
         {
-            StatusOS.EmImpedimento => "img/em-impedimento.png",
-            StatusOS.EmProgresso => "img/em-progresso.png",
-            StatusOS.Concluida => "img/concluida.png",
-            StatusOS.Parada => "img/parada.png",
-            StatusOS.Deferida => "img/deferida.png",
+            StatusOS.EmImpedimento => "img/status-os/em-impedimento.svg",
+            StatusOS.EmProgresso => "img/status-os/em-progresso.svg",
+            StatusOS.Concluida => "img/status-os/concluida.svg",
+            StatusOS.Parada => "img/status-os/parada.svg",
+            StatusOS.Deferida => "img/status-os/deferida.svg",
             _ => ""
         };
     }

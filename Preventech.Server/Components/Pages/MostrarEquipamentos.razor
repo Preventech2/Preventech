@@ -18,7 +18,7 @@
                 alt="" /></button>
     </section>
     <QuickGrid TGridItem="Equipamento" Items="@equipamentos.AsQueryable()">
-        <PropertyColumn Sortable="true" Property="@(item => item.Patrimonio)" Title="Patrimônio" />
+        <PropertyColumn Property="@(item => item.Patrimonio)" Title="Patrimônio" />
         <PropertyColumn Class="d-none d-md-table-cell" Sortable="true" Property="@(item => item.Nome)" Title="Nome" />
         <PropertyColumn Property="@(item => item.Local)" Title="Laboratório" />
         <TemplateColumn Title="Status">
