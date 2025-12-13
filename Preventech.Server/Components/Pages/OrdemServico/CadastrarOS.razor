@@ -276,7 +276,7 @@
         }
         else
         {
-            equipamentosFiltrados = equipamentos.Where(e => e.Patrimonio.Contains(filtro) || e.Nome.Contains(filtro) || e.Nome.ToLower().Contains(filtro.ToLower()));
+            equipamentosFiltrados = equipamentos.Where(e => e.Patrimonio.StartsWith(filtro) || e.Nome.ToLower().Contains(filtro.ToLower()));
         }
     }
 }
