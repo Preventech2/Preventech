@@ -45,7 +45,7 @@ public class Equipamento
     /// </summary>
     public ICollection<Preditiva>? ManutPreditiva { get; set; }
 
-    public override string ToString() => $"{Nome}<patrimonio ({Patrimonio})>";
+    public override string ToString() => $"({Patrimonio}) {Nome}";
 
     /// <summary>
     /// Equipamento vazio utilizado para passar sobre filtros
