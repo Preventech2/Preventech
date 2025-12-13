@@ -4,110 +4,57 @@
 
 @rendermode InteractiveServer
 
-<h3>Editar Grupo do Usuário</h3>
+@using Microsoft.AspNetCore.Components.QuickGrid
+
+@inject UsuarioService usuarioService
+@inject GrupoPerfilService grupoPerfilService
+
+<HeaderTitle Title="Gerenciar Grupos de Usuários" />
+
+<MostrarMensagem @bind-Mensagem="@mensagem" />
 
 <PageSection>
-    <MostrarMensagem @bind-Mensagem="@mensagem" />
-    @if (!userSelected)
+    @if (usuarios.Any())
     {
-        <EditForm Model="@usuario" OnValidSubmit="BuscarUsuario">
-            <DataAnnotationsValidator />
-            <ValidationSummary />
-
-            <div class="mb-3">
-                <label for="cpf" class="form-label">Cpf</label>
-                <CpfInput id="cpf" @bind-Cpf="usuario.Cpf" />
-            </div>
-            <button type="submit" class="btn btn-primary" disabled="@isProcessing">
-                @if (isProcessing)
-                {
-                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                }
-                else
-                {
-                    <text>Selecionar usuário</text>
-                }
-            </button>
-        </EditForm>
+        <section class="header-section">
+            <h4>Usuários do Sistema</h4>
+        </section>
+        <QuickGrid TGridItem="Usuario" Items="@(usuarios.OrderBy(u => u.Nome))">
+            <PropertyColumn Property="@(item => item.Nome)" Title="Nome" />
+            <PropertyColumn Property="@(item => item.Grupo != null ? item.Grupo.Nome : "Sem grupo")" Title="Grupo Atual" />
+            <TemplateColumn Class="col-actions" Title="Ações" Context="item">
+                <button class="btn-icon" @onclick="() => EditarUsuario(item.Id)"><img class="icon" src="img/edit-icon.svg" alt="" /></button>
+            </TemplateColumn>
+        </QuickGrid>
     }
     else
     {
-        <EditForm Model="@usuario" OnValidSubmit="EditarGrupo">
-            <AntiforgeryToken />
-            <DataAnnotationsValidator />
-            <ValidationSummary />
-
-            <div class="mb-3">
-                <label for="cpf" class="form-label">Cpf</label>
-                <h6 id="cpf">@FormatCpf(usuario.Cpf)</h6>
-            </div>
-            
-            <SelecionarGrupo @bind-Grupo="usuario.Grupo" />
-
-            <button type="submit" class="btn btn-primary" disabled="@isProcessing">
-                @if (isProcessing)
-                {
-                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                }
-                else
-                {
-                    <text>Mudar grupo</text>
-                }
-            </button>
-            <button type="button" class="btn btn-secondary" disabled="@isProcessing" @onclick="Cancelar">
-                <text>Cancelar</text>
-            </button>
-        </EditForm>
+        <div>
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            <p><em>Carregando usuários...</em></p>
+        </div>
     }
 </PageSection>
 
+<ModalEditarGrupoUsuario @bind-IsActive="@IsEditModalActive" @bind-UsuarioId="@UsuarioId" OnGrupoEditado="OnGrupoEditado" />
+
 @code {
-    [Inject]
-    private UsuarioService usuarioService { get; set; } = null!;
-
-    [Inject]
-    private GrupoPerfilService grupoPerfilService { get; set; } = null!;
-
-    Usuario usuario = new Usuario();
-    private List<GrupoPerfil> gruposPerfis = new List<GrupoPerfil>();
-    private bool userSelected = false;
+    private IQueryable<Usuario> usuarios = new List<Usuario>().AsQueryable();
+    private bool IsEditModalActive { get; set; } = false;
+    private int UsuarioId { get; set; } = 0;
     private string mensagem = string.Empty;
-    private bool isProcessing = false;
 
     protected override async Task OnInitializedAsync()
     {
-        ApiResponse<List<GrupoPerfil>> response = await grupoPerfilService.GetGruposPerfisAsync();
-        if (response.Success && response.Data != null)
-        {
-            gruposPerfis = response.Data;
-        }
+        await CarregarUsuarios();
     }
 
-    private async Task BuscarUsuario()
-    {   
-        ApiResponse<Usuario> response = await usuarioService.GetUsuarioByCpfAsync(usuario);
-        if (response.Success && response.Data != null)
-        {
-            usuario = response.Data;
-            userSelected = true;
-            mensagem = string.Empty;
-        }
-        else
-        {
-            mensagem = response.Message;
-            userSelected = false;
-            usuario = new Usuario();
-        }
-    }
-
-    private async Task EditarGrupo()
+    private async Task CarregarUsuarios()
     {
-        ApiResponse<Usuario> response = await usuarioService.AddGrupoInUsuarioAsync(usuario);
-        if (response.Success)
+        ApiResponse<List<Usuario>> response = await usuarioService.GetUsuariosAsync();
+        if (response.Success && response.Data != null)
         {
-            mensagem = response.Message;
-            userSelected = false;
-            usuario = new Usuario();
+            usuarios = response.Data.AsQueryable();
         }
         else
         {
@@ -115,20 +62,17 @@
         }
     }
 
-    private void Cancelar()
+    public void EditarUsuario(int id)
     {
-        userSelected = false;
-        usuario = new Usuario();
-        mensagem = string.Empty;
+        if (id <= 0) return;
+
+        UsuarioId = id;
+        IsEditModalActive = true;
     }
 
-    private string FormatCpf(string? cpf)
-    {   
-        if (string.IsNullOrEmpty(cpf))
-            return string.Empty;
-        cpf = cpf.Insert(3, ".");
-        cpf = cpf.Insert(7, ".");
-        cpf = cpf.Insert(11, "-");
-        return cpf;
+    private async Task OnGrupoEditado()
+    {
+        IsEditModalActive = false;
+        await CarregarUsuarios();
     }
 }

@@ -112,12 +112,13 @@ namespace Preventech.Core.Controllers
             }
         }
 
-        [HttpGet("/user/{id}")]
+        [HttpGet("user/{id}")]
         public async Task<ApiResponse<List<OrdemServico>>> GetOSByResponsavel(int id)
         {
             try
             {
                 var ordens = await _context.OrdensServico
+                    .AsNoTracking()
                     .Include(o => o.Requisitante)
                     .Include(o => o.TecnicoResponsavel)
                     .Where(e => e.TecnicoResponsavelId == id)
@@ -178,6 +179,8 @@ namespace Preventech.Core.Controllers
                 existingOrdem.TecnicoResponsavelId = updatedOrdem.TecnicoResponsavelId;
                 existingOrdem.RequisitanteId = updatedOrdem.RequisitanteId;
                 existingOrdem.EquipamentoId = updatedOrdem.EquipamentoId;
+                existingOrdem.DataConclusão = updatedOrdem.DataConclusão;
+                existingOrdem.DescricaoSolucao = updatedOrdem.DescricaoSolucao;
 
                 await _context.SaveChangesAsync();
 

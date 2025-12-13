@@ -1,0 +1,180 @@
+@namespace Preventech.Server.Components.Modals
+
+@rendermode InteractiveServer
+
+@inject UsuarioService UsuarioService
+@inject GrupoPerfilService GrupoPerfilService
+
+<Modal IsActive="@IsActive" IsActiveChanged="@OnIsActiveChanged">
+    <MostrarMensagem @bind-Mensagem="mensagem" />
+    <h3 class="m-0">Editar Grupo do Usuário</h3>
+    <EditForm class="edit-form" Model="@usuario" OnValidSubmit="@EditarGrupo">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-group">
+            <label for="nome">Nome do Usuário</label>
+            <InputText id="nome" class="form-control" @bind-Value="@usuario.Nome" disabled />
+        </div>
+
+        <div class="form-group">
+            <label for="grupo" class="form-label">Grupo</label>
+            @if (gruposPerfis.Any())
+            {
+                <InputSelect id="grupo" class="form-control" @bind-Value="@grupoIdSelecionado">
+                    <option value="0">Selecionar grupo</option>
+                    @foreach (var grupo in gruposPerfis)
+                    {
+                        <option value="@grupo.Id">@grupo.Nome</option>
+                    }
+                </InputSelect>
+            }
+            else
+            {
+                <p><em>Carregando grupos...</em></p>
+            }
+        </div>
+
+        <button type="submit" class="btn btn-primary" disabled="@IsProcessing">
+            @if (IsProcessing)
+            {
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <text> Salvando...</text>
+            }
+            else
+            {
+                <text>Salvar</text>
+            }
+        </button>
+    </EditForm>
+</Modal>
+
+@code {
+    [Parameter]
+    public bool IsActive { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsActiveChanged { get; set; }
+
+    [Parameter]
+    public EventCallback OnGrupoEditado { get; set; }
+
+    [Parameter]
+    public int UsuarioId { get; set; }
+
+    [Parameter]
+    public EventCallback<int> UsuarioIdChanged { get; set; }
+
+    private Usuario usuario = new Usuario();
+    private List<GrupoPerfil> gruposPerfis = new List<GrupoPerfil>();
+    private int grupoIdSelecionado = 0;
+    public string mensagem = string.Empty;
+    private bool IsProcessing { get; set; } = false;
+
+    private async Task OnIsActiveChanged(bool value)
+    {
+        IsActive = value;
+        await IsActiveChanged.InvokeAsync(value);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CarregarGrupos();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (IsActive && UsuarioId > 0)
+        {
+            await CarregarUsuario();
+        }
+    }
+
+    private async Task CarregarGrupos()
+    {
+        ApiResponse<List<GrupoPerfil>> response = await GrupoPerfilService.GetGruposPerfisAsync();
+        if (response.Success && response.Data != null)
+        {
+            gruposPerfis = response.Data;
+        }
+        else
+        {
+            mensagem = response.Message;
+        }
+    }
+
+    private async Task CarregarUsuario()
+    {
+        mensagem = string.Empty;
+        
+        // Buscar todos os usuários e filtrar pelo ID
+        ApiResponse<List<Usuario>> response = await UsuarioService.GetUsuariosAsync();
+        if (response.Success && response.Data != null)
+        {
+            usuario = response.Data.FirstOrDefault(u => u.Id == UsuarioId) ?? new Usuario();
+            
+            // Define o ID do grupo selecionado
+            grupoIdSelecionado = usuario.Grupo?.Id ?? 0;
+            
+            if (usuario.Grupo == null)
+            {
+                usuario.Grupo = new GrupoPerfil();
+            }
+        }
+        else
+        {
+            mensagem = response.Message;
+            usuario = new Usuario();
+            grupoIdSelecionado = 0;
+        }
+    }
+
+    private async Task EditarGrupo()
+    {
+        IsProcessing = true;
+        
+        if (grupoIdSelecionado == 0)
+        {
+            mensagem = "Por favor, selecione um grupo válido.";
+            IsProcessing = false;
+            return;
+        }
+
+        try
+        {
+            // Buscar o grupo completo pelo ID selecionado
+            ApiResponse<GrupoPerfil> grupoResponse = await GrupoPerfilService.GetGrupoPerfilByIdAsync(grupoIdSelecionado);
+            if (grupoResponse.Success && grupoResponse.Data != null)
+            {
+                usuario.Grupo = grupoResponse.Data;
+            }
+            else
+            {
+                mensagem = "Erro ao carregar o grupo selecionado.";
+                IsProcessing = false;
+                return;
+            }
+
+            ApiResponse<Usuario> response = await UsuarioService.AddGrupoInUsuarioAsync(usuario);
+
+            if (response != null && response.Success)
+            {
+                mensagem = response.Message;
+                await OnGrupoEditado.InvokeAsync();
+                await OnIsActiveChanged(false);
+            }
+            else
+            {
+                mensagem = response?.Message ?? "Erro ao editar o grupo do usuário.";
+            }
+        }
+        catch (Exception ex)
+        {
+            mensagem = $"Erro: {ex.Message}";
+        }
+        finally
+        {
+            IsProcessing = false;
+        }
+    }
+}

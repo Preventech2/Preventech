@@ -18,12 +18,15 @@
     </section>
     <QuickGrid TGridItem="Localizacao" Items="@localizacoes">
         @* <PropertyColumn Sortable="true" Property="@(item => item.Id)" Title="ID" /> *@
+        @* <TemplateColumn Class="col-actions" Title="">
+            <button class="btn-icon" @onclick="() => AcionarEditar(context)"><img class="icon" src="img/edit-icon.svg" alt="" /></button>
+        </TemplateColumn> *@
         <PropertyColumn Sortable="true" Property="@(item => item.Apelido)" Title="Nome" />
         <PropertyColumn Sortable="true" Property="@(item => "C" + item.Campus)" Title="Campus" />
         <PropertyColumn Class="d-none d-lg-table-cell" Property="@(item => "P" + item.Predio)" Title="Prédio" />
         <PropertyColumn Class="d-none d-lg-table-cell" Property="@(item => item.Andar)" Title="Andar" />
         <PropertyColumn Property="@(item => item.Numero)" Title="Sala" />
-        <PropertyColumn Property="@(item => item.Responsavel.Nome)" Title="Responsável" />
+        <PropertyColumn Class="d-none d-md-table-cell" Property="@(item => item.Responsavel.Nome)" Title="Responsável" />
         <TemplateColumn Class="col-actions" Title="Ações">
             <button class="btn-icon" @onclick="() => AcionarEditar(context)"><img class="icon" src="img/edit-icon.svg" alt="" /></button>
         </TemplateColumn>

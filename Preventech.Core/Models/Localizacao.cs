@@ -62,7 +62,7 @@ public class Localizacao
         this.Responsavel = Responsavel;
     }
 
-    public override string ToString() => $"{Apelido ?? "s/n"} gerido por {Responsavel.Nome} em c{Campus}p{Predio}s{Numero}";
+    public override string ToString() => $"{Apelido ?? "s/n"} gerido por {Responsavel.Nome}";
 
     /// <summary>
     /// Localização vazia utilizada para passar sobre filtros

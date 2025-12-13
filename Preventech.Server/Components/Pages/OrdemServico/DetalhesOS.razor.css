@@ -1,0 +1,23 @@
+:root {
+    --preto: #31383E;
+    --cinza-escuro: #818F9C;
+    --cinza-claro: #C6CCD2;
+    --branco: #F4F5F6;
+    --azul-escuro: #0A62AE;
+    --azul: #85ABCC;
+    --azul-claro: #D7E4EF;
+    --vermelho-claro: #DB5757;
+    --vermelho: #D22D2D;
+    --verde-claro: #83DB57;
+    --verde: #64D22D;
+    --amarelo-claro: #FFCC33;
+    --amarelo: #FFBF00;
+}
+
+.card .card-header-background {
+    background-color: var(--azul-escuro);
+}
+
+.card-border {
+    border: 1px solid var(--azul-escuro);
+}

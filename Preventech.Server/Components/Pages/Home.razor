@@ -1,23 +1,73 @@
 ﻿@page "/"
+@using iText.Layout.Element
 @rendermode InteractiveServer
-
-@using Preventech.Server.Components.Modals
 
 @attribute [Authorize]
 
 @inject NavigationManager navigationManager
-@inject NotificacaoSiteService notificacaoSiteService
 @inject UserClaimsHelper userClaimsHelper
+@inject OrdemServicoService ordemServicoService
 
 <HeaderTitle Title="Home" />
 
-<h1>Bem vindo ao Preventech!</h1>
+<AuthorizeView Roles="@PerfilExtension.VisualizarLaboratorio">
+    <Authorized>
+        <PageSection>
+            <section class="header-section">
+                <div class="header-logo-title">
+                    <div class="home-logo-container">
+                        <img src="favicon.png" alt="" class="home-logo" />
+                    </div>
+                    <h4>Preventech</h4>
+                </div>
+            </section>
+        </PageSection>
+    </Authorized>
+</AuthorizeView>
 
 <AuthorizeView Roles="@PerfilExtension.EditarOrdemDeServico">
     <Authorized>
         <PageSection>
             <section class="header-section">
                 <h4>Tarefas pendentes</h4>
+            </section>
+            <section class="body-section">
+                @if (isLoading)
+                {
+                    <div class="text-center p-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                    </div>
+                }
+                else if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <MostrarMensagem Mensagem="@errorMessage" />
+                }
+                else if (!ordensServicosPendentes.Any())
+                {
+                    <MostrarMensagem Mensagem="Nenhuma tarefa pendente no momento." />
+                }
+                else
+                {
+                    <QuickGrid Items="@ordensServicosPendentes.AsQueryable()" Context="ordem">
+                        <TemplateColumn Title="Status" Context="ordem">
+                            <div class="nowrap">
+                                <img src="@GetStatusIcon(ordem.Status)" alt="Status Icon"
+                                    width="14" height="14" style="margin-right: 2px;" />
+                                @ordem.Status
+                            </div>
+                        </TemplateColumn>
+                        <PropertyColumn Property="@(item => item.Titulo)" Title="Título" />
+                        <PropertyColumn Class="d-none d-lg-table-cell" Property="@(item => item.Descricao)" Title="Descrição" />
+                        <PropertyColumn Property="@(item => item.Abertura)" Title="Abertura" />
+                        <TemplateColumn Title="" Context="ordem">
+                            <div>
+                                <button class="btn-icon" @onclick='@(() => NavegarParaEdicao(ordem))'><img class="icon" src="img/external-link-icon.svg" alt="" /></button>
+                            </div>
+                        </TemplateColumn>
+                    </QuickGrid>
+                }
             </section>
         </PageSection>
     </Authorized>
@@ -29,6 +79,63 @@
             <section class="header-section">
                 <h4>Dashboard Laboratórios</h4>
             </section>
+            <section class="body-section">
+                <MostrarMensagem Mensagem="🚧 Em desenvolvimento... 🔨" />
+            </section>
         </PageSection>
     </Authorized>
 </AuthorizeView>
+
+@code {
+    private List<OrdemServico> ordensServicosPendentes = new List<OrdemServico>();
+    private bool isLoading = true;
+    private string errorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            UserInfo? userInfo = await userClaimsHelper.GetCurrentUserInfoAsync();
+            if (userInfo != null && userInfo.IsAuthenticated && userInfo.Id > 0)
+            {
+                var response = await ordemServicoService.GetOrdemServicoByResponsavelAsync(userInfo.Id);
+                if (response.Success && response.Data != null)
+                {
+                    ordensServicosPendentes = response.Data.Where(os => os.Status != StatusOS.Concluida).ToList();
+                }
+                else
+                {
+                    errorMessage = response.Message ?? "Erro ao carregar ordens de serviço";
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Erro ao carregar dados: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+    
+    private void NavegarParaEdicao(OrdemServico ordem)
+    {
+        if (ordem == null) return;
+
+        navigationManager.NavigateTo($"/ordens-servico/{ordem.Id}");
+    }
+
+    private string GetStatusIcon(StatusOS status)
+    {
+        return status switch
+        {
+            StatusOS.EmImpedimento => "img/status-os/em-impedimento.svg",
+            StatusOS.EmProgresso => "img/status-os/em-progresso.svg",
+            StatusOS.Concluida => "img/status-os/concluida.svg",
+            StatusOS.Parada => "img/status-os/parada.svg",
+            StatusOS.Deferida => "img/status-os/deferida.svg",
+            _ => ""
+        };
+    }
+}

@@ -135,7 +135,7 @@ namespace Preventech.Core.Controllers
                         Nome = u.Nome,
                         Grupo = u.Grupo
                     })
-                    .ToListAsync();                
+                    .ToListAsync();
 
                 return new ApiResponse<List<Usuario>>
                 {

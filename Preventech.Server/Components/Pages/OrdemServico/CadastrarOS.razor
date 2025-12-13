@@ -1,9 +1,12 @@
 ﻿@page "/cadastrar/ordem-servico"
 
+@namespace Preventech.Server.Components.Pages
+
 @attribute [Authorize(Roles = PerfilExtension.CriarOrdemDeServico)]
 
 @rendermode InteractiveServer
 @inject UserClaimsHelper UserClaimsHelper
+@inject NavigationManager NavigationManager
 
 <HeaderTitle Title="Ordem de Serviço" />
 
@@ -11,74 +14,118 @@
 
 <PageSection>
     <section class="header-section">
-        <h4>Cadastrar OS</h4>
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-file-earmark-plus text-primary"></i>
+            <h4 class="mb-0">Cadastrar OS</h4>
+        </div>
     </section>
+
     <EditForm class="edit-form" Model="ordemServico" OnSubmit="FormData" FormName="cadastrar-Ordem-Servico">
-        <div class="form-group">
-            <label for="titulo">Título</label>
-            <InputText @bind-Value="ordemServico!.Titulo" class="form-control"/>
-        </div>
+        <!-- Informações Básicas -->
+        <section class="border-bottom pb-3 mb-3">
+            <div class="row g-2">
+                <div class="col-12">
+                    <label for="titulo" class="form-label fw-semibold">Título <span class="text-danger">*</span></label>
+                    <InputText @bind-Value="ordemServico!.Titulo" class="form-control shadow-sm" />
+                </div>
 
-        <div class="form-group">
-            <label for="descricao">Descrição</label>
-            <InputTextArea @bind-Value="ordemServico!.Descricao" class="form-control"/>
-        </div>
+                <div class="col-12">
+                    <label for="descricao" class="form-label fw-semibold">Descrição <span class="text-danger">*</span></label>
+                    <InputTextArea @bind-Value="ordemServico!.Descricao" class="form-control shadow-sm" rows="3" />
+                </div>
 
-        <div class="form-group">
-            <label for="observacoes">Alguma observação?</label>
-            <InputTextArea @bind-Value="ordemServico!.Observacoes" class="form-control"/>
-        </div>
-
-        <div class="form-group">
-            <label for="documento">Deseja anexar um documento?</label>
-            <InputFile OnChange="HandleFileSelection" multiple />
-        </div>
-
-        @if(equipamentos != null && equipamentos.Any()) 
-        {
-            @* <div class="mb-3">
-                <label>Equipamento:
-                    <InputSelect @bind-Value="ordemServico!.EquipamentoId" class="form-control">
-                        @foreach (Equipamento equipamento in equipamentos)
-                        {
-                            <option value="@equipamento.Id">@equipamento.ToString()</option>
-                        }
-                    </InputSelect>
-                </label>
-                <br />
-                <span>Não encontrou o equipamento? <a href="/cadastrar/equipamento" target="_blank">Cadastre-o!</a></span>
-            </div> *@
-            <div class="mb-3">
-                <label for="grupo">
-                    Equipamento
-                </label>
-            <InputSelect @bind-Value="ordemServico!.EquipamentoId" class="form-control">
-                <option value="0">Selecionar equipamento</option>
-                @foreach (Equipamento equipamento in equipamentos)
-                {
-                    <option value="@equipamento.Id">@equipamento.ToString()</option>
-                }
-            </InputSelect>
+                <div class="col-12">
+                    <label for="observacoes" class="form-label fw-semibold">Observações</label>
+                    <InputTextArea @bind-Value="ordemServico!.Observacoes" class="form-control shadow-sm" rows="2" />
+                </div>
             </div>
-        }
-        else
-        {   
-            <p><em>Carregando equipamentos</em></p>
-            <span>Não encontrou o equipamento? <a href="/cadastrar/equipamento" target="_blank">Cadastre-o!</a></span>
-        }
+        </section>
 
-        <br />
-        <button type="submit" class="btn btn-primary" disabled="@isProcessing">
-            @if (isProcessing)
+        <!-- Equipamento -->
+        <section class="border-bottom pb-3 mb-2">
+            <div class="col-12">
+                <label class="form-label fw-semibold">Equipamento</label>
+            </div>
+            @if(equipamentos != null && equipamentos.Any()) 
             {
-                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                <text>Cadastrando...</text>
+                <div class="row g-2">
+                    <div class="col-12 col-md-4">
+                        <div class="input-group shadow-sm">
+                            <span class="input-group-text bg-white">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" class="form-control border-start-0" placeholder="Filtrar..." 
+                                   @oninput="@((ChangeEventArgs e) => FilterEquipamentos(e.Value?.ToString()))" />
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-8">
+                        <InputSelect @bind-Value="ordemServico!.EquipamentoId" class="form-select shadow-sm">
+                            <option value="0">Selecionar equipamento</option>
+                            @foreach (var equipamento in equipamentosFiltrados.Take(10))
+                            {
+                                <option value="@equipamento.Id">@equipamento.ToString()</option>
+                            }
+                        </InputSelect>
+                    </div>
+                </div>
             }
             else
-            {
-                <text>Cadastrar</text>
+            {   
+                <div class="alert alert-info d-flex align-items-center gap-2 mb-0" role="alert">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span>Carregando equipamentos...</span>
+                </div>
+                <small class="text-muted">Não encontrou o equipamento? <a href="/cadastrar/equipamento" target="_blank">Cadastre-o!</a></small>
             }
-        </button>
+        </section>
+
+        <!-- Documentos -->
+        <section class="border-bottom pb-3 mb-3">
+            <div class="row g-3">
+                <div class="col-12">
+                    <label for="documento" class="form-label fw-semibold">Anexar Documentos</label>
+                    <InputFile OnChange="HandleFileSelection" multiple class="form-control shadow-sm" />
+                    <small class="form-text text-muted">Tamanho máximo: 50MB por arquivo</small>
+                </div>
+                @if (arquivosParaUpload.Any())
+                {
+                    <div class="col-12">
+                        <div class="alert alert-success d-flex align-items-center gap-2" role="alert">
+                            <i class="bi bi-check-circle"></i>
+                            <span>@arquivosParaUpload.Count arquivo(s) selecionado(s)</span>
+                        </div>
+                        <div class="list-group">
+                            @foreach (var file in arquivosParaUpload)
+                            {
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="bi bi-file-earmark-text text-primary"></i>
+                                        <span>@file.Name</span>
+                                    </div>
+                                    <span class="badge bg-secondary rounded-pill">@((file.Size / 1024.0).ToString("F2")) KB</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+
+        <!-- Botão de Envio -->
+        <div class="d-grid">
+            <button type="submit" class="btn btn-primary btn-lg shadow-sm" disabled="@isProcessing">
+                @if (isProcessing)
+                {
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <text>Cadastrando...</text>
+                }
+                else
+                {
+                    <i class="bi bi-cloud-upload me-2"></i>
+                    <text>Cadastrar Ordem de Serviço</text>
+                }
+            </button>
+        </div>
     </EditForm>
 </PageSection>
 
@@ -87,6 +134,7 @@
     private OrdemServico? ordemServico { get; set; } = null;
     
     private IQueryable<Equipamento> equipamentos = null!;
+    private IQueryable<Equipamento> equipamentosFiltrados = null!;
 
     [Inject]
     OrdemServicoService OSservice { get; set; } = null!;
@@ -101,7 +149,6 @@
     private const long MAX_FILE_SIZE = 1024 * 1024 * 50; // 50MB
 
     private string mensagemResultado = string.Empty;
-    private bool sucesso = false;
     private bool isProcessing = false;
     private UserInfo? userInfo = null;
     private PecaSelection pecaSelectionComponent = null!;
@@ -113,6 +160,7 @@
 
         ApiResponse<List<Equipamento>> response = await EquipService.GetEquipamentos(Equipamento.Vazio);
         equipamentos = response.Data?.AsQueryable() ?? new List<Equipamento>().AsQueryable();
+        equipamentosFiltrados = equipamentos;
     }
     
     private async Task FormData()
@@ -122,7 +170,7 @@
 
         if (userInfo == null){
             isProcessing = false;
-            sucesso = false;
+            
             mensagemResultado = "Erro de autenticação: Não foi possível identificar o usuário requisitante. Por favor, tente recarregar a página ou fazer login novamente.";
             return; // STOP the submission
         }
@@ -130,7 +178,7 @@
         if (ordemServico == null)
         {
             isProcessing = false;
-            sucesso = false;
+            
             mensagemResultado = "Erro interno: Dados da ordem de serviço não foram inicializados corretamente.";
             return; // STOP the submission
         }
@@ -170,29 +218,27 @@
             if (arquivosComErro == arquivosParaUpload.Count)
             {
                 // Todos os uploads falharam
-                sucesso = false;
                 mensagemResultado = $"Ordem de Serviço criada, mas NENHUM arquivo foi anexado. {mensagemResultado}";
             }
 
             else if (arquivosComErro > 0)
             {
                 // A OS foi criada e alguns arquivos foram anexados, mas nem todos.
-                sucesso = true;
                 mensagemResultado = $"Ordem de Serviço criada com sucesso. Alguns documentos falharam no upload ({arquivosComErro} de {arquivosParaUpload.Count}). Detalhes: {mensagemResultado}";
             }
             else
             {
                 // Sucesso Total
-                sucesso = true;
                 mensagemResultado = response.Message;
                 ordemServico = new OrdemServico();
                 arquivosParaUpload.Clear();
             }
-        }
 
+            NavigationManager.NavigateTo($"/ordens-servico/{novaOrdemId}");
+        }
         else
         {
-            sucesso = false;
+            
             mensagemResultado = response.Message;
         }
 
@@ -216,11 +262,23 @@
             else 
             {
                 mensagemResultado = $"O arquivo {file.Name} excede o tamanho máximo permitido de {MAX_FILE_SIZE / (1024 * 1024)} MB. Remova-o para continuar.";
-                sucesso = false;
+                
                 arquivosParaUpload.Clear(); // Opcional: Limpar tudo se houver um arquivo muito grande
                 break;
             }
         }
         StateHasChanged(); // Força a atualização da UI para mostrar a lista de arquivos
+    }
+
+    public void FilterEquipamentos(string? filtro)
+    {
+        if (string.IsNullOrWhiteSpace(filtro))
+        {
+            equipamentosFiltrados = equipamentos;
+        }
+        else
+        {
+            equipamentosFiltrados = equipamentos.Where(e => e.Patrimonio.StartsWith(filtro) || e.Nome.ToLower().Contains(filtro.ToLower()));
+        }
     }
 }

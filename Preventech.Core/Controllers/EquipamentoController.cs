@@ -61,7 +61,7 @@ namespace Preventech.Core.Controllers
                          (filtro.Id <= 0 || filtro.Id == query.Id)
                       && (string.IsNullOrWhiteSpace(filtro.Patrimonio) || filtro.Patrimonio.Equals(query.Patrimonio))
                       && (string.IsNullOrWhiteSpace(filtro.Nome) || filtro.Nome.Equals(query.Nome))
-                      && (filtro.Status == StatusEquipamento.Invalido || filtro.Status == query.Status )
+                      && (filtro.Status == StatusEquipamento.Invalido || filtro.Status == query.Status)
                       && (filtro.Local == null || filtro.Local.Campus <= 0 || query.Local.Campus == filtro.Local.Campus)
                       && (filtro.Local == null || filtro.Local.Predio <= 0 || query.Local.Predio == filtro.Local.Predio)
                       && (filtro.Local == null || filtro.Local.Andar <= 0 || query.Local.Andar == filtro.Local.Andar)

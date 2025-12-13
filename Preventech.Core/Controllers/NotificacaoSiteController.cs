@@ -72,7 +72,7 @@ namespace Preventech.Core.Controllers
                 Data = true
             };
         }
-    
+
         [HttpPost("cadastro/varias")]
         public ApiResponse<bool> EnviarNotificoesAsync([FromBody] NotificacaoSiteUsuariosDTO nsus)
         {
@@ -182,7 +182,7 @@ namespace Preventech.Core.Controllers
                 Data = true
             };
         }
-    
+
         [HttpPost("apagar")]
         public ApiResponse<bool> ApagarNotificacao([FromBody] NotificacaoSiteUsuario notificacaoSiteUsuario)
         {
