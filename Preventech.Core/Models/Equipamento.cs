@@ -1,6 +1,6 @@
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Preventech.Core.Models;
 
@@ -16,19 +16,24 @@ public class Equipamento
     /// <summary>
     /// Nome do patrimônio
     /// </summary>
-    [MaxLength(120)]
-    public string? Nome { get; set; } = "";
+    [StringLength(120)]
+    public string Nome { get; set; } = string.Empty;
 
     /// <summary>
     /// Chave patrimonial
     /// </summary>
-    [MaxLength(120)]
-    public string? Patrimonio { get; set; } = "";
+    [StringLength(120)]
+    public string Patrimonio { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Como o equipamento se encontra atualmente
+    /// </summary>
+    public StatusEquipamento Status { get; set; } = StatusEquipamento.Invalido;
 
     /// <summary>
     /// Localização do patrimônio
     /// </summary>
-    public Localizacao? Local { get; set; }
+    public Localizacao Local { get; set; } = Localizacao.Vazia;
 
     /// <summary>
     /// Manutenção preventiva associada ao equipamento
@@ -41,4 +46,9 @@ public class Equipamento
     public ICollection<Preditiva>? ManutPreditiva { get; set; }
 
     public override string ToString() => $"{Nome}<patrimonio ({Patrimonio}) em {Local}>";
+
+    /// <summary>
+    /// Equipamento vazio utilizado para passar sobre filtros
+    /// </summary>
+    public static readonly Equipamento Vazio = new();
 }

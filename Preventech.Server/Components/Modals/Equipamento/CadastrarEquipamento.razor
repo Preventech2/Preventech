@@ -1,0 +1,110 @@
+﻿@namespace Preventech.Server.Components.Modals
+@rendermode InteractiveServer
+
+@inject LocalizacaoService localizacaoService
+@inject UsuarioService usuarioService
+@inject EquipamentoService equipamentoService;
+
+
+<Modal IsActive="IsActive" IsActiveChanged="@OnIsActiveChanged">
+    <MostrarMensagem @bind-Mensagem="mensagem" />
+
+    <EditForm class="edit-form" Model="equipamento" FormName="cadastrar-Equipamento">
+        <label>Nome:</label>
+        <InputText @bind-Value="equipamento!.Nome" class="form-control" />
+        <label>Patrimônio:</label>
+        <InputText @bind-Value="equipamento!.Patrimonio" class="form-control" />
+        @if (locais != null && locais.Any())
+        {
+            <div class="mb-3">
+                <label>Localização:</label>
+                <InputSelect @bind-Value="@equipamento.Local.Id" class="form-control">
+                    <option value="0">Selecionar local</option>
+                    @foreach (var local in locais)
+                    {
+                        <option value="@local.Id">@local.ToString()</option>
+                    }
+                </InputSelect>
+            </div>
+        }
+        else
+        {
+            <p><em>Carregando locais</em></p>
+        }
+        <button type="submit" @onclick="FormData" class="btn btn-primary" disabled="@isProcessing" autofocus>
+            @if (isProcessing)
+            {
+                <text>Cadastrando...</text>
+            }
+            else
+            {
+                <text>Cadastrar</text>
+            }
+        </button>
+    </EditForm>
+</Modal>
+
+@code {
+    [Parameter]
+    public bool IsActive { get; set; } = false;
+
+    [Parameter]
+    public EventCallback<bool> IsActiveChanged { get; set; }
+
+    [SupplyParameterFromForm]
+    private Equipamento equipamento { get; set; } = new Equipamento();
+    private IQueryable<Localizacao> locais = null!;
+    private string mensagem = string.Empty;
+    private bool isProcessing = false;
+    
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ResetForm();
+    }
+
+    private async Task ResetForm()
+    {
+        equipamento = new Equipamento();
+
+        var res = await localizacaoService.GetLocalizacoes(Localizacao.Vazia);
+        
+        if (res.Success == false)
+            mensagem = res.Message;
+        else
+            mensagem = string.Empty;
+
+        if (res.Data is List<Localizacao> locs)
+            locais = locs.AsQueryable();
+    }
+
+    private async Task FormData()
+    {
+        isProcessing = true;
+        mensagem = string.Empty;
+        StateHasChanged();
+        try
+        {
+            if (await equipamentoService.AddEquipamentoAsync(equipamento!) is ApiResponse<Equipamento> res) {
+                mensagem = res.Message ?? "Erro inesperado ao cadastrar o equipamento.";
+            }
+        }
+        catch (Exception ex)
+        {
+            mensagem = $"Erro: {ex.Message}";
+        }
+        finally
+        {
+            isProcessing = false;
+            StateHasChanged();
+        }
+    }
+
+    // Informa ao componente pai a mudança do estado do Modal
+    private async Task OnIsActiveChanged(bool isActive)
+    {
+        await ResetForm();
+        IsActive = isActive;
+        await IsActiveChanged.InvokeAsync(IsActive);
+    }
+}

@@ -1,0 +1,77 @@
+﻿@using Microsoft.AspNetCore.Mvc.ModelBinding
+
+@attribute [Authorize(Roles = PerfilExtension.Admin)]
+
+@rendermode InteractiveServer
+
+@inject GrupoPerfilService grupoPerfilService
+
+<div class="mb-3">
+    <label for="grupo" class="form-label fw-semibold small">
+        <i class="bi bi-people-fill me-2"></i>Grupo
+    </label>
+    <InputSelect id="grupo" class="form-select shadow-sm" @bind-Value="selectedValue">
+        <option value="">Sem grupo</option>
+        @foreach (var grupo in gruposPerfis)
+        {
+            <option value="@grupo.Nome">@grupo.Nome</option>
+        }
+    </InputSelect>
+    @if (!string.IsNullOrEmpty(selectedValue))
+    {
+        <div class="form-text text-success mt-2 small">
+            <i class="bi bi-check-circle-fill me-1"></i>
+            Grupo selecionado: <strong>@selectedValue</strong>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public GrupoPerfil Grupo { get; set; } = new GrupoPerfil();
+
+    [Parameter, EditorRequired]
+    public EventCallback<GrupoPerfil> GrupoChanged { get; set; }
+
+    public List<GrupoPerfil> gruposPerfis { get; set; } = new List<GrupoPerfil>();
+
+    private string? selectedValue
+    {
+        get => Grupo?.Nome ?? string.Empty;
+        set
+        {
+            if (Grupo?.Nome != value)
+            {
+                if (!string.IsNullOrEmpty(value))
+                {
+                    // Encontra o grupo selecionado na lista
+                    GrupoPerfil? grupoSelecionado = gruposPerfis.FirstOrDefault(g => g.Nome == value);
+
+                    if (grupoSelecionado != null)
+                    {
+                        // Atualiza o parâmetro Grupo
+                        Grupo = grupoSelecionado;
+
+                        // Notifica o componente pai sobre a mudança
+                        GrupoChanged.InvokeAsync(grupoSelecionado);
+                    }
+                }
+                else
+                {
+                    // Se valor vazio, define grupo como null
+                    Grupo = null!;
+                    GrupoChanged.InvokeAsync(null!);
+                }
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        ApiResponse<List<GrupoPerfil>> response = await grupoPerfilService.GetGruposPerfisAsync();
+        if (response.Success && response.Data != null)
+        {
+            gruposPerfis = response.Data;
+        }
+    }
+}

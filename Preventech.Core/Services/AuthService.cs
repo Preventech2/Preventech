@@ -1,39 +1,36 @@
 using System;
-using Microsoft.AspNetCore.Components;
+using System.Text.Json;
 using Microsoft.JSInterop;
 using Preventech.Core.Models;
 
 namespace Preventech.Core.Services;
 
-public class AuthService
+public class AuthService(IJSRuntime jsRuntime)
 {
-    private readonly IJSRuntime _jsRuntime;
-
-    public AuthService(IJSRuntime jsRuntime)
+    private readonly IJSRuntime _jsRuntime = jsRuntime;
+    private readonly JsonSerializerOptions _jsonOptions = new()
     {
-        _jsRuntime = jsRuntime;
-    }
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = false
+    };
 
     public async Task<bool> Login(Usuario usuario)
     {
         try
         {
-            // Send Usuario as JSON to match controller expectation
+            // Serializa o usuário completo automaticamente
+            var usuarioJson = JsonSerializer.Serialize(usuario, _jsonOptions);
+
             var jsCode = $@"
                 (async () => {{
-                    const usuarioData = {{
-                        Id: {usuario.Id},
-                        Nome: '{usuario.Nome}',
-                        Cpf: '{usuario.Cpf}',
-                        Perfil: {(int)(usuario.Perfil ?? Perfil.NenhumaPermissao)}
-                    }};
+                    const Usuario = {usuarioJson};
                     
                     const response = await fetch('/api/auth/login', {{
                         method: 'POST',
                         headers: {{
                             'Content-Type': 'application/json'
                         }},
-                        body: JSON.stringify(usuarioData),
+                        body: JSON.stringify(Usuario),
                         credentials: 'include'
                     }});
                     
@@ -41,14 +38,22 @@ public class AuthService
                         window.location.href = response.url;
                         return true;
                     }}
-                    return response.ok;
+                    
+                    if (response.ok) {{
+                        return true;
+                    }}
+                    
+                    const errorText = await response.text();
+                    console.error('Erro no login:', errorText);
+                    return false;
                 }})()
             ";
-            
+
             return await _jsRuntime.InvokeAsync<bool>("eval", jsCode);
         }
-        catch
+        catch (Exception ex)
         {
+            Console.WriteLine($"Erro no login: {ex.Message}");
             return false;
         }
     }
@@ -65,17 +70,27 @@ public class AuthService
                     });
                     
                     if (response.ok && response.redirected) {
+                        console.log('Redirecionando para:', response.url);
                         window.location.href = response.url;
                         return true;
                     }
-                    return response.ok;
+                    
+                    if (response.ok) {
+                        window.location.href = '/account/login';
+                        return true;
+                    }
+                    
+                    const errorText = await response.text();
+                    console.error('Erro no logout:', errorText);
+                    return false;
                 })()
             ";
-            
+
             return await _jsRuntime.InvokeAsync<bool>("eval", jsCode);
         }
-        catch
+        catch (Exception ex)
         {
+            Console.WriteLine($"Erro no logout: {ex.Message}");
             return false;
         }
     }

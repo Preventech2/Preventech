@@ -1,38 +1,90 @@
 @page "/equipamentos"
+
+@attribute [Authorize(Roles = PerfilExtension.VisualizarEquipamento)]
+
 @rendermode InteractiveServer
 
 @using Microsoft.AspNetCore.Components.QuickGrid
 @using Preventech.Core.DTOs
+@inject EquipamentoService equipamentoService
 
-@if (equipamentos == null)
-{
-    <p><em>Carregando...</em></p>
-}
-else if (!equipamentos.Any())
-{
-    <p><em>Nenhum equipamento cadastrado.</em></p>
-}
-else
-{
-    <h3>Lista de Equipamentos</h3>
-}
+<HeaderTitle Title="Equipamentos" />
 
-<QuickGrid TGridItem="Equipamento" Items="@equipamentos">
-    <PropertyColumn Property="@(item => item.Id)" Title="ID" />
-    <PropertyColumn Property="@(item => item.Patrimonio)" Title="Patrimônio" />
-    <PropertyColumn Property="@(item => item.Nome)" Title="Nome" />
-    <PropertyColumn Property="@(item => item.Local)" Title="Local" />
-</QuickGrid>
+<MostrarMensagem @bind-Mensagem="mensagem" />
+<PageSection>
+    <section class="header-section">
+        <h4>Equipamentos</h4>
+        <button class="btn-icon" @onclick="@(() => IsCadastrarActive = true)"><img class="icon" src="img/add-icon.svg"
+                alt="" /></button>
+    </section>
+    <QuickGrid TGridItem="Equipamento" Items="@equipamentos.AsQueryable()">
+        <PropertyColumn Sortable="true" Property="@(item => item.Patrimonio)" Title="Patrimônio" />
+        <PropertyColumn Class="d-none d-md-table-cell" Sortable="true" Property="@(item => item.Nome)" Title="Nome" />
+        <PropertyColumn Property="@(item => item.Local)" Title="Laboratório" />
+        <TemplateColumn Title="Status">
+            <span class="@(GetStatus(context.Status))"></span>
+            <span>
+                @ReprStatus(context.Status)
+            </span>
+        </TemplateColumn>
+        <TemplateColumn Class="col-actions" Title="Ações">
+            <button class="btn-icon" @onclick="() => AcionarEditar(context)"><img class="icon" src="img/edit-icon.svg"
+                    alt="" /></button>
+        </TemplateColumn>
+    </QuickGrid>
+</PageSection>
+
+<CadastrarEquipamento @bind-IsActive="@IsCadastrarActive" />
+<EditarEquipamento @bind-IsActive="@IsEditarActive" @bind-equipamento="equipamento" />
+
 
 @code {
-    private IQueryable<Equipamento> equipamentos = null!;
+    private Equipamento equipamento = Equipamento.Vazio;
 
-    [Inject]
-    EquipamentoService equipamentoService { get; set; } = null!;
+    /// Todos os equipamentos que existem no sistema
+    private List<Equipamento> equipamentos = new();
 
+    /// Define se o modal de cadastro foi selecionado
+    bool IsCadastrarActive = false;
+
+    /// Define se o modal de edição foi selecionado
+    bool IsEditarActive = false;
+    string mensagem = string.Empty;
     protected override async Task OnInitializedAsync()
     {
-        ApiResponse<List<Equipamento>> response = await equipamentoService.GetEquipamentosAsync();
-        equipamentos = response.Data?.AsQueryable() ?? new List<Equipamento>().AsQueryable();
+        await CarregarEquipamentos();
     }
+
+    private async Task CarregarEquipamentos()
+    {
+        var response = 
+        await equipamentoService.GetEquipamentos(Equipamento.Vazio);
+        if (!response.Success)
+            mensagem = response.Message ?? string.Empty;
+        equipamentos = response.Data ?? new();
+    }
+
+    private void AcionarEditar(Equipamento item)
+    {
+        equipamento = item;
+        IsEditarActive = true;
+    }
+
+    private string GetStatus(StatusEquipamento status) => status switch
+    {
+        StatusEquipamento.Inoperante => "status-inoperante",
+        StatusEquipamento.ComAvaria => "status-avaria",
+        StatusEquipamento.ManutencaoEmDia => "status-emdia",
+        StatusEquipamento.Funcionando => "status-funcionando",
+        _ => "status-invalido"
+    };
+
+    private string ReprStatus(StatusEquipamento status) => status switch
+    {
+        StatusEquipamento.Inoperante => "Inoperante",
+        StatusEquipamento.ComAvaria => "Funcionando com avaria",
+        StatusEquipamento.ManutencaoEmDia => "Manutenções em dia",
+        StatusEquipamento.Funcionando => "Funcionando",
+        _ => "Inválido"
+    };
 }

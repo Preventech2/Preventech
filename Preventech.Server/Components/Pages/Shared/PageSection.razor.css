@@ -1,0 +1,32 @@
+.page-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: auto;
+    width: 100%;
+    border-radius: 7.5px;
+    background-color: var(--branco);
+    margin-bottom: 1rem;
+    overflow-x: hidden;
+}
+
+.page-section {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    width: 100%;
+    padding: 10px;
+}
+
+::deep .header-section {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    text-align: center;
+    justify-content: space-between;
+}
+
+::deep h1, ::deep h2, ::deep h3, ::deep h4, ::deep h5, ::deep h6 {
+    margin: 0 !important;
+}

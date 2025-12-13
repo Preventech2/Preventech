@@ -2,50 +2,51 @@ using System;
 using System.Net.Http.Json;
 using Preventech.Core.Models;
 using Preventech.Core.DTOs;
-using Quartz.Util;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.AspNetCore.Http;
-using Microsoft.JSInterop;
+using Microsoft.AspNetCore.Mvc;
+using System.Text.Json.Serialization.Metadata;
 
 namespace Preventech.Core.Services;
 
-public class LocalizacaoService
+public class LocalizacaoService(HttpClient httpClient)
 {
-    private readonly HttpClient _httpClient;
-
-    public LocalizacaoService(HttpClient httpClient)
+    public static string Query(Localizacao loc, string Prefixo = "")
     {
-        _httpClient = httpClient;
-    }
-
-    public static string Query(Localizacao loc) {
         var itens = new Dictionary<string, string>() { };
-        if (!loc.Apelido.IsNullOrWhiteSpace())
-            itens.Add("Apelido", loc.Apelido!);
+        if (!string.IsNullOrWhiteSpace(loc.Apelido))
+            itens.Add($"{Prefixo}Apelido", loc.Apelido!);
 
         if (loc.Campus > 0)
-            itens.Add("Campus", loc.Campus.ToString());
+            itens.Add($"{Prefixo}Campus", loc.Campus.ToString());
 
         if (loc.Predio > 0)
-            itens.Add("Predio", loc.Predio.ToString());
+            itens.Add($"{Prefixo}Predio", loc.Predio.ToString());
 
         if (loc.Andar > 0)
-            itens.Add("Andar", loc.Andar.ToString());
+            itens.Add($"{Prefixo}Andar", loc.Andar.ToString());
 
         if (loc.Numero > 0)
-            itens.Add("Sala", loc.Numero.ToString());
+            itens.Add($"{Prefixo}Sala", loc.Numero.ToString());
 
-        
+
         var res = string.Join("&", from item in itens select $"{item.Key}={item.Value}");
-        if (res.IsNullOrWhiteSpace()) return res;
+        if (string.IsNullOrWhiteSpace(res)) return string.Empty;
 
         return "?" + res;
     }
 
-    public async Task<ApiResponse<List<Localizacao>>> GetLocalizacoes(Localizacao loc)
+    public async Task<ApiResponse<List<Localizacao>>> GetLocalizacoes()
+    {
+        var response = await httpClient.GetAsync($"/api/localizacao");
+        var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<Localizacao>>>()
+        ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<List<Equipamento>>.");
+        return result;
+    }
+
+    public async Task<ApiResponse<List<Localizacao>>> GetLocalizacoes([FromQuery] Localizacao loc)
     {
         var query = Query(loc);
-        var response = await _httpClient.GetAsync($"/api/localizacao{query}");
+        var response = await httpClient.GetAsync($"/api/localizacao{query}");
         var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<Localizacao>>>()
         ?? throw new InvalidOperationException("Failed to deserialize ApiResponse<List<Equipamento>>.");
         return result;
@@ -54,8 +55,7 @@ public class LocalizacaoService
     public async Task<ApiResponse<Localizacao>?> AddLocalizacaoAsync(Localizacao local)
     {
 
-        var response = await _httpClient.PostAsJsonAsync("api/localizacao", local);
-        Console.WriteLine(response.StatusCode);
+        var response = await httpClient.PostAsJsonAsync("api/localizacao", local);
         if (response.IsSuccessStatusCode)
         {
             return await response.Content.ReadFromJsonAsync<ApiResponse<Localizacao>>();
@@ -67,8 +67,9 @@ public class LocalizacaoService
         }
     }
 
-    public async Task<ApiResponse<Localizacao>> EditarLocalizacaoAsync(Localizacao loc) {
-        var response = await _httpClient.PatchAsJsonAsync("api/localizacao/", loc);
+    public async Task<ApiResponse<Localizacao>?> EditarLocalizacaoAsync(Localizacao loc)
+    {
+        var response = await httpClient.PatchAsJsonAsync("api/localizacao/", loc);
         if (response.IsSuccessStatusCode)
         {
             return await response.Content.ReadFromJsonAsync<ApiResponse<Localizacao>>();

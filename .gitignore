@@ -4,11 +4,11 @@
 ## Get latest from `dotnet new gitignore`
 
 Migrations
-
+pgdata/
 out/
 outpublish/
 Preventech.Core/[Mm]igrations/*
-
+Preventech.Server/wwwroot/uploads/
 *.pem
 # dotenv files
 .env

@@ -1,71 +1,86 @@
 ﻿@page "/cadastrar/ordem-servico"
+
+@attribute [Authorize(Roles = PerfilExtension.CriarOrdemDeServico)]
+
 @rendermode InteractiveServer
 @inject UserClaimsHelper UserClaimsHelper
 
-<PageTitle>Cadastrar uma Ordem de Serviço</PageTitle>
+<HeaderTitle Title="Ordem de Serviço" />
 
-<h1>Cadastrar OS</h1>
+<MostrarMensagem @bind-Mensagem="mensagemResultado" />
 
-
-@if (!string.IsNullOrEmpty(mensagemResultado))
-{
-    <div class="alert @(sucesso ? "alert-success" : "alert-danger")" role="alert">
-        @mensagemResultado
-    </div>
-}
-
-<EditForm Model="ordemServico" OnSubmit="FormData" FormName="cadastrar-Ordem-Servico">
-    <div class="mb-3">
-        <label>Título:
+<PageSection>
+    <section class="header-section">
+        <h4>Cadastrar OS</h4>
+    </section>
+    <EditForm class="edit-form" Model="ordemServico" OnSubmit="FormData" FormName="cadastrar-Ordem-Servico">
+        <div class="form-group">
+            <label for="titulo">Título</label>
             <InputText @bind-Value="ordemServico!.Titulo" class="form-control"/>
-        </label>
-    </div>
-
-    <div class="mb-3">
-        <label>Descrição:
-            <InputTextArea @bind-Value="ordemServico!.Descricao" class="form-control"/>
-        </label>
-    </div>
-
-        <div class="mb-3">
-        <label>Alguma observação?
-            <InputTextArea @bind-Value="ordemServico!.Observacoes" class="form-control"/>
-        </label>
-    </div>
-
-    @if(equipamentos != null && equipamentos.Any()) 
-    {
-        <div class="mb-3">
-            <label>Equipamento:
-                <InputSelect @bind-Value="ordemServico!.EquipamentoId">
-                    @foreach (Equipamento equipamento in equipamentos)
-                    {
-                        <option value="@equipamento.Id">@equipamento.ToString()</option>
-                    }
-                </InputSelect>
-            </label>
-            <span>Não encontrou o equipamento? <a href="/cadastrar/equipamento">Cadastre-o!</a></span>
         </div>
-    }
-    else
-    {
-        <p><em>Carregando equipamentos</em></p>
-    }
 
-    <PecaSelection @ref="pecaSelectionComponent" />
+        <div class="form-group">
+            <label for="descricao">Descrição</label>
+            <InputTextArea @bind-Value="ordemServico!.Descricao" class="form-control"/>
+        </div>
 
-    <button type="submit" class="btn btn-primary" disabled="@isProcessing">
-        @if (isProcessing)
+        <div class="form-group">
+            <label for="observacoes">Alguma observação?</label>
+            <InputTextArea @bind-Value="ordemServico!.Observacoes" class="form-control"/>
+        </div>
+
+        <div class="form-group">
+            <label for="documento">Deseja anexar um documento?</label>
+            <InputFile OnChange="HandleFileSelection" multiple />
+        </div>
+
+        @if(equipamentos != null && equipamentos.Any()) 
         {
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            <text>Cadastrando...</text>
+            @* <div class="mb-3">
+                <label>Equipamento:
+                    <InputSelect @bind-Value="ordemServico!.EquipamentoId" class="form-control">
+                        @foreach (Equipamento equipamento in equipamentos)
+                        {
+                            <option value="@equipamento.Id">@equipamento.ToString()</option>
+                        }
+                    </InputSelect>
+                </label>
+                <br />
+                <span>Não encontrou o equipamento? <a href="/cadastrar/equipamento" target="_blank">Cadastre-o!</a></span>
+            </div> *@
+            <div class="mb-3">
+                <label for="grupo">
+                    Equipamento
+                </label>
+            <InputSelect @bind-Value="ordemServico!.EquipamentoId" class="form-control">
+                <option value="0">Selecionar equipamento</option>
+                @foreach (Equipamento equipamento in equipamentos)
+                {
+                    <option value="@equipamento.Id">@equipamento.ToString()</option>
+                }
+            </InputSelect>
+            </div>
         }
         else
-        {
-            <text>Cadastrar</text>
+        {   
+            <p><em>Carregando equipamentos</em></p>
+            <span>Não encontrou o equipamento? <a href="/cadastrar/equipamento" target="_blank">Cadastre-o!</a></span>
         }
-    </button>
-</EditForm>
+
+        <br />
+        <button type="submit" class="btn btn-primary" disabled="@isProcessing">
+            @if (isProcessing)
+            {
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <text>Cadastrando...</text>
+            }
+            else
+            {
+                <text>Cadastrar</text>
+            }
+        </button>
+    </EditForm>
+</PageSection>
 
 @code {
     [SupplyParameterFromForm]
@@ -78,6 +93,12 @@
     
     [Inject]
     EquipamentoService EquipService { get; set; } = null!;
+    
+    [Inject]
+    DocumentoService DocService { get; set; } = null!;
+
+    private List<IBrowserFile> arquivosParaUpload = new List<IBrowserFile>();
+    private const long MAX_FILE_SIZE = 1024 * 1024 * 50; // 50MB
 
     private string mensagemResultado = string.Empty;
     private bool sucesso = false;
@@ -88,9 +109,9 @@
     {
         userInfo = await UserClaimsHelper.GetCurrentUserInfoAsync();
 
-        ordemServico ??= new OrdemServico();
+        ordemServico = new OrdemServico();
 
-        ApiResponse<List<Equipamento>> response = await EquipService.GetEquipamentosAsync();
+        ApiResponse<List<Equipamento>> response = await EquipService.GetEquipamentos(Equipamento.Vazio);
         equipamentos = response.Data?.AsQueryable() ?? new List<Equipamento>().AsQueryable();
     }
     
@@ -98,6 +119,27 @@
     {
         isProcessing = true;
         mensagemResultado = string.Empty;
+
+        if (userInfo == null){
+            isProcessing = false;
+            sucesso = false;
+            mensagemResultado = "Erro de autenticação: Não foi possível identificar o usuário requisitante. Por favor, tente recarregar a página ou fazer login novamente.";
+            return; // STOP the submission
+        }
+
+        if (ordemServico == null)
+        {
+            isProcessing = false;
+            sucesso = false;
+            mensagemResultado = "Erro interno: Dados da ordem de serviço não foram inicializados corretamente.";
+            return; // STOP the submission
+        }
+
+        if (ordemServico.EquipamentoId.HasValue == false || ordemServico.EquipamentoId == 0)
+        {
+            ordemServico.EquipamentoId = null;
+        }
+
         ordemServico!.Abertura = DateTime.UtcNow;
         ordemServico!.Status = StatusOS.Parada;
         ordemServico!.TecnicoResponsavel = null;
@@ -107,9 +149,78 @@
         Core.DTOs.ApiResponse<OrdemServico> response = await OSservice.AddOrdemServicoAsync(ordemServico) ?? new Core.DTOs.ApiResponse<OrdemServico>();
         mensagemResultado = response.Message;
 
-        isProcessing = false;
-        sucesso = true;
+        if (response.Success && response.Data != null)
+        {
+            Guid novaOrdemId = response.Data.Id;
+            int arquivosComErro = 0;
+            foreach (var file in arquivosParaUpload)
+            {
+                // ⭐ NOVO: Chama o serviço para enviar o arquivo ao endpoint 'api/documentos/upload/{ordemId}'
+                Core.DTOs.ApiResponse<object> responseUpload = await DocService.UploadDocumentoAsync(novaOrdemId, file);
 
-        ordemServico = new OrdemServico();
+                if (!responseUpload.Success)
+                {
+                    arquivosComErro++;
+                    // Acumula erros, mas continua tentando os outros arquivos
+                    mensagemResultado += $"Erro ao fazer upload do arquivo {file.Name}: {responseUpload.Message}. ";
+                }
+            }
+            
+            // 4. Finalizar
+            if (arquivosComErro == arquivosParaUpload.Count)
+            {
+                // Todos os uploads falharam
+                sucesso = false;
+                mensagemResultado = $"Ordem de Serviço criada, mas NENHUM arquivo foi anexado. {mensagemResultado}";
+            }
+
+            else if (arquivosComErro > 0)
+            {
+                // A OS foi criada e alguns arquivos foram anexados, mas nem todos.
+                sucesso = true;
+                mensagemResultado = $"Ordem de Serviço criada com sucesso. Alguns documentos falharam no upload ({arquivosComErro} de {arquivosParaUpload.Count}). Detalhes: {mensagemResultado}";
+            }
+            else
+            {
+                // Sucesso Total
+                sucesso = true;
+                mensagemResultado = response.Message;
+                ordemServico = new OrdemServico();
+                arquivosParaUpload.Clear();
+            }
+        }
+
+        else
+        {
+            sucesso = false;
+            mensagemResultado = response.Message;
+        }
+
+
+        isProcessing = false;
+    }
+
+    private void HandleFileSelection(InputFileChangeEventArgs e) 
+    {
+        arquivosParaUpload.Clear(); // Limpa seleção anterior
+        mensagemResultado = string.Empty;
+
+        foreach (var file in e.GetMultipleFiles()) 
+        {
+            if (file.Size <= MAX_FILE_SIZE) 
+            {
+                // ⭐ MUDANÇA: Apenas armazena a referência do IBrowserFile.
+                // O conteúdo real será lido durante o upload no DocService.
+                arquivosParaUpload.Add(file);
+            } 
+            else 
+            {
+                mensagemResultado = $"O arquivo {file.Name} excede o tamanho máximo permitido de {MAX_FILE_SIZE / (1024 * 1024)} MB. Remova-o para continuar.";
+                sucesso = false;
+                arquivosParaUpload.Clear(); // Opcional: Limpar tudo se houver um arquivo muito grande
+                break;
+            }
+        }
+        StateHasChanged(); // Força a atualização da UI para mostrar a lista de arquivos
     }
 }

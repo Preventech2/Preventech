@@ -1,0 +1,78 @@
+﻿@using Microsoft.AspNetCore.Components.QuickGrid
+@using Preventech.Core.Models
+
+@rendermode InteractiveServer
+
+@inject HabilidadeService HabilidadeService
+@inject UserClaimsHelper UserClaimsHelper
+
+<QuickGrid Items="@habilidades.AsQueryable()" TGridItem="Habilidade">
+    <PropertyColumn Title="Categoria" Property="@(item => item.Categoria!.Nome)" />
+    <PropertyColumn Title="Descricao" Property="@(item => item.Descricao)" />
+    <TemplateColumn Class="col-actions-2" Title="Ações" Context="item">
+        <section style="display: flex; gap: 0.5rem;">
+            <button class="btn-icon" @onclick="() => EditarHabilidade.InvokeAsync(item.Id)"><img class="icon" src="img/edit-icon.svg" alt="" /></button>
+            <button class="btn-icon" @onclick="() => RemoverHabilidade(item.Id)"><img class="icon" src="img/rem-icon.svg" alt="" /></button>
+        </section>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    [Parameter]
+    public bool NeedUpdate { get; set; } = false;
+
+    [Parameter]
+    public EventCallback<bool> NeedUpdateChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<int> EditarHabilidade { get; set; }
+
+    private List<Habilidade> habilidades = new List<Habilidade>();
+    private UserInfo UserInfo = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadHabilidades();
+    }
+
+    private async Task LoadHabilidades()
+    {
+        UserInfo = await UserClaimsHelper.GetCurrentUserInfoAsync() ?? new UserInfo();
+        ApiResponse<List<Habilidade>> response = await HabilidadeService.GetAllHabilidadesByUsuarioAsync(UserInfo.GetUsuario());
+        if (response.Success && response.Data != null)
+        {
+            habilidades = response.Data;
+        }
+        else
+        {
+            habilidades = new List<Habilidade>();
+        }
+    }
+
+    private async Task RemoverHabilidade(int id)
+    {
+        if (id <= 0) return;
+
+        Habilidade habilidadeToRemove = new Habilidade { Id = id };
+        ApiResponse<Habilidade> response = await HabilidadeService.DeleteHabilidadeAsync(habilidadeToRemove);
+        if (response.Success)
+        {
+            await LoadHabilidades();
+            NeedUpdate = true;
+            await NeedUpdateChanged.InvokeAsync(NeedUpdate);
+        }
+        else
+        {
+            // Handle error
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (NeedUpdate)
+        {
+            await LoadHabilidades();
+            NeedUpdate = false; // Reset the flag after updating
+        }
+    }
+}

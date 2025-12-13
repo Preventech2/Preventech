@@ -1,0 +1,15 @@
+
+
+.shake-animation {
+    animation: shake 0.5s;
+}
+
+/* Balançando animação */
+@keyframes shake {
+    0% { transform: rotate(0deg); }
+    20% { transform: rotate(-21deg); }
+    40% { transform: rotate(21deg); }
+    60% { transform: rotate(-21deg); }
+    80% { transform: rotate(21deg); }
+    100% { transform: rotate(0deg); }
+}

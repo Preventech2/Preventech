@@ -1,42 +1,34 @@
 ﻿@page "/"
+@rendermode InteractiveServer
+
+@using Preventech.Server.Components.Modals
 
 @attribute [Authorize]
 
 @inject NavigationManager navigationManager
+@inject NotificacaoSiteService notificacaoSiteService
+@inject UserClaimsHelper userClaimsHelper
 
-<PageTitle>Home</PageTitle>
+<HeaderTitle Title="Home" />
 
 <h1>Bem vindo ao Preventech!</h1>
 
-<AuthorizeView>
+<AuthorizeView Roles="@PerfilExtension.EditarOrdemDeServico">
     <Authorized>
-        <p>Você está logado.</p>
-        <ul>
-            <li><a href="/localizacao/cadastrar">Cadastrar localizacao</a></li>
-            <li><a href="/equipamento/cadastrar">Cadastrar Equipamento</a></li>
-            <li><a href="/equipamentos">Equipamentos</a></li>
-            <li><a href="/cadastrar/usuario">Cadastrar Usuário</a></li>
-            <li><a href="/usuarios">Usuários</a></li>
-            <li><a href="/cadastrar/ordem-servico">Cadastrar Ordem de Serviço</a></li>
-            <li><a href="/ordens-servico">Visualizar Ordens de Serviço</a></li>
-            <li><a href="/enviar-email">Enviar Email</a></li>
-            <li><a href="/cadastrar/peca">Cadastrar Peça</a></li>
-        </ul>
+        <PageSection>
+            <section class="header-section">
+                <h4>Tarefas pendentes</h4>
+            </section>
+        </PageSection>
     </Authorized>
-    <NotAuthorized>
-        <p>Você não está logado. Por favor, faça login para acessar mais funcionalidades.</p>
-    </NotAuthorized>
 </AuthorizeView>
 
-<p>
-    <AuthorizeView Roles="VisualizarEquipamento">
-        <Authorized>
-            <!-- Conteúdo permitido -->
-            Top Secret
-        </Authorized>
-        <NotAuthorized>
-            <!-- Conteúdo negado -->
-            Conteudo restrito
-        </NotAuthorized>
-    </AuthorizeView>
-</p>
+<AuthorizeView Roles="@PerfilExtension.VisualizarLaboratorio">
+    <Authorized>
+        <PageSection>
+            <section class="header-section">
+                <h4>Dashboard Laboratórios</h4>
+            </section>
+        </PageSection>
+    </Authorized>
+</AuthorizeView>

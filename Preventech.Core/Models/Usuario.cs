@@ -10,19 +10,18 @@ public class Usuario
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
-    [Required]
     [StringLength(11)]
-    public string? Cpf { get; set; }
+    public string? Cpf { get; set; } = null;
 
     [MaxLength(50)]
-    public string? Nome { get; set; }
+    public string? Nome { get; set; } = null;
 
     [EmailAddress]
     [MaxLength(50)]
-    public string? Email { get; set; }
+    public string? Email { get; set; } = null;
 
     [MaxLength(50)]
-    public string? Senha { get; set; }
+    public string? Senha { get; set; } = null;
 
-    public Perfil? Perfil { get; set; }
+    public GrupoPerfil? Grupo { get; set; }
 }

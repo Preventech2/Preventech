@@ -1,0 +1,17 @@
+@namespace Preventech.Server.Components.Pages
+
+@using System.Globalization
+
+<div class="page-container">
+    <section class="page-section">
+        @ChildContent
+    </section>
+</div>
+
+
+@code {
+    // Este componente serve para estruturar os conteúdos das páginas
+    // Recebe, normalmente, um título, uma tabela e um botão de adicionar/editar
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

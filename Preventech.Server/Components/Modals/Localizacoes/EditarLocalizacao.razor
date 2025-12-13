@@ -1,0 +1,117 @@
+@namespace Preventech.Server.Components.Modals
+@rendermode InteractiveServer
+
+@inject LocalizacaoService localizacaoService
+@inject UsuarioService usuarioService
+
+<Modal IsActive="@IsActive" IsActiveChanged="@OnIsActiveChanged">
+    <MostrarMensagem @bind-Mensagem="mensagem" />
+    <h2>Editar localização</h2>
+
+    <form class="edit-form">
+        <label>Nome:</label> <InputText @bind-Value="Local!.Apelido" class="form-control" />
+        <label>Campus:</label> <InputNumber @bind-Value="Local!.Campus" class="form-control" />
+        <label>Prédio:</label> <InputNumber @bind-Value="Local!.Predio" class="form-control" />
+        <label>Andar:</label> <InputNumber @bind-Value="Local!.Andar" class="form-control" />
+        <label>Sala:</label> <InputNumber @bind-Value="Local!.Numero" class="form-control" />
+        <label>Técnicos</label>
+            @if (gestores != null && gestores.Any())
+            {
+                <InputSelect @bind-Value="@Local!.Responsavel!.Id" class="form-control">
+                    <option value="0">Selecionar Gestor</option>
+                    @foreach (var gestor in gestores)
+                    {
+                        <option value="@gestor.Id">@gestor.Nome</option>
+                    }
+                </InputSelect>
+            }
+            else
+            {
+                <p><em>Técnicos não encontrados!</em></p>
+            }
+        <button @onclick="EditarLoc" type="submit" class="btn btn-primary" disabled="@isProcessing" autofocus>
+        @if (isProcessing)
+            {
+                <text>Editando...</text>
+            }
+            else
+            {
+                <text>Editar</text>
+            }
+        </button>
+    </form>
+</Modal>
+
+@code {
+    [Parameter]
+    public bool IsActive { get; set; } = false;
+
+    [Parameter]
+    public EventCallback<bool> IsActiveChanged { get; set; }
+
+    [Parameter]
+    public Localizacao Local { get; set; } = Localizacao.Vazia;
+    [Parameter]
+    public EventCallback<Localizacao> LocalChanged { get; set; }
+    private IEnumerable<Usuario> gestores = new List<Usuario>();
+    private bool isProcessing = false;
+    public string mensagem = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await InitializeLocalizacao();
+    }
+
+    private async Task InitializeLocalizacao()
+    {
+        var restec = await usuarioService.GetUsuariosAsync();
+        if (!restec.Success)
+            mensagem = restec.Message ?? "";
+        else
+            mensagem = string.Empty;
+        if (restec != null && restec.Success)
+        {
+            gestores = from gestor in restec!.Data
+                    where gestor.Grupo != null && (gestor.Grupo.Permissoes & Perfil.EditarLaboratorio) != 0
+                    select gestor;
+        }
+    }
+
+    private async Task EditarLoc()
+    {
+        isProcessing = true;
+        mensagem = string.Empty;
+        @* StateHasChanged(); *@
+
+        try
+        {
+            var res = await localizacaoService.EditarLocalizacaoAsync(Local);
+            if (res == null)
+                mensagem = "sem resposta";
+            else if (!res.Success)
+                mensagem = res.Message;
+            else
+            {
+                Console.WriteLine($"Localização editada com sucesso: {res.Data?.Apelido}"); 
+                Local = Localizacao.Vazia;
+            }
+        }
+        catch (Exception ex)
+        {
+            mensagem = $"Erro: {ex.Message}";
+        }
+        finally
+        {
+            isProcessing = false;
+            @* StateHasChanged(); *@
+        }
+    }
+
+    // Informa ao componente pai a mudança do estado do Modal
+    private async Task OnIsActiveChanged(bool isActive)
+    {
+        await InitializeLocalizacao();
+        IsActive = isActive;
+        await IsActiveChanged.InvokeAsync(IsActive);
+    }
+}

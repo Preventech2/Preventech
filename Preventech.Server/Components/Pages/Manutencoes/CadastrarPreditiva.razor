@@ -15,30 +15,32 @@
 }
 
 <EditForm Model="equipamento" OnSubmit="FormData" FormName="cadastrar-Equipamento">
-    <label>Nome:
+    <div>
+        <label>Nome:</label>
         <InputText @bind-Value="equipamento!.Nome" class="form-control" />
-    </label>
-    <label>Patrimônio:
+    </div>
+    <div>
+        <label>Patrimônio:</label>
         <InputText @bind-Value="equipamento!.Patrimonio" class="form-control" />
-    </label>
+    </div>
+    <div>
+        
     @if (locais != null && locais.Any())
     {
-        <div class="mb-3">
-            <label>Localização:
-                <InputSelect @bind-Value="localid">
-                    @foreach (var local in locais)
-                    {
-                        <option value="@local!.Id">@local.ToString()</option>
-                    }
-                </InputSelect>
-            </label>
-            <span>Não encontrou o local? <a href="/cadastrar/localizacao">Cadastre-o!</a></span>
-        </div>
+        <label>Localização:</label>
+            <InputSelect @bind-Value="localid">
+                @foreach (var local in locais)
+                {
+                    <option value="@local!.Id">@local.ToString()</option>
+                }
+            </InputSelect>
+        <span>Não encontrou o local? <a href="/cadastrar/localizacao">Cadastre-o!</a></span>
     }
     else
     {
         <p><em>Carregando locais</em></p>
     }
+    </div>
     <button type="submit" class="btn btn-primary" disabled="@isProcessing">
         @if (isProcessing)
         {
@@ -72,7 +74,7 @@
     protected override async Task OnInitializedAsync()
     {
         equipamento ??= new Equipamento();
-        var res = await localizacaoService.GetLocalizacoes(new Localizacao());
+        var res = await localizacaoService.GetLocalizacoes(Localizacao.Vazia);
         sucesso = res.Success;
         mensagemResultado = res.Message;
         if (res.Data != null)
@@ -112,6 +114,7 @@
         finally
         {
             isProcessing = false;
+            equipamento = new Equipamento();
             StateHasChanged();
         }
     }

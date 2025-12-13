@@ -1,85 +1,123 @@
 @page "/signup"
 @using Preventech.Core.DTOs
+@using Preventech.Core.Templates
 
 @rendermode InteractiveServer
 
+@inject NavigationManager navigationManager
+@inject AuthService authService
+@inject UsuarioService usuarioService
+@inject EmailService emailService
+@inject NotificacaoSiteService notificacaoSiteService
+
 <h3>Cadastro</h3>
 
-@if (!string.IsNullOrEmpty(mensagem))
-{
-    <div class="alert alert-info" role="alert">
-        @mensagem
-    </div>
-}
+<MostrarMensagem @bind-Mensagem="mensagem" />
 
-<EditForm Model="usuario" OnValidSubmit="OnSubmit">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+<PageSection>
+    <EditForm class="edit-form" Model="usuario" OnValidSubmit="OnSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
 
-    <div class="mb-3">
-        <label for="cpf" class="form-label">Cpf</label>
-        <InputText id="cpf" type="text" class="form-control" maxlength="14" @bind-Value="viewCpf" @oninput="FormatCpf" />
-    </div>
-    <div class="mb-3">
-        <label for="nome" class="form-label">Nome</label>
-        <InputText id="nome" type="text" class="form-control" @bind-Value="usuario.Nome" />
-    </div>
-    <div class="mb-3">
-        <label for="email" class="form-label">Email</label>
-        <InputText id="email" type="email" class="form-control" @bind-Value="usuario.Email" />
-    </div>
-    <div class="mb-3">
-        <label for="senha" class="form-label">Senha</label>
-        <InputText id="senha" type="password" class="form-control" @bind-Value="usuario.Senha" />
-    </div>
-    <button type="submit" class="btn btn-primary">Cadastrar</button>
-
-</EditForm>
+        <div class="mb-3">
+            <label for="cpf" class="form-label">Cpf</label>
+            <CpfInput id="cpf" @bind-Cpf="usuario.Cpf" />
+        </div>
+        <div class="mb-3">
+            <label for="nome" class="form-label">Nome</label>
+            <InputText id="nome" type="text" class="form-control" @bind-Value="usuario.Nome" />
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <InputText id="email" type="email" class="form-control" @bind-Value="usuario.Email" />
+        </div>
+        <div class="mb-3">
+            <label for="senha" class="form-label">Senha</label>
+            <InputText id="senha" type="password" class="form-control" @bind-Value="usuario.Senha" />
+        </div>
+        <button type="submit" class="btn btn-primary" disabled="@isProcessing">
+            @if (isProcessing)
+            {
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            }
+            else
+            {
+                <text>Cadastrar</text>
+            }
+        </button>
+    </EditForm>
+</PageSection>
 
 @code {
     [SupplyParameterFromForm]
     public Usuario usuario { get; set; } = new Usuario();
 
     private string viewCpf = string.Empty;
-
-    [Inject]
-    private UsuarioService usuarioService { get; set; } = null!;
-
-    [Inject]
-    private EmailService emailService { get; set; } = null!;
+    private bool isProcessing = false;
 
     private string mensagem = string.Empty;
 
-    private void FormatCpf(ChangeEventArgs e)
-    {
-        string digits = new string(e.Value?.ToString()?.Where(char.IsDigit).ToArray() ?? Array.Empty<char>());
-        
-        if (digits.Length > 11) {
-            digits = digits.Substring(0, 11);
-            Console.WriteLine("CPF com 11 dígitos atingido:" + digits);
-        }
-
-        usuario.Cpf = digits;
-        
-        if (digits.Length >= 4)
-            digits = digits.Insert(3, ".");
-        if (digits.Length >= 8)
-            digits = digits.Insert(7, ".");
-        if (digits.Length >= 12)
-            digits = digits.Insert(11, "-");
-
-        viewCpf = digits;
-    }
-
     public async Task OnSubmit()
     {
-        SendEmail();
+        isProcessing = true;
+        
+        // Checa se todos os campos foram preenchidos
+        if (string.IsNullOrWhiteSpace(usuario.Cpf) ||
+            string.IsNullOrWhiteSpace(usuario.Nome) ||
+            string.IsNullOrWhiteSpace(usuario.Email) ||
+            string.IsNullOrWhiteSpace(usuario.Senha))
+        {
+            mensagem = "Por favor, preencha todos os campos.";
+            isProcessing = false;
+            return;
+        }
+
         ApiResponse<Usuario> response = await usuarioService.AddUsuarioAsync(usuario) ?? new ApiResponse<Usuario>();
         mensagem = response.Message;
+
+        if (response.Success && response.Data != null)
+        {
+            mensagem = "Usuário cadastrado com sucesso!";
+
+            response = await usuarioService.LoginUsuarioAsync(response.Data);
+            if (response.Success && response.Data != null)
+            {
+                usuario = response.Data;
+                await SendNotificacoes();
+                await authService.Login(response.Data);
+                navigationManager.NavigateTo("/");
+            }
+            else
+            {
+                mensagem = response.Message ?? "Erro ao fazer login.";
+                usuario = new Usuario(); // Limpa os campos
+            }
+        }
+        else
+        {
+            mensagem = response.Message ?? "Erro ao cadastrar usuário.";
+        }
+
+        usuario = new Usuario();
+        isProcessing = false;
     }
 
-    public void SendEmail()
+    public async Task SendNotificacoes()
     {
-        emailService.SendEmail(usuario.Email!, "Bem-vindo ao Preventech", "Seu cadastro foi realizado com sucesso!");
+        UserInfo userInfo = new();
+        userInfo.Nome = usuario.Nome!;
+
+        NotificacaoEmail notificacaoEmail = new NotificacaoEmail(
+            titulo: NotificacaoTemplates.BoasVindas.Titulo,
+            mensagem: NotificacaoTemplates.BoasVindas.MensagemEmail(userInfo.DisplayName()),
+            destinatario: usuario.Email!);
+
+        emailService.EnviarEmail(notificacaoEmail);
+
+        NotificacaoSite notificacaoSite = new NotificacaoSite(
+            titulo: NotificacaoTemplates.BoasVindas.Titulo,
+            mensagem: NotificacaoTemplates.BoasVindas.MensagemSite(userInfo.DisplayName()));
+
+        await notificacaoSiteService.EnviarNotificacaoAsync(notificacaoSite, usuario);
     }
 }

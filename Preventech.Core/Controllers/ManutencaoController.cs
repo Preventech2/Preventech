@@ -46,7 +46,8 @@ public class ManutencaoController
     {
         var hoje = DateTime.Today;
         var inicio = DateTime.Now;
-        if (UltimaVarredura - inicio < TimeSpan.FromHours(23)) {
+        if (UltimaVarredura - inicio < TimeSpan.FromHours(23))
+        {
             Console.WriteLine("Sistema já foi varrido recentemente");
             return new ApiResponse<TimeSpan>
             {
@@ -121,7 +122,8 @@ public class ManutencaoController
     }
 
     [HttpPost("cadastrar/preditiva")]
-    public async Task<ApiResponse<Preditiva?>> CadastrarPreditiva([FromBody] Preditiva pred){
+    public async Task<ApiResponse<Preditiva?>> CadastrarPreditiva([FromBody] Preditiva pred)
+    {
         try
         {
             await _context!.Preditivas.AddAsync(pred);

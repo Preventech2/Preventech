@@ -38,5 +38,5 @@ public class CookieAuthStateProvider : RevalidatingServerAuthenticationStateProv
         }
 
         return Task.FromResult(result);
-    } 
+    }
 }

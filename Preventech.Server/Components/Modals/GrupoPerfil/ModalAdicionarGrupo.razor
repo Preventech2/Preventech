@@ -1,0 +1,98 @@
+@namespace Preventech.Server.Components.Modals
+
+@rendermode InteractiveServer
+
+@inject GrupoPerfilService GrupoPerfilService
+
+<Modal IsActive="@IsActive" IsActiveChanged="@OnIsActiveChanged">
+    <MostrarMensagem @bind-Mensagem="mensagem" />
+    <h3>Adicionar Grupo</h3>
+    <EditForm class="edit-form" Model="@novoGrupo" OnValidSubmit="@AdicionarGrupo">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-group">
+            <label for="nome">Nome</label>
+            <InputText id="nome" class="form-control" @bind-Value="@novoGrupo.Nome" />
+            <ValidationMessage For="@(() => novoGrupo.Nome)" />
+        </div>
+
+        <div class="form-group">
+            <label for="descricao" class="form-label">Permissões</label>
+            <PerfilCheckbox @bind-Grupo="novoGrupo" />
+        </div>
+
+        <button type="submit" class="btn btn-primary" disabled="@IsProcessing">Adicionar</button>
+    </EditForm>
+</Modal>
+
+@code {
+    [Parameter]
+    public bool IsActive { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsActiveChanged { get; set; }
+
+    [Parameter]
+    public EventCallback OnGrupoAdicionado { get; set; }
+
+    private GrupoPerfil novoGrupo = new GrupoPerfil();
+
+    public string mensagem = string.Empty;
+    private bool IsProcessing { get; set; } = false;
+
+    protected override void OnInitialized()
+    {
+        ResetModal();
+    }
+
+    private void ResetModal()
+    {
+        mensagem = string.Empty;
+        novoGrupo = new GrupoPerfil
+        {
+            Nome = string.Empty,
+            Permissoes = Perfil.NenhumaPermissao
+        };
+    }
+
+    private async Task AdicionarGrupo()
+    {
+        IsProcessing = true;
+        if(string.IsNullOrWhiteSpace(novoGrupo?.Nome))
+        {
+            mensagem = "Por favor, preencha o nome do grupo.";
+            IsProcessing = false;
+            return;
+        }
+
+        try
+        {
+            ApiResponse<GrupoPerfil>? response = await GrupoPerfilService.AddGrupoPerfilAsync(novoGrupo);
+            
+            if (response?.Success == true && response.Data != null)
+            {
+                ResetModal(); // Reseta o formulário
+                await OnGrupoAdicionado.InvokeAsync(null);
+            }
+            else
+            {
+                mensagem = response?.Message ?? "Erro ao adicionar o grupo.";
+            }
+        }
+        catch (Exception ex)
+        {
+            mensagem = $"Erro na requisição: {ex.Message}";
+        }
+        
+        IsProcessing = false;
+    }
+
+    // Informa ao componente pai a mudança do estado do Modal
+    private async Task OnIsActiveChanged(bool isActive)
+    {
+        ResetModal();
+        IsActive = isActive;
+        await IsActiveChanged.InvokeAsync(IsActive);
+    }
+}

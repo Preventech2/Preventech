@@ -1,0 +1,83 @@
+@namespace Preventech.Server.Components.Modals
+
+@rendermode InteractiveServer
+
+@inject HabilidadeSistemaService HabilidadeSistemaService
+
+<Modal IsActive="IsActive" IsActiveChanged="@OnIsActiveChanged">
+    <MostrarMensagem @bind-Mensagem="mensagem" />
+    <h3>Adicionar Habilidade do Sistema</h3>
+    <EditForm class="edit-form" Model="@novaHabilidade" OnValidSubmit="@AdicionarHabilidadeSistema">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-group">
+            <label for="nome">Nome</label>
+            <InputText id="nome" class="form-control" @bind-Value="@novaHabilidade.Nome" />
+            <ValidationMessage For="@(() => novaHabilidade.Nome)" />
+        </div>
+
+        <button type="submit" class="btn btn-primary" disabled="@IsProcessing">Adicionar</button>
+    </EditForm>
+
+    <section class="info-section">
+        <p>Essas habilidades do sistema definem quais possíveis habilidades os usuários podem ter.</p>
+        <p>Adicione com base nas necessidades das manutenções.</p>
+    </section>
+</Modal>
+
+@code {
+    [Parameter]
+    public bool IsActive { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsActiveChanged { get; set; }
+
+    [Parameter]
+    public EventCallback OnHabilidadeAdicionada { get; set; }
+
+    private HabilidadeSistema novaHabilidade = new HabilidadeSistema();
+
+    public string mensagem = string.Empty;
+    private bool IsProcessing { get; set; } = false;
+
+    protected override void OnInitialized()
+    {
+        InitializeHabilidade();
+    }
+
+    private async Task AdicionarHabilidadeSistema()
+    {
+        IsProcessing = true;
+        ApiResponse<HabilidadeSistema> response = await HabilidadeSistemaService.AddHabilidadeSistemaAsync(novaHabilidade);
+        if (response.Success)
+        {
+            mensagem = "Habilidade adicionada com sucesso!";
+            novaHabilidade = new HabilidadeSistema(); // Reset form
+            await OnHabilidadeAdicionada.InvokeAsync(null);
+        }
+        else
+        {
+            mensagem = response.Message;
+            novaHabilidade = new HabilidadeSistema(); // Reset form
+        }
+        IsProcessing = false;
+    }
+
+    private void InitializeHabilidade()
+    {
+        mensagem = string.Empty; // Limpa mensagens anteriores
+        novaHabilidade = new HabilidadeSistema
+        {
+            Nome = string.Empty
+        };
+    }
+
+    // Informa ao componente pai a mudança do estado do Modal
+    private async Task OnIsActiveChanged(bool isActive)
+    {
+        InitializeHabilidade();
+        IsActive = isActive;
+        await IsActiveChanged.InvokeAsync(IsActive);
+    }
+}

@@ -91,6 +91,7 @@ namespace Preventech.Core.Controllers
                     .Include(o => o.TecnicoResponsavel)
                     .Include(o => o.Pecas)       
                         .ThenInclude(p => p.Peca)
+                    .Include(o => o.Arquivos)
                     .FirstOrDefaultAsync(e => e.Id == id);
 
                 return new ApiResponse<OrdemServico>
