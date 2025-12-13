@@ -24,7 +24,6 @@ public class OrdemServicoService
     }
 
     // Example method to get a single OrdemServico by ID
-    
     public async Task<ApiResponse<OrdemServico>> GetOrdemServicoByIdAsync(Guid id)
     {
         var response = await _httpClient.GetAsync($"api/ordem-servico/{id}");
@@ -66,5 +65,25 @@ public class OrdemServicoService
     {
         var response = await _httpClient.DeleteAsync($"api/ordem-servico/{id}");
         response.EnsureSuccessStatusCode();
+    }
+
+    public async Task<ApiResponse<OrdemServicoPeca>> AddPecaOrdemServicoAsync(OrdemServicoPeca osPeca)
+    {
+        var response = await _httpClient.PostAsJsonAsync("api/ordem-servico/pecas", osPeca);
+        if (!response.IsSuccessStatusCode)
+        {
+            var erroConteudo = await response.Content.ReadAsStringAsync();
+            
+            throw new HttpRequestException($"Erro na API: {response.StatusCode}. Detalhes: {erroConteudo}");
+        }
+        var result = await response.Content.ReadFromJsonAsync<ApiResponse<OrdemServicoPeca>>();
+        return result ?? throw new InvalidOperationException("A API retornou sucesso, mas o JSON veio vazio.");
+    }
+
+    // Método Remover
+    public async Task<ApiResponse<bool>> RemoverPecaOrdemServicoAsync(Guid idOrdem, Guid idPeca)
+    {
+        var response = await _httpClient.DeleteAsync($"api/ordem-servico/pecas/{idOrdem}/{idPeca}");
+        return await response.Content.ReadFromJsonAsync<ApiResponse<bool>>();
     }
 }

@@ -33,13 +33,7 @@ namespace Preventech.Core.Controllers
 
             try
             {
-                // Adiciona as peças ao contexto
-                if (ordem.Pecas != null && ordem.Pecas.Any())
-                    foreach (var peca in ordem.Pecas)
-                        _context.Pecas.Attach(peca);
-                    
-                
-                // Adiciona a OS ao contexto
+                // Adiciona o equipamento ao contexto
                 _context.OrdensServico.Add(ordem);
 
                 // Salva as mudanças no banco de dados
@@ -95,6 +89,8 @@ namespace Preventech.Core.Controllers
                 var ordem = await _context.OrdensServico
                     .Include(o => o.Requisitante)
                     .Include(o => o.TecnicoResponsavel)
+                    .Include(o => o.Pecas)       
+                        .ThenInclude(p => p.Peca)
                     .FirstOrDefaultAsync(e => e.Id == id);
 
                 return new ApiResponse<OrdemServico>
@@ -181,7 +177,6 @@ namespace Preventech.Core.Controllers
                 existingOrdem.TecnicoResponsavelId = updatedOrdem.TecnicoResponsavelId;
                 existingOrdem.RequisitanteId = updatedOrdem.RequisitanteId;
                 existingOrdem.EquipamentoId = updatedOrdem.EquipamentoId;
-                existingOrdem.Pecas = updatedOrdem.Pecas;
 
                 await _context.SaveChangesAsync();
 
@@ -200,6 +195,107 @@ namespace Preventech.Core.Controllers
                     Message = $"Erro ao atualizar Ordem de Serviço: {ex.Message}",
                     Data = null
                 };
+            }
+        }
+
+        [HttpPost("pecas")]
+        public async Task<ApiResponse<OrdemServicoPeca>> AddPecaOrdemServico([FromBody] OrdemServicoPeca osPeca)
+        {
+            if (osPeca == null || osPeca.QtdPecas <= 0)
+            {
+                return new ApiResponse<OrdemServicoPeca> { Success = false, Message = "Dados inválidos." };
+            }
+
+            try
+            {
+                var pecaEstoque = await _context.Pecas.FindAsync(osPeca.IdPeca);
+                
+                if (pecaEstoque == null)
+                {
+                    return new ApiResponse<OrdemServicoPeca> { Success = false, Message = "Peça não encontrada no estoque." };
+                }
+
+                // Verifica se tem quantidade suficiente no estoque
+                if (pecaEstoque.Quantidade < osPeca.QtdPecas)
+                {
+                    return new ApiResponse<OrdemServicoPeca> 
+                    { 
+                        Success = false, 
+                        Message = $"Estoque insuficiente. Disponível: {pecaEstoque.Quantidade}, Solicitado: {osPeca.QtdPecas}" 
+                    };
+                }
+
+                var osExiste = await _context.OrdensServico.AnyAsync(o => o.Id == osPeca.IdOrdemServico);
+                if (!osExiste)
+                {
+                    return new ApiResponse<OrdemServicoPeca> { Success = false, Message = "A Ordem de Serviço informada não existe." };
+                }
+
+                var relacaoExistente = await _context.OrdensServicoPecas
+                    .FirstOrDefaultAsync(x => x.IdOrdemServico == osPeca.IdOrdemServico && x.IdPeca == osPeca.IdPeca);
+
+                if (relacaoExistente != null)
+                {
+                    relacaoExistente.QtdPecas += osPeca.QtdPecas;
+                }
+                else
+                {
+                    _context.Add(osPeca);
+                }
+
+                // Atualiza O ESTOQUE
+                pecaEstoque.Quantidade -= osPeca.QtdPecas;
+
+                // Salva tudo numa única transação
+                await _context.SaveChangesAsync();
+
+                return new ApiResponse<OrdemServicoPeca>
+                {
+                    Success = true,
+                    Message = "Peça adicionada e estoque atualizado!",
+                    Data = osPeca
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse<OrdemServicoPeca>
+                {
+                    Success = false,
+                    Message = $"Erro ao processar: {ex.Message}"
+                };
+            }
+        }
+
+        [HttpDelete("pecas/{idOrdem}/{idPeca}")]
+        public async Task<ApiResponse<bool>> RemovePeca(Guid idOrdem, Guid idPeca)
+        {
+            try
+            {
+                // Busca a relação (Saber quantas peças foram usadas)
+                var relacao = await _context.OrdensServicoPecas
+                    .FirstOrDefaultAsync(x => x.IdOrdemServico == idOrdem && x.IdPeca == idPeca);
+
+                if (relacao == null)
+                    return new ApiResponse<bool> { Success = false, Message = "Peça não vinculada a esta OS." };
+
+                // Busca a peça no estoque para devolver
+                var pecaEstoque = await _context.Pecas.FindAsync(idPeca);
+
+                if (pecaEstoque != null)
+                {
+                    // DEVOLVE AO ESTOQUE
+                    pecaEstoque.Quantidade += relacao.QtdPecas;
+                }
+
+                // Remove a relação da OS
+                _context.Remove(relacao);
+                
+                await _context.SaveChangesAsync();
+                return new ApiResponse<bool> { Success = true, Message = "Peça removida e devolvida ao estoque." };
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse<bool> { Success = false, Message = $"Erro: {ex.Message}" };
             }
         }
     }

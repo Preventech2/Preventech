@@ -15,16 +15,10 @@ public class Peca
     /// <summary>
     /// Descrição da peça
     /// </summary>
-    [Required(ErrorMessage = "A descrição da peça é obrigatória.")]
-    public string Descricao { get; set; } = string.Empty;
+    public string? Descricao { get; set; }
 
     /// <summary>
     ///  Quantidade da peça no estoque
     /// </summary>
     public int? Quantidade { get; set; }
-
-    /// <summary>
-    /// Ordens de Serviço que usam esta peça.
-    /// </summary>
-    public List<OrdemServico> OrdensDeServico { get; set; } = new();
 }

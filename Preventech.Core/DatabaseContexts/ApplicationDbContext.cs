@@ -13,13 +13,36 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<Equipamento> Equipamentos { get; set; }
     public DbSet<Usuario> Usuarios { get; set; }
+    public DbSet<GrupoPerfil> GruposPerfis { get; set; }
     public DbSet<OrdemServico> OrdensServico { get; set; }
     public DbSet<Localizacao> Localizacoes { get; set; }
     public DbSet<Preventiva> Preventivas { get; set; }
     public DbSet<Preditiva> Preditivas { get; set; }
-
-
+    public DbSet<DocumentoAnexado> DocumentosAnexados { get; set; }
+    public DbSet<HabilidadeSistema> HabilidadesSistema { get; set; }
+    public DbSet<Habilidade> Habilidades { get; set; }
+    public DbSet<NotificacaoSite> NotificacoesSite { get; set; }
+    public DbSet<NotificacaoSiteUsuario> NotificacoesSiteUsuarios { get; set; }
     public DbSet<Peca> Pecas { get; set; }
+    public DbSet<OrdemServicoPeca> OrdensServicoPecas { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+    base.OnModelCreating(modelBuilder);
+
+    modelBuilder.Entity<OrdemServicoPeca>()
+        .HasKey(osp => new { osp.IdOrdemServico, osp.IdPeca });
+
+    modelBuilder.Entity<OrdemServicoPeca>()
+        .HasOne(osp => osp.OrdemServico)
+        .WithMany(os => os.Pecas)
+        .HasForeignKey(osp => osp.IdOrdemServico);
+
+    modelBuilder.Entity<OrdemServicoPeca>()
+        .HasOne(osp => osp.Peca)
+        .WithMany()
+        .HasForeignKey(osp => osp.IdPeca);
+}
 
     // ================ existe a chance de que os relacionamentos não sejam descobertos ================
     // ================ existe a chance de que os relacionamentos não sejam descobertos ================

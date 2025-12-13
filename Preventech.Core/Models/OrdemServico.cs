@@ -1,7 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Preventech.Core.Services;
 
 namespace Preventech.Core.Models;
 
@@ -28,18 +27,23 @@ public class OrdemServico
     public string Descricao { get; set; } = "";
 
     public string? Observacoes { get; set; }
-    
+
     public int? TecnicoResponsavelId { get; set; }
     public Usuario? TecnicoResponsavel { get; set; }
 
     public int? EquipamentoId { get; set; }
     public Equipamento? Equipamento { get; set; }
-    
+
     public int? RequisitanteId { get; set; }
     public Usuario? Requisitante { get; set; }
 
-    public List<Peca>? Pecas { get; set; } = new();
-    
+    public string? DescricaoSolucao { get; set; }
+    public DateTime? DataConclusão { get; set; }
+
+    public virtual ICollection<OrdemServicoPeca> Pecas { get; set; } = new List<OrdemServicoPeca>();
+
+    public ICollection<DocumentoAnexado> Arquivos { get; set; } = new List<DocumentoAnexado>();
+
     public static Guid GerarIdOrdem()
     {
         var agora = DateTimeOffset.Now;

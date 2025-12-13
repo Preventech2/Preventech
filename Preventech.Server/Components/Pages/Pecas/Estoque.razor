@@ -1,0 +1,224 @@
+@page "/estoque"
+@using Preventech.Core.Models
+@using Preventech.Core.Services
+@using Preventech.Core.DTOs
+@using Preventech.Core.Extensions
+@inject PecaService PecaService
+@attribute [Authorize(Roles = PerfilExtension.GerenciarEstoque)]
+@rendermode InteractiveServer
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Gerenciamento de Estoque</h3>
+        
+        @* Pequeno formulário para adicionar nova peça *@
+        <div class="d-flex gap-2">
+            <input class="form-control" placeholder="Nova peça..." @bind="novaPecaDescricao" />
+            <input class="form-control" type="number" placeholder="Qtd" style="width: 80px;" @bind="novaPecaQuantidade" />
+            <button class="btn btn-success" @onclick="CriarNovaPeca" disabled="@isProcessing">
+                @if (isProcessing)
+                {
+                    <span class="spinner-border spinner-border-sm"></span>
+                }
+                else
+                {
+                    <i class="bi bi-plus-lg"></i> <text>Adicionar</text>
+                }
+            </button>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(mensagem))
+    {
+        <div class="alert @(sucesso ? "alert-success" : "alert-danger") alert-dismissible fade show" role="alert">
+            @mensagem
+            <button type="button" class="btn-close" @onclick="() => mensagem = string.Empty"></button>
+        </div>
+    }
+
+    @if (pecas == null)
+    {
+        <div class="d-flex justify-content-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+        </div>
+    }
+    else if (!pecas.Any())
+    {
+        <div class="alert alert-warning">O estoque está vazio. Adicione itens acima.</div>
+    }
+    else
+    {
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Descrição</th>
+                    <th style="width: 150px;">Quantidade</th>
+                    <th style="width: 150px;">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in pecas)
+                {
+                    <tr>
+                        @if (editingId == item.Id)
+                        {
+                            @* --- MODO EDIÇÃO --- *@
+                            <td>
+                                <input class="form-control" @bind="editingModel.Descricao" />
+                            </td>
+                            <td>
+                                <input type="number" class="form-control" @bind="editingModel.Quantidade" />
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-success me-1" @onclick="SalvarEdicao" title="Salvar">
+                                    <i class="bi bi-check-lg"></i>
+                                </button>
+                                <button class="btn btn-sm btn-secondary" @onclick="CancelarEdicao" title="Cancelar">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </td>
+                        }
+                        else
+                        {
+                            @* --- MODO VISUALIZAÇÃO --- *@
+                            <td>@item.Descricao</td>
+                            <td>
+                                <span class="badge @(item.Quantidade > 0 ? "bg-primary" : "bg-danger")">
+                                    @item.Quantidade
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" @onclick="() => IniciarEdicao(item)">
+                                    <i class="bi bi-pencil-fill"></i> Editar
+                                </button>
+                                @* Botão de excluir comentado abaixo (leia a nota no final da resposta) *@
+                                @* <button class="btn btn-sm btn-outline-danger" @onclick="() => ExcluirPeca(item.Id)">Excluir</button> *@
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@code {
+    private List<Peca>? pecas; // Pode ser nulo inicialmente
+    private bool isProcessing = false;
+    private string mensagem = string.Empty;
+    private bool sucesso = false;
+
+    // Controle de Edição
+    private Guid editingId = Guid.Empty;
+    private Peca editingModel = new(); 
+
+    // Controle de Criação
+    private string novaPecaDescricao = string.Empty;
+    private int novaPecaQuantidade = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CarregarPecas();
+    }
+
+    private async Task CarregarPecas()
+    {
+        var response = await PecaService.GetPecasAsync();
+        if (response.Success && response.Data != null)
+        {
+            pecas = response.Data.OrderBy(p => p.Descricao).ToList();
+        }
+        else
+        {
+            pecas = new List<Peca>();
+            mensagem = response.Message ?? "Erro ao carregar peças.";
+            sucesso = false;
+        }
+    }
+
+    // --- LÓGICA DE EDIÇÃO ---
+
+    private void IniciarEdicao(Peca itemOriginal)
+    {
+        editingId = itemOriginal.Id;
+        // Clone simples para não afetar a UI antes de salvar
+        editingModel = new Peca 
+        { 
+            Id = itemOriginal.Id, 
+            Descricao = itemOriginal.Descricao, 
+            Quantidade = itemOriginal.Quantidade 
+        };
+        mensagem = string.Empty;
+    }
+
+    private void CancelarEdicao()
+    {
+        editingId = Guid.Empty;
+        editingModel = new();
+    }
+
+    private async Task SalvarEdicao()
+    {
+        isProcessing = true;
+        
+        // CORREÇÃO: Passando o ID e o Objeto conforme seu Service novo
+        var response = await PecaService.UpdatePecaAsync(editingModel.Id, editingModel);
+
+        // Verifica se response não é nulo e se Success é true
+        if (response != null && response.Success)
+        {
+            mensagem = "Peça atualizada com sucesso!";
+            sucesso = true;
+            editingId = Guid.Empty; 
+            await CarregarPecas(); 
+        }
+        else
+        {
+            mensagem = $"Erro ao salvar: {response?.Message ?? "Erro desconhecido"}";
+            sucesso = false;
+        }
+
+        isProcessing = false;
+    }
+
+    // --- LÓGICA DE CRIAÇÃO ---
+
+    private async Task CriarNovaPeca()
+    {
+        if (string.IsNullOrWhiteSpace(novaPecaDescricao)) 
+        {
+            mensagem = "A descrição é obrigatória.";
+            sucesso = false;
+            return;
+        }
+
+        isProcessing = true;
+
+        var nova = new Peca 
+        { 
+            Descricao = novaPecaDescricao, 
+            Quantidade = novaPecaQuantidade 
+        };
+
+        // CORREÇÃO: Chamando AddPecaAsync conforme seu Service novo
+        var response = await PecaService.AddPecaAsync(nova);
+
+        if (response != null && response.Success)
+        {
+            mensagem = "Peça cadastrada!";
+            sucesso = true;
+            novaPecaDescricao = string.Empty;
+            novaPecaQuantidade = 0;
+            await CarregarPecas();
+        }
+        else
+        {
+            mensagem = $"Erro ao criar: {response?.Message ?? "Erro desconhecido"}";
+            sucesso = false;
+        }
+
+        isProcessing = false;
+    }
+}
