@@ -57,11 +57,11 @@ public class ManutencaoController
             };
         }
         Console.WriteLine($"== Iniciando varredura dia {hoje}");
-        foreach (var pred in _context!.Preditivas)
-            pred.Status = Status(pred.UltimaRealizacao, pred.Frequencia);
+        //foreach (var pred in _context!.Preditivas)
+        //    pred.Status = Status(pred.UltimaRealizacao, pred.Frequencia);
 
-        foreach (var prev in _context!.Preventivas)
-            prev.Status = Status(prev.UltimaRealizacao, prev.Frequencia);
+        //foreach (var prev in _context!.Preventivas)
+        //    prev.Status = Status(prev.UltimaRealizacao, prev.Frequencia);
 
         await _context.SaveChangesAsync();
         UltimaVarredura = DateTime.Now;
@@ -84,7 +84,7 @@ public class ManutencaoController
             {
                 Success = true,
                 Message = "Manutenções preditivas",
-                Data = await _context!.Preditivas.ToListAsync(),
+               // Data = await _context!.Preditivas.ToListAsync(),
             };
         }
         catch (Exception ex)
@@ -107,7 +107,7 @@ public class ManutencaoController
             {
                 Success = true,
                 Message = "Manutenções preventivas",
-                Data = await _context!.Preventivas.ToListAsync(),
+               // Data = await _context!.Preventivas.ToListAsync(),
             };
         }
         catch (Exception ex)
@@ -126,7 +126,7 @@ public class ManutencaoController
     {
         try
         {
-            await _context!.Preditivas.AddAsync(pred);
+            //await _context!.Preditivas.AddAsync(pred);
             await _context!.SaveChangesAsync();
 
             return new ApiResponse<Preditiva?>
@@ -152,7 +152,7 @@ public class ManutencaoController
     {
         try
         {
-            await _context!.Preditivas.AddAsync(pred);
+            //await _context!.Preditivas.AddAsync(pred);
             await _context!.SaveChangesAsync();
 
             return new ApiResponse<Preditiva?>

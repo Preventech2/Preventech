@@ -98,6 +98,11 @@
             UserInfo? userInfo = await userClaimsHelper.GetCurrentUserInfoAsync();
             if (userInfo != null && userInfo.IsAuthenticated && userInfo.Id > 0)
             {
+                Console.WriteLine($"Usuario: {userInfo.Nome} (ID: {userInfo.Id})");
+                foreach (var role in userInfo.Roles)
+                {
+                    Console.WriteLine($"| Role: {role}");
+                }
                 var response = await ordemServicoService.GetOrdemServicoByResponsavelAsync(userInfo.Id);
                 if (response.Success && response.Data != null)
                 {

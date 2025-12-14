@@ -20,6 +20,6 @@ public enum Perfil
     PossuirHabilidades = 1 << 9,
     GerenciarEstoque = 1 << 10,        // 16 bit 1 (1024)
 
-    Admin = All,
+    Admin = 1 << 15,
     All = 0b1111111111111111, // 16bits
 }

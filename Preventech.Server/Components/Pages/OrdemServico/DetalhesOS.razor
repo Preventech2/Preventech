@@ -484,12 +484,6 @@ else
         {
             listaPecasDisponiveis = responsePecas.Data;
         }
-        
-        var responsePecas = await PecaService.GetPecasAsync();
-        if (responsePecas != null && responsePecas.Data != null)
-        {
-            listaPecasDisponiveis = responsePecas.Data;
-        }
     }
     private string GetStatusIcon(StatusOS status)
     {
@@ -705,7 +699,6 @@ else
         if (pecaSelecionadaId == Guid.Empty)
         {
             mensagemResultado = "Selecione uma peça válida.";
-            sucesso = false;
             return;
         }
 
@@ -723,7 +716,6 @@ else
         if (response.Success)
         {
             mensagemResultado = "Peça adicionada com sucesso!";
-            sucesso = true;
 
             pecaSelecionadaId = Guid.Empty;
             quantidadePeca = 1;
@@ -733,7 +725,6 @@ else
         else
         {
             mensagemResultado = $"Erro ao adicionar: {response.Message}";
-            sucesso = false;
         }
 
         isProcessing = false;
@@ -751,13 +742,12 @@ else
         if (response.Success)
         {
             mensagemResultado = "Peça removida com sucesso!";
-            sucesso = true;
+            
             await RecarregarDadosOS();
         }
         else
         {
             mensagemResultado = $"Erro ao remover: {response.Message}";
-            sucesso = false;
         }
 
         isProcessing = false;

@@ -192,7 +192,6 @@
         ordemServico!.Status = StatusOS.Parada;
         ordemServico!.TecnicoResponsavel = null;
         ordemServico!.RequisitanteId = userInfo?.Id;
-        ordemServico!.Pecas = pecaSelectionComponent.PecasSelecionadas;
         
         Core.DTOs.ApiResponse<OrdemServico> response = await OSservice.AddOrdemServicoAsync(ordemServico) ?? new Core.DTOs.ApiResponse<OrdemServico>();
         mensagemResultado = response.Message;

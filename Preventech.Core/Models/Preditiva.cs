@@ -25,4 +25,6 @@ public class Preditiva
     public Equipamento? Referente { get; set; }
 
     public StatusManutencao Status { get; set; }
+
+    public string Observacoes { get; set; } = string.Empty;
 }

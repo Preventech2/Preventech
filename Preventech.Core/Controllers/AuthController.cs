@@ -33,6 +33,7 @@ namespace Preventech.Core.Controllers
             foreach (var flag in Enum.GetValues<Perfil>())
             {
                 if (flag == Perfil.NenhumaPermissao || flag == Perfil.All) continue;
+                Console.WriteLine($"Verificando permissão: {flag}");
                 if (perfil.HasFlag(flag))
                 {
                     identity.AddClaim(new Claim(ClaimTypes.Role, flag.ToString()));
